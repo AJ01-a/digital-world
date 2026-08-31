@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --color-ink: #e8ecf6;
+  --color-ink-dim: #a7b0c4;
+  --color-ink-faint: #6a7386;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Environment colours are animatable custom properties so an entire
+   world can cross-fade into the next one. */
+@property --env-void   { syntax: "<color>"; inherits: true; initial-value: #05060b; }
+@property --env-a      { syntax: "<color>"; inherits: true; initial-value: #0b1020; }
+@property --env-b      { syntax: "<color>"; inherits: true; initial-value: #131a33; }
+@property --env-accent { syntax: "<color>"; inherits: true; initial-value: #9fb4ff; }
+@property --env-tint   { syntax: "<color>"; inherits: true; initial-value: #8fa1d0; }
+@property --env-ray    { syntax: "<color>"; inherits: true; initial-value: #2a3a72; }
+@property --env-shift  { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+:root {
+  --env-void: #05060b;
+  --env-a: #0b1020;
+  --env-b: #131a33;
+  --env-accent: #9fb4ff;
+  --env-tint: #8fa1d0;
+  --env-ray: #2a3a72;
+  --env-shift: 0;
+  --shell: clamp(1.25rem, 5vw, 5.5rem);
+  transition:
+    --env-void 1200ms var(--ease-out-expo),
+    --env-a 1200ms var(--ease-out-expo),
+    --env-b 1200ms var(--ease-out-expo),
+    --env-accent 900ms var(--ease-out-expo),
+    --env-tint 900ms var(--ease-out-expo),
+    --env-ray 1200ms var(--ease-out-expo);
+  color-scheme: dark;
+  accent-color: var(--env-accent);
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+html {
+  scroll-behavior: smooth;
+  background: #05060b;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--env-accent) 35%, transparent);
+  color: #fff;
+}
+
+/* Slim, unobtrusive scrollbar */
+@supports (scrollbar-width: thin) {
+  html { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--env-accent) 35%, transparent) transparent; }
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--env-accent) 28%, transparent);
+  border-radius: 99px;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--env-accent) 80%, white);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hide the native cursor only where a custom one is drawn */
+body[data-cursor="custom"],
+body[data-cursor="custom"] * { cursor: none !important; }
+
+/* ─────────────────────────────────────────────────────────────
+   Typography helpers
+   ───────────────────────────────────────────────────────────── */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  line-height: 0.95;
+}
+
+@utility h-section {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.012em;
+  line-height: 1.04;
+  font-size: clamp(1.9rem, 1.15rem + 2.5vw, 3.15rem);
+  text-wrap: balance;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--env-tint);
+}
+
+@utility prose-lede {
+  font-size: clamp(1.0625rem, 0.95rem + 0.55vw, 1.375rem);
+  line-height: 1.65;
+  color: color-mix(in oklab, var(--color-ink) 82%, var(--env-tint));
+  font-weight: 300;
+  max-width: 62ch;
+}
+
+@utility glass {
+  background: color-mix(in oklab, var(--env-void) 82%, transparent);
+  border: 1px solid color-mix(in oklab, var(--env-accent) 16%, transparent);
+}
+
+@utility hairline {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--env-accent) 45%, transparent),
+    transparent
+  );
+}
+
+/* Text that sits over imagery keeps a soft cinematic shadow */
+@utility over-art {
+  text-shadow: 0 1px 30px rgba(0, 0, 0, 0.85), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Motion
+   ───────────────────────────────────────────────────────────── */
+@keyframes drift-up {
+  from { transform: translate3d(0, 12px, 0); opacity: 0; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.55; }
+  70% { transform: scale(1.9); opacity: 0; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes caret {
+  0%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes sheen {
+  from { transform: translateX(-120%) skewX(-18deg); }
+  to { transform: translateX(220%) skewX(-18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  :root { transition: none; }
+}
+
+/* Translate only: scaling a heavily blurred layer re-rasterises it every
+   frame, which is the most expensive thing a background can do. */
+@keyframes float-a {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(5vw, 4vh, 0); }
+}
+
+@keyframes float-b {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-6vw, -5vh, 0); }
+}
+
+@media (max-width: 860px) {
+  .env-blob { animation: none !important; }
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -280; }
+}
+
+/* ── the walk ── */
+@keyframes dog-walk {
+  0% { transform: translateX(-22%); }
+  100% { transform: translateX(640%); }
+}
+@keyframes dog-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5%); }
+}
+@keyframes leg-swing-a {
+  0%, 100% { transform: rotate(14deg); }
+  50% { transform: rotate(-14deg); }
+}
+@keyframes leg-swing-b {
+  0%, 100% { transform: rotate(-14deg); }
+  50% { transform: rotate(14deg); }
+}
+@keyframes tail-wag {
+  0%, 100% { transform: rotate(-9deg); }
+  50% { transform: rotate(11deg); }
+}
+@keyframes grass-sway {
+  0%, 100% { transform: skewX(-1.4deg); }
+  50% { transform: skewX(1.6deg); }
+}
+
+.dog-walk { animation: dog-walk 34s linear infinite; }
+.dog-bob { animation: dog-bob 0.62s ease-in-out infinite; }
+.leg-a { animation: leg-swing-a 0.62s ease-in-out infinite; }
+.leg-b { animation: leg-swing-b 0.62s ease-in-out infinite; }
+.dog-tail { animation: tail-wag 0.9s ease-in-out infinite; }
+.grass-sway { animation: grass-sway 7s ease-in-out infinite; transform-origin: bottom; }
+
+/* Expensive glow: full strength on desktop, dialled back where the GPU is small. */
+.art-glow { filter: drop-shadow(0 0 14px var(--env-accent)); }
+
+@media (min-width: 861px) {
+  .glass {
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  }
+}
+
+@media (max-width: 860px) {
+  .art-glow { filter: none; }
+}

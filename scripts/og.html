@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Inter:wght@300;400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body {
+        width: 1200px; height: 630px; overflow: hidden;
+        background: #05060b; color: #e8ecf6; font-family: Inter, sans-serif;
+        display: grid; place-items: center; position: relative;
+      }
+      .bg { position: absolute; inset: 0;
+        background:
+          radial-gradient(120% 90% at 50% -10%, rgba(28,38,78,0.9) 0%, transparent 60%),
+          radial-gradient(90% 70% at 18% 10%, rgba(43,58,120,0.75), transparent 62%),
+          radial-gradient(80% 70% at 88% 92%, rgba(159,180,255,0.22), transparent 60%),
+          linear-gradient(180deg, #0b1020 0%, #05060b 100%);
+      }
+      .grain { position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+      .vig { position: absolute; inset: 0; background: radial-gradient(100% 80% at 50% 45%, transparent 30%, rgba(0,0,0,0.7) 100%); }
+      .wrap { position: relative; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+      .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 15px; letter-spacing: 0.42em; text-transform: uppercase; color: #8fa1d0; }
+      .name { font-size: 132px; font-weight: 300; letter-spacing: 0.04em; line-height: 0.9; }
+      .sur { font-size: 30px; font-weight: 300; letter-spacing: 0.46em; color: #b6c1e0; margin-top: -6px; }
+      .rule { width: 460px; height: 1px; background: linear-gradient(90deg, transparent, rgba(159,180,255,0.6), transparent); }
+      .tag { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 34px; color: #cdd6ee; }
+      .kw { font-family: "JetBrains Mono", monospace; font-size: 14px; letter-spacing: 0.3em; text-transform: uppercase; color: #8fa1d0; display: flex; gap: 18px; align-items: center; }
+      .dot { width: 4px; height: 4px; border-radius: 99px; background: #9fb4ff; }
+      svg.mark { filter: drop-shadow(0 0 22px rgba(159,180,255,0.55)); }
+      .star { position: absolute; border-radius: 99px; background: #cfd8f5; }
+    </style>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div id="stars"></div>
+    <div class="grain"></div>
+    <div class="vig"></div>
+    <div class="wrap">
+      <svg class="mark" width="86" height="86" viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="44" fill="none" stroke="#9fb4ff" stroke-opacity="0.3" stroke-width="1.2" stroke-dasharray="3 9"/>
+        <g fill="none" stroke="#dfe6ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 68 L34 28 L46 68"/><path d="M27 56 H41"/>
+          <path d="M56 28 H76"/><path d="M69 28 V57 C69 66 62 70 54 67"/>
+        </g>
+      </svg>
+      <div>
+        <div class="name">AJ</div>
+        <div class="sur">ALMACHAR</div>
+      </div>
+      <div class="rule"></div>
+      <div class="tag">“Welcome to my little corner of the internet.”</div>
+      <div class="kw"><span>Games</span><i class="dot"></i><span>Technology</span><i class="dot"></i><span>Curiosity</span><i class="dot"></i><span>Exploration</span></div>
+    </div>
+    <script>
+      const host = document.getElementById('stars');
+      let seed = 7;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      for (let i = 0; i < 90; i++) {
+        const s = document.createElement('i');
+        s.className = 'star';
+        const r = 1 + rnd() * 2.2;
+        s.style.cssText = `width:${r}px;height:${r}px;left:${rnd() * 1200}px;top:${rnd() * 630}px;opacity:${0.15 + rnd() * 0.5}`;
+        host.appendChild(s);
+      }
+    </script>
+  </body>
+</html>
