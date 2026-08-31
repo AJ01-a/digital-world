@@ -34,6 +34,18 @@
   --env-ray: #2a3a72;
   --env-shift: 0;
   --shell: clamp(1.25rem, 5vw, 5.5rem);
+  /* No transition here on purpose: animating an inherited custom property on
+     the root invalidates the style of every element in the document on every
+     frame, which is what made world changes stutter on a phone. The values
+     switch instantly here, and the *background* animates its own copy. */
+  color-scheme: dark;
+  accent-color: var(--env-accent);
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+/* The environment cross-fade, confined to the background subtree. */
+.env-stage {
   transition:
     --env-void 1200ms var(--ease-out-expo),
     --env-a 1200ms var(--ease-out-expo),
@@ -41,11 +53,26 @@
     --env-accent 900ms var(--ease-out-expo),
     --env-tint 900ms var(--ease-out-expo),
     --env-ray 1200ms var(--ease-out-expo);
-  color-scheme: dark;
-  accent-color: var(--env-accent);
 }
 
-* { -webkit-tap-highlight-color: transparent; }
+/* Phones cross-fade the environment faster: fewer frames spent repainting
+   large gradients while the palette moves. */
+@media (max-width: 860px) {
+  .env-stage {
+    transition-duration: 650ms, 650ms, 650ms, 500ms, 500ms, 650ms;
+  }
+}
+
+/* Chrome follows the new palette with its own cheap colour transitions
+   rather than a document-wide variable animation. */
+.glass,
+[data-panel],
+.eyebrow {
+  transition:
+    color 700ms var(--ease-out-expo),
+    border-color 700ms var(--ease-out-expo),
+    background-color 700ms var(--ease-out-expo);
+}
 
 html {
   scroll-behavior: smooth;

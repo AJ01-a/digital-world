@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TERMINAL_HELP } from '../../data/content';
 import { SCENE_MAP, type SceneId } from '../../data/worlds';
-import { useExperience } from '../../state/experience';
+import { useActions, useTerminalOpen } from '../../state/experience';
 
 interface Line { kind: 'in' | 'out' | 'accent'; text: string }
 
@@ -50,7 +50,8 @@ const RESPONSES: Record<string, string[]> = {
 };
 
 export default function SecretTerminal() {
-  const { terminalOpen, setTerminalOpen, goTo } = useExperience();
+  const terminalOpen = useTerminalOpen();
+  const { setTerminalOpen, goTo } = useActions();
   const [lines, setLines] = useState<Line[]>(BANNER);
   const [value, setValue] = useState('');
   const [history, setHistory] = useState<string[]>([]);

@@ -19,10 +19,11 @@ import Strategy from './sections/Strategy';
 import Tech from './sections/Tech';
 import Words from './sections/Words';
 import { scrollToSection } from './lib/utils';
-import { ExperienceProvider, useExperience } from './state/experience';
+import { ExperienceProvider, useAudioOn, useEnv } from './state/experience';
 
 function Ambient() {
-  const { audioOn, active } = useExperience();
+  const audioOn = useAudioOn();
+  const { active } = useEnv();
   useAmbient(audioOn, active);
   return null;
 }

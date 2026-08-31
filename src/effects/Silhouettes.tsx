@@ -14,11 +14,11 @@ const mulberry32 = (seed: number) => () => {
 
 interface Branch { d: string; w: number; depth: number }
 
-function growTree(): Branch[] {
+function growTree(maxDepth: number): Branch[] {
   const rnd = mulberry32(24);
   const out: Branch[] = [];
   const grow = (x: number, y: number, angle: number, len: number, width: number, depth: number) => {
-    if (depth > 6 || len < 9) return;
+    if (depth > maxDepth || len < 9) return;
     const spread = 0.42 + rnd() * 0.3;
     const ex = x + Math.cos(angle) * len;
     const ey = y + Math.sin(angle) * len;
@@ -35,7 +35,10 @@ function growTree(): Branch[] {
   return out;
 }
 
-const TREE = growTree();
+/* Two levels of detail: a phone mounts this artwork mid-transition, and every
+   path it does not have to build is a frame it does not drop. */
+const TREE_FULL = growTree(6);
+const TREE_LITE = growTree(4);
 
 const ridge = (seed: number, base: number, amp: number, steps = 14) => {
   const rnd = mulberry32(seed);
@@ -62,6 +65,8 @@ const peaks = (seed: number, base: number, amp: number, count = 7) => {
 export interface ScapeProps {
   /** Lets a narrow card crop to the interesting part of the scene. */
   align?: string;
+  /** Small screens get a lighter version of the same composition. */
+  lite?: boolean;
 }
 
 const Frame = ({ children, align = 'xMidYMax slice' }: { children: React.ReactNode; align?: string }) => (
@@ -76,7 +81,7 @@ const Frame = ({ children, align = 'xMidYMax slice' }: { children: React.ReactNo
 );
 
 /** Elden Ring — a vast, distant, glowing tree. */
-export const TreeScape = ({ align }: ScapeProps = {}) => (
+export const TreeScape = ({ align, lite }: ScapeProps = {}) => (
   <Frame align={align}>
     <defs>
       <radialGradient id="tree-halo" cx="50%" cy="72%" r="46%">
@@ -91,7 +96,7 @@ export const TreeScape = ({ align }: ScapeProps = {}) => (
     </defs>
     <rect width="1440" height="900" fill="url(#tree-halo)" />
     <g stroke="url(#tree-fade)" fill="none" strokeLinecap="round" className="art-glow">
-      {TREE.map((b, i) => (
+      {(lite ? TREE_LITE : TREE_FULL).map((b, i) => (
         <path key={i} d={b.d} strokeWidth={b.w} opacity={0.12 + b.depth * 0.03} />
       ))}
     </g>
@@ -187,13 +192,13 @@ export const MountainScape = ({ align }: ScapeProps = {}) => (
 );
 
 /** Driving — a city seen from the road at night. */
-export const CityScape = ({ align }: ScapeProps = {}) => {
+export const CityScape = ({ align, lite }: ScapeProps = {}) => {
   const rnd = mulberry32(77);
-  const towers = Array.from({ length: 26 }, (_, i) => {
+  const towers = Array.from({ length: lite ? 16 : 26 }, (_, i) => {
     const w = 26 + rnd() * 58;
-    const x = i * 58 - 30 + rnd() * 12;
+    const x = i * (lite ? 94 : 58) - 30 + rnd() * 12;
     const h = 80 + rnd() * 250;
-    return { x, w, h, windows: Math.floor(h / 26) };
+    return { x, w, h, windows: Math.floor(h / (lite ? 44 : 26)) };
   });
   return (
     <Frame align={align}>
@@ -230,7 +235,7 @@ export const CityScape = ({ align }: ScapeProps = {}) => {
 };
 
 /** Walks — hills, trees and late sun. */
-export const NatureScape = ({ align }: ScapeProps = {}) => {
+export const NatureScape = ({ align, lite }: ScapeProps = {}) => {
   const rnd = mulberry32(41);
   return (
     <Frame align={align}>
@@ -245,8 +250,8 @@ export const NatureScape = ({ align }: ScapeProps = {}) => {
       <circle cx="374" cy="558" r="60" fill="#ffca86" opacity="0.42" />
       <path d={ridge(6, 700, 70)} fill="var(--env-a)" opacity="0.8" />
       <g fill="var(--env-void)" opacity="0.85">
-        {Array.from({ length: 11 }).map((_, i) => {
-          const x = 60 + i * 132 + rnd() * 40;
+        {Array.from({ length: lite ? 7 : 11 }).map((_, i) => {
+          const x = 60 + i * (lite ? 200 : 132) + rnd() * 40;
           const h = 90 + rnd() * 90;
           return (
             <g key={i}>
@@ -258,7 +263,7 @@ export const NatureScape = ({ align }: ScapeProps = {}) => {
       </g>
       <path d={ridge(14, 800, 50)} fill="var(--env-void)" opacity="0.9" />
       <g stroke="#000" strokeOpacity="0.55" strokeWidth="2" strokeLinecap="round">
-        {Array.from({ length: 54 }).map((_, i) => {
+        {Array.from({ length: lite ? 26 : 54 }).map((_, i) => {
           const x = rnd() * 1440;
           const h = 24 + rnd() * 46;
           return <path key={i} d={`M${x.toFixed(0)} 900 q${(rnd() * 16 - 8).toFixed(0)} ${-h / 2} ${(rnd() * 20 - 10).toFixed(0)} ${-h}`} fill="none" />;
@@ -269,9 +274,9 @@ export const NatureScape = ({ align }: ScapeProps = {}) => {
 };
 
 /** Automation — a quiet circuit horizon. */
-export const CircuitScape = ({ align }: ScapeProps = {}) => {
+export const CircuitScape = ({ align, lite }: ScapeProps = {}) => {
   const rnd = mulberry32(88);
-  const lines = Array.from({ length: 18 }, () => {
+  const lines = Array.from({ length: lite ? 10 : 18 }, () => {
     const y = 300 + rnd() * 560;
     const x = rnd() * 1440;
     const len = 120 + rnd() * 300;
@@ -286,7 +291,7 @@ export const CircuitScape = ({ align }: ScapeProps = {}) => {
         ))}
       </g>
       <g fill="var(--env-accent)" opacity="0.2">
-        {Array.from({ length: 26 }).map((_, i) => (
+        {Array.from({ length: lite ? 14 : 26 }).map((_, i) => (
           <circle key={i} cx={rnd() * 1440} cy={260 + rnd() * 620} r={1.6} />
         ))}
       </g>

@@ -4,11 +4,11 @@ import { TECH_COPY, TOPICS } from '../data/content';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useDevice } from '../state/experience';
 import { cn } from '../lib/utils';
 
 export default function Tech() {
-  const { compact, reducedMotion } = useExperience();
+  const { compact, reducedMotion } = useDevice();
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeTopic = TOPICS.find((t) => t.id === activeId) ?? null;
 

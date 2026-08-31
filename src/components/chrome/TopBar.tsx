@@ -2,12 +2,14 @@ import { motion, useMotionValueEvent, useScroll, useSpring } from 'motion/react'
 import { useState } from 'react';
 import { primeAudio } from '../../audio/ambient';
 import { IDENTITY } from '../../data/content';
-import { useExperience } from '../../state/experience';
+import { useActions, useAudioOn, useDevice } from '../../state/experience';
 import Logo from '../ui/Logo';
 import { cn } from '../../lib/utils';
 
 export default function TopBar() {
-  const { goTo, audioOn, toggleAudio, setTerminalOpen, compact } = useExperience();
+  const { goTo, toggleAudio, setTerminalOpen } = useActions();
+  const audioOn = useAudioOn();
+  const { compact } = useDevice();
   const { scrollY, scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 22, mass: 0.4 });
   const [lifted, setLifted] = useState(false);

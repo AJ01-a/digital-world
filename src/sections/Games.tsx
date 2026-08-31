@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { GAME_MAP, GAME_WORLDS, type GameWorld } from '../data/worlds';
-import { useExperience } from '../state/experience';
+import { useActions, useDevice, useEnv } from '../state/experience';
 import { useTilt } from '../hooks/useTilt';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
@@ -18,7 +18,7 @@ const CROP: Record<string, string> = {
 };
 
 /** Each card renders the same procedural art in its own world's palette. */
-function WorldCard({
+const WorldCard = memo(function WorldCard({
   world,
   index,
   active,
@@ -27,7 +27,7 @@ function WorldCard({
   world: GameWorld;
   index: number;
   active: boolean;
-  onSelect: () => void;
+  onSelect: (id: string) => void;
 }) {
   const { rotateX, rotateY, glareX, glareY, onPointerMove, onPointerLeave, enabled } = useTilt(7);
   const Art = ART[world.art];
@@ -35,7 +35,7 @@ function WorldCard({
   return (
     <motion.button
       type="button"
-      onClick={onSelect}
+      onClick={() => onSelect(world.id)}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       aria-pressed={active}
@@ -127,11 +127,14 @@ function WorldCard({
       )}
     </motion.button>
   );
-}
+});
 
 export default function Games() {
-  const { setOverride, active, compact } = useExperience();
+  const { setOverride } = useActions();
+  const { active } = useEnv();
+  const { compact } = useDevice();
   const [selected, setSelected] = useState<string>(GAME_WORLDS[0].id);
+  const select = useCallback((id: string) => setSelected(id), []);
   const world = GAME_MAP[selected];
 
   /* Entering the section hands the environment to the selected world. */
@@ -165,7 +168,7 @@ export default function Games() {
       <div className="mt-5 grid grid-cols-2 gap-3.5 sm:gap-5 lg:grid-cols-4">
         {GAME_WORLDS.map((g, i) => (
           <Reveal key={g.id} delay={0.06 * i} amount={0.2}>
-            <WorldCard world={g} index={i} active={g.id === selected} onSelect={() => setSelected(g.id)} />
+            <WorldCard world={g} index={i} active={g.id === selected} onSelect={select} />
           </Reveal>
         ))}
       </div>

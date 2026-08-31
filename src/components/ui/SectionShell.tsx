@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { useCallback, type ReactNode } from 'react';
 import { SCENE_MAP, type SceneId } from '../../data/worlds';
-import { useExperience } from '../../state/experience';
+import { useActions } from '../../state/experience';
 import { cn } from '../../lib/utils';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 }
 
 export default function SectionShell({ id, children, className, header = true, size = 'full', align = 'start', labelledBy }: Props) {
-  const { register } = useExperience();
+  const { register } = useActions();
   const scene = SCENE_MAP[id];
 
   const ref = useCallback(

@@ -1,12 +1,14 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { useExperience } from '../../state/experience';
+import { useActions, useCeremony, useDevice } from '../../state/experience';
 
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
 /** Win messages, plus the hidden code. */
 export default function Ceremony() {
-  const { ceremony, celebrate, reducedMotion } = useExperience();
+  const ceremony = useCeremony();
+  const { celebrate } = useActions();
+  const { reducedMotion } = useDevice();
   const [burst, setBurst] = useState(0);
 
   useEffect(() => {

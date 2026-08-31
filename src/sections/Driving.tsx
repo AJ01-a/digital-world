@@ -4,10 +4,10 @@ import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
 import RoadCanvas from '../effects/RoadCanvas';
-import { useExperience } from '../state/experience';
+import { useDevice } from '../state/experience';
 
 export default function Driving() {
-  const { reducedMotion, compact } = useExperience();
+  const { reducedMotion, compact } = useDevice();
 
   return (
     <SectionShell id="driving" labelledBy="driving-title">

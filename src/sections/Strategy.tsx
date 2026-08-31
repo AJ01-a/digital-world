@@ -13,13 +13,14 @@ import MagneticButton from '../components/ui/MagneticButton';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useActions, useDevice } from '../state/experience';
 import { cn } from '../lib/utils';
 
 type Status = 'idle' | 'wrong' | 'solved';
 
 export default function Strategy() {
-  const { celebrate, compact } = useExperience();
+  const { celebrate } = useActions();
+  const { compact } = useDevice();
   const [puzzleIndex, setPuzzleIndex] = useState(0);
   const puzzle = PUZZLES[puzzleIndex];
   const [board, setBoard] = useState<Board>(() => parseFen(puzzle.fen));

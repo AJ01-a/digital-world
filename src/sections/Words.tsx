@@ -4,7 +4,7 @@ import MagneticButton from '../components/ui/MagneticButton';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useActions, useTerminalOpen } from '../state/experience';
 import { cn, pick } from '../lib/utils';
 
 /** Words that mean something to me — the puzzle picks one at random. */
@@ -37,7 +37,8 @@ function score(guess: string, answer: string): Mark[] {
 }
 
 export default function Words() {
-  const { terminalOpen, celebrate } = useExperience();
+  const terminalOpen = useTerminalOpen();
+  const { celebrate } = useActions();
   const boardRef = useRef<HTMLDivElement>(null);
   // Typing should work as soon as the board is on screen — waiting for this
   // to become the "active" chapter made the puzzle feel broken.

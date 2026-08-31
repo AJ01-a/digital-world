@@ -1,12 +1,12 @@
 import { motion } from 'motion/react';
 import { IDENTITY } from '../data/content';
-import { useExperience } from '../state/experience';
+import { useActions } from '../state/experience';
 import MagneticButton from '../components/ui/MagneticButton';
 import SectionShell from '../components/ui/SectionShell';
 import { useReducedMotion } from '../hooks/useMediaQuery';
 
 export default function Hero() {
-  const { goTo } = useExperience();
+  const { goTo } = useActions();
   const reduced = useReducedMotion();
 
   return (

@@ -4,7 +4,7 @@ import Logo from '../components/ui/Logo';
 import MagneticButton from '../components/ui/MagneticButton';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useActions, useDevice } from '../state/experience';
 
 /**
  * Add your own links here later — anything you leave out simply does not
@@ -13,7 +13,8 @@ import { useExperience } from '../state/experience';
 const LINKS: { label: string; href: string }[] = [];
 
 export default function Outro() {
-  const { goTo, setTerminalOpen, compact } = useExperience();
+  const { goTo, setTerminalOpen } = useActions();
+  const { compact } = useDevice();
 
   return (
     <SectionShell id="outro" header={false} align="center" className="text-center">

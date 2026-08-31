@@ -15,6 +15,7 @@ export default function Panel({
 }) {
   return (
     <div
+      data-panel
       style={style}
       className={cn(
         'relative overflow-hidden rounded-2xl border border-[color-mix(in_oklab,var(--env-accent)_16%,transparent)]',

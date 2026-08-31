@@ -4,7 +4,7 @@ import { DOG } from '../data/content';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useDevice } from '../state/experience';
 import { rand } from '../lib/utils';
 
 /** Side-on dog silhouette, drawn as paths so it stays crisp at any size. */
@@ -49,7 +49,7 @@ function DogSilhouette({ animated }: { animated: boolean }) {
 interface Seed { id: number; x: number; y: number; drift: number; rise: number }
 
 export default function Dog() {
-  const { reducedMotion, compact } = useExperience();
+  const { reducedMotion, compact } = useDevice();
   const [seeds, setSeeds] = useState<Seed[]>([]);
   const nextId = useRef(0);
 

@@ -1,14 +1,16 @@
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { RAIL_SCENES, SCENE_MAP, type SceneId } from '../../data/worlds';
-import { useExperience } from '../../state/experience';
+import { useActions, useDevice, useEnv } from '../../state/experience';
 import { cn } from '../../lib/utils';
 
 /** Hidden scenes light up their parent entry in the rail. */
 const PARENT: Partial<Record<SceneId, SceneId>> = { words: 'strategy', omarchy: 'tech' };
 
 export default function NavRail() {
-  const { active, goTo, compact } = useExperience();
+  const { active } = useEnv();
+  const { goTo } = useActions();
+  const { compact } = useDevice();
   const [open, setOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, { stiffness: 90, damping: 22, mass: 0.4 });

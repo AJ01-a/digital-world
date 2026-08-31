@@ -5,7 +5,7 @@ import MagneticButton from '../components/ui/MagneticButton';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useExperience } from '../state/experience';
+import { useDevice } from '../state/experience';
 import { cn } from '../lib/utils';
 
 type Line = { kind: 'cmd' | 'out' | 'ok'; text: string };
@@ -14,7 +14,7 @@ type Line = { kind: 'cmd' | 'out' | 'ok'; text: string };
 const STAGE_FOR_STEP = [1, 1, 2, 2, 3, 4];
 
 export default function Automation() {
-  const { reducedMotion } = useExperience();
+  const { reducedMotion } = useDevice();
   const [lines, setLines] = useState<Line[]>([]);
   const [typing, setTyping] = useState('');
   const [running, setRunning] = useState(false);
