@@ -10,10 +10,10 @@ export default function Hero() {
   const reduced = useReducedMotion();
 
   return (
-    <SectionShell id="home" header={false} className="items-center text-center">
+    <SectionShell id="home" header={false} align="center" className="items-center text-center">
       <div className="relative mx-auto flex max-w-[900px] flex-col items-center">
         <motion.p
-          className="eyebrow mb-7"
+          className="eyebrow mb-7 [@media(max-height:560px)]:mb-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.9 }}
@@ -30,7 +30,7 @@ export default function Hero() {
             {'AJ'.split('').map((ch, i) => (
               <motion.span
                 key={ch}
-                className="inline-block text-[clamp(4.2rem,15vw,10.5rem)] leading-[0.86] font-light tracking-[0.02em] text-[var(--color-ink)]"
+                className="inline-block text-[clamp(3.4rem,min(15vw,26svh),10.5rem)] leading-[0.86] font-light tracking-[0.02em] text-[var(--color-ink)]"
                 initial={reduced ? undefined : { opacity: 0, y: '0.4em', filter: 'blur(16px)' }}
                 animate={reduced ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
                 transition={{ delay: 0.3 + i * 0.12, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
@@ -39,11 +39,11 @@ export default function Hero() {
               </motion.span>
             ))}
           </div>
-          <div className="mt-3 flex justify-center sm:mt-5">
+          <div className="mt-3 flex justify-center sm:mt-5 [@media(max-height:560px)]:mt-2">
             {'ALMACHAR'.split('').map((ch, i) => (
               <motion.span
                 key={`${ch}-${i}`}
-                className="inline-block text-[clamp(0.92rem,3.4vw,1.9rem)] font-light tracking-[0.42em] text-[color-mix(in_oklab,var(--color-ink)_78%,var(--env-tint))]"
+                className="inline-block text-[clamp(0.85rem,min(3.4vw,5svh),1.9rem)] font-light tracking-[0.42em] text-[color-mix(in_oklab,var(--color-ink)_78%,var(--env-tint))]"
                 initial={reduced ? undefined : { opacity: 0, y: 12 }}
                 animate={reduced ? undefined : { opacity: 1, y: 0 }}
                 transition={{ delay: 0.75 + i * 0.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
@@ -68,7 +68,7 @@ export default function Hero() {
         </div>
 
         <motion.div
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 [@media(max-height:560px)]:mt-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.05, duration: 1 }}
@@ -82,7 +82,7 @@ export default function Hero() {
         </motion.div>
 
         <motion.p
-          className="mt-9 max-w-[34ch] text-[clamp(1.1rem,1rem+0.6vw,1.5rem)] leading-relaxed text-[color-mix(in_oklab,var(--color-ink)_80%,var(--env-tint))] italic"
+          className="mt-9 [@media(max-height:560px)]:mt-3 max-w-[34ch] text-[clamp(1.05rem,min(1rem+0.6vw,3.6svh),1.5rem)] leading-relaxed text-[color-mix(in_oklab,var(--color-ink)_80%,var(--env-tint))] italic"
           style={{ fontFamily: 'var(--font-display)' }}
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,7 +92,7 @@ export default function Hero() {
         </motion.p>
 
         <motion.div
-          className="mt-12 flex flex-col items-center gap-5 sm:flex-row"
+          className="mt-12 flex flex-col items-center gap-5 sm:flex-row [@media(max-height:560px)]:mt-5"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.45, duration: 0.9 }}
@@ -110,13 +110,13 @@ export default function Hero() {
       </div>
 
       <motion.div
-        className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-3"
+        className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-3 [@media(max-height:560px)]:hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1.2 }}
         aria-hidden="true"
       >
-        <span className="font-mono text-[0.6rem] tracking-[0.32em] text-[var(--env-tint)] uppercase opacity-70">
+        <span className="font-mono text-[0.68rem] tracking-[0.32em] text-[var(--env-tint)] uppercase opacity-70">
           Scroll
         </span>
         <span className="relative h-12 w-px overflow-hidden bg-[color-mix(in_oklab,var(--env-accent)_20%,transparent)]">

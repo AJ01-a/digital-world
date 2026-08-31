@@ -91,7 +91,7 @@ export default function About() {
                 <path d="M1 7h11M7.5 2.5 12 7l-4.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </MagneticButton>
-            <span className="font-mono text-[0.62rem] tracking-[0.22em] text-[var(--env-tint)] uppercase opacity-70">
+            <span className="font-mono text-[0.7rem] tracking-[0.22em] text-[var(--env-tint)] uppercase opacity-70">
               {String(seen).padStart(2, '0')} / {String(FACTS.length).padStart(2, '0')} found
             </span>
           </div>

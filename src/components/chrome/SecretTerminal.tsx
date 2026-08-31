@@ -74,7 +74,14 @@ export default function SecretTerminal() {
   }, [terminalOpen, setTerminalOpen]);
 
   useEffect(() => {
-    if (terminalOpen) window.setTimeout(() => inputRef.current?.focus(), 120);
+    if (!terminalOpen) return;
+    const focus = window.setTimeout(() => inputRef.current?.focus(), 120);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.clearTimeout(focus);
+      document.body.style.overflow = previous;
+    };
   }, [terminalOpen]);
 
   useEffect(() => {
@@ -127,7 +134,7 @@ export default function SecretTerminal() {
     <AnimatePresence>
       {terminalOpen && (
         <motion.div
-          className="fixed inset-0 z-[70] flex items-end justify-center p-3 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -152,13 +159,13 @@ export default function SecretTerminal() {
                   <span key={c} className="h-2.5 w-2.5 rounded-full opacity-60" style={{ background: c }} />
                 ))}
               </span>
-              <span className="font-mono text-[0.6rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase">
+              <span className="font-mono text-[0.68rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase">
                 aj@world:~
               </span>
               <button
                 type="button"
                 onClick={() => setTerminalOpen(false)}
-                className="ml-auto font-mono text-[0.58rem] tracking-[0.2em] text-[var(--color-ink-faint)] uppercase hover:text-[var(--color-ink)]"
+                className="ml-auto font-mono text-[0.66rem] tracking-[0.2em] text-[var(--color-ink-faint)] uppercase hover:text-[var(--color-ink)]"
               >
                 esc
               </button>

@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useInView } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MagneticButton from '../components/ui/MagneticButton';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
@@ -37,7 +37,11 @@ function score(guess: string, answer: string): Mark[] {
 }
 
 export default function Words() {
-  const { active, terminalOpen, celebrate } = useExperience();
+  const { terminalOpen, celebrate } = useExperience();
+  const boardRef = useRef<HTMLDivElement>(null);
+  // Typing should work as soon as the board is on screen — waiting for this
+  // to become the "active" chapter made the puzzle feel broken.
+  const onScreen = useInView(boardRef, { amount: 0.12 });
   const [answer, setAnswer] = useState(() => pick(WORDS));
   const [guesses, setGuesses] = useState<string[]>([]);
   const [draft, setDraft] = useState('');
@@ -95,9 +99,9 @@ export default function Words() {
     setNote(null);
   }, []);
 
-  /* Physical keyboard, but only while this is the section you are looking at. */
+  /* Physical keyboard, but only while the board is actually on screen. */
   useEffect(() => {
-    if (active !== 'words' || terminalOpen) return;
+    if (!onScreen || terminalOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
@@ -115,7 +119,7 @@ export default function Words() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [active, terminalOpen, submit, back, type, done]);
+  }, [onScreen, terminalOpen, submit, back, type, done]);
 
   const rows = Array.from({ length: ROWS }, (_, r) => {
     if (r < guesses.length) return { letters: guesses[r], marks: marks[r], settled: true };
@@ -155,6 +159,7 @@ export default function Words() {
         <div className="lg:col-span-7">
           <Reveal delay={0.15}>
             <Panel className="mx-auto max-w-[520px] p-5 sm:p-6">
+              <div ref={boardRef}>
               <motion.div
                 key={shake}
                 animate={shake ? { x: [0, -8, 8, -5, 0] } : undefined}
@@ -230,7 +235,7 @@ export default function Words() {
                         type="button"
                         onClick={submit}
                         disabled={done}
-                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-2.5 py-2.5 font-mono text-[0.58rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
+                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-3 py-3 font-mono text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
                       >
                         Enter
                       </button>
@@ -245,7 +250,7 @@ export default function Words() {
                           disabled={done}
                           aria-label={`Letter ${k}`}
                           className={cn(
-                            'min-w-0 flex-1 rounded-md py-2.5 text-[0.8rem] font-medium transition-colors duration-200 disabled:opacity-35 sm:flex-none sm:px-2.5',
+                            'min-w-[30px] flex-1 rounded-md py-3 text-[0.85rem] font-medium transition-colors duration-200 disabled:opacity-35 sm:min-w-[36px]',
                             !st && 'bg-white/[0.05] text-[var(--color-ink-dim)] hover:bg-white/10',
                             st === 'exact' && 'bg-[var(--env-accent)] text-[#06110c]',
                             st === 'near' && 'border border-[var(--env-accent)] text-[var(--env-accent)]',
@@ -262,13 +267,14 @@ export default function Words() {
                         onClick={back}
                         disabled={done}
                         aria-label="Delete letter"
-                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-2.5 py-2.5 font-mono text-[0.58rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
+                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-3 py-3 font-mono text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
                       >
                         Del
                       </button>
                     )}
                   </div>
                 ))}
+              </div>
               </div>
             </Panel>
           </Reveal>

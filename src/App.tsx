@@ -18,6 +18,7 @@ import Outro from './sections/Outro';
 import Strategy from './sections/Strategy';
 import Tech from './sections/Tech';
 import Words from './sections/Words';
+import { scrollToSection } from './lib/utils';
 import { ExperienceProvider, useExperience } from './state/experience';
 
 function Ambient() {
@@ -29,8 +30,23 @@ function Ambient() {
 function Experience() {
   const [ready, setReady] = useState(false);
 
+  /* Content mounts after the intro, so the browser cannot restore a scroll
+     position on its own. Take it over: start at the top, unless the visitor
+     followed a link to a particular chapter. */
+  useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  }, []);
+
   useEffect(() => {
     document.documentElement.style.overflow = ready ? '' : 'hidden';
+    if (!ready) return;
+    const target = window.location.hash.slice(1);
+    const el = target ? document.getElementById(target) : null;
+    const id = window.setTimeout(() => {
+      if (el) scrollToSection(el);
+      else window.scrollTo(0, 0);
+    }, 60);
+    return () => window.clearTimeout(id);
   }, [ready]);
 
   return (

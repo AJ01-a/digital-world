@@ -26,18 +26,36 @@ const VOICES: Record<SceneId, Voice> = {
   outro: { root: 110, filter: 700, noise: 0.04, wave: 'sine' },
 };
 
+type Ctor = typeof AudioContext;
+let shared: AudioContext | null = null;
+
+/**
+ * Safari on iOS only honours audio that starts inside a real user gesture,
+ * and React effects run after the handler returns — so the context is created
+ * and resumed straight from the click, then reused for the rest of the visit.
+ */
+export function primeAudio(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  const Ctor: Ctor | undefined =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: Ctor }).webkitAudioContext;
+  if (!Ctor) return null;
+  if (!shared || shared.state === 'closed') shared = new Ctor();
+  void shared.resume();
+  return shared;
+}
+
 interface Graph {
   ctx: AudioContext;
   master: GainNode;
   noiseGain: GainNode;
   noiseFilter: BiquadFilterNode;
-  oscs: { osc: OscillatorNode; gain: GainNode; ratio: number }[];
   padFilter: BiquadFilterNode;
+  oscs: { osc: OscillatorNode; ratio: number }[];
+  teardown: () => void;
 }
 
 function buildNoiseBuffer(ctx: AudioContext) {
-  const seconds = 3;
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   let b0 = 0, b1 = 0, b2 = 0;
   for (let i = 0; i < data.length; i++) {
@@ -51,77 +69,85 @@ function buildNoiseBuffer(ctx: AudioContext) {
   return buffer;
 }
 
+function build(ctx: AudioContext): Graph {
+  const master = ctx.createGain();
+  master.gain.value = 0;
+  master.connect(ctx.destination);
+
+  const noiseSource = ctx.createBufferSource();
+  noiseSource.buffer = buildNoiseBuffer(ctx);
+  noiseSource.loop = true;
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 700;
+  noiseFilter.Q.value = 0.6;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.value = 0.05;
+  noiseSource.connect(noiseFilter).connect(noiseGain).connect(master);
+  noiseSource.start();
+
+  const padFilter = ctx.createBiquadFilter();
+  padFilter.type = 'lowpass';
+  padFilter.frequency.value = 900;
+  padFilter.connect(master);
+
+  const lfos: OscillatorNode[] = [];
+  const oscs = [1, 1.5, 2, 3].map((ratio, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 110 * ratio;
+    osc.detune.value = i * 4 - 6;
+    const gain = ctx.createGain();
+    gain.gain.value = [0.09, 0.05, 0.035, 0.018][i];
+    osc.connect(gain).connect(padFilter);
+
+    // Very slow breathing so the pad never sits still.
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.04 + i * 0.017;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.02;
+    lfo.connect(lfoGain).connect(gain.gain);
+    lfo.start();
+    osc.start();
+    lfos.push(lfo);
+    return { osc, ratio };
+  });
+
+  master.gain.setTargetAtTime(0.16, ctx.currentTime, 1.4);
+
+  const teardown = () => {
+    const t = ctx.currentTime;
+    master.gain.cancelScheduledValues(t);
+    master.gain.setTargetAtTime(0, t, 0.25);
+    window.setTimeout(() => {
+      for (const { osc } of oscs) {
+        try { osc.stop(); } catch { /* already stopped */ }
+      }
+      for (const lfo of lfos) {
+        try { lfo.stop(); } catch { /* already stopped */ }
+      }
+      try { noiseSource.stop(); } catch { /* already stopped */ }
+      master.disconnect();
+      // Keep the context itself alive but idle: re-creating one outside a
+      // gesture would be blocked on iOS.
+      void ctx.suspend();
+    }, 900);
+  };
+
+  return { ctx, master, noiseGain, noiseFilter, padFilter, oscs, teardown };
+}
+
 export function useAmbient(on: boolean, scene: SceneId) {
   const graph = useRef<Graph | null>(null);
 
   useEffect(() => {
-    if (!on) {
-      const g = graph.current;
-      if (g) {
-        graph.current = null;
-        const t = g.ctx.currentTime;
-        g.master.gain.cancelScheduledValues(t);
-        g.master.gain.setTargetAtTime(0, t, 0.3);
-        window.setTimeout(() => g.ctx.close().catch(() => {}), 1200);
-      }
-      return;
-    }
-
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctor) return;
-    const ctx = new Ctor();
-    void ctx.resume();
-
-    const master = ctx.createGain();
-    master.gain.value = 0;
-    master.connect(ctx.destination);
-
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = buildNoiseBuffer(ctx);
-    noiseSource.loop = true;
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.value = 700;
-    noiseFilter.Q.value = 0.6;
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.05;
-    noiseSource.connect(noiseFilter).connect(noiseGain).connect(master);
-    noiseSource.start();
-
-    const padFilter = ctx.createBiquadFilter();
-    padFilter.type = 'lowpass';
-    padFilter.frequency.value = 900;
-    padFilter.connect(master);
-
-    const oscs = [1, 1.5, 2, 3].map((ratio, i) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 110 * ratio;
-      osc.detune.value = i * 4 - 6;
-      const gain = ctx.createGain();
-      gain.gain.value = [0.09, 0.05, 0.035, 0.018][i];
-      osc.connect(gain).connect(padFilter);
-
-      // Very slow breathing so the pad never sits still.
-      const lfo = ctx.createOscillator();
-      lfo.frequency.value = 0.04 + i * 0.017;
-      const lfoGain = ctx.createGain();
-      lfoGain.gain.value = 0.02;
-      lfo.connect(lfoGain).connect(gain.gain);
-      lfo.start();
-      osc.start();
-      return { osc, gain, ratio };
-    });
-
-    master.gain.setTargetAtTime(0.16, ctx.currentTime, 1.4);
-    graph.current = { ctx, master, noiseGain, noiseFilter, oscs, padFilter };
-
+    if (!on) return;
+    const ctx = primeAudio();
+    if (!ctx) return;
+    graph.current = build(ctx);
     return () => {
-      const g = graph.current;
+      graph.current?.teardown();
       graph.current = null;
-      if (!g) return;
-      g.master.gain.setTargetAtTime(0, g.ctx.currentTime, 0.25);
-      window.setTimeout(() => g.ctx.close().catch(() => {}), 900);
     };
   }, [on]);
 

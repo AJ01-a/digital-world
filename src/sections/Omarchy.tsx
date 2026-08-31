@@ -34,7 +34,7 @@ export default function Omarchy() {
             <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
               {OMARCHY.specs.map(([k, v]) => (
                 <div key={k} className="flex flex-col gap-1 border-l border-[color-mix(in_oklab,var(--env-accent)_25%,transparent)] pl-4">
-                  <dt className="font-mono text-[0.58rem] tracking-[0.24em] text-[var(--env-accent)] uppercase">{k}</dt>
+                  <dt className="font-mono text-[0.66rem] tracking-[0.24em] text-[var(--env-accent)] uppercase">{k}</dt>
                   <dd className="text-sm text-[var(--color-ink-dim)]">{v}</dd>
                 </div>
               ))}
@@ -52,7 +52,7 @@ export default function Omarchy() {
                     <span key={c} className="h-2 w-2 rounded-full opacity-70" style={{ background: c }} />
                   ))}
                 </span>
-                <span className="font-mono text-[0.62rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase">
+                <span className="font-mono text-[0.7rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase">
                   workspace 1 · omarchy
                 </span>
                 <span className="hairline ml-auto hidden h-px w-24 sm:block" />
@@ -61,7 +61,7 @@ export default function Omarchy() {
 
             <motion.div className="col-span-3 sm:col-span-2" custom={1} variants={pane} initial="hidden" animate={inView ? 'shown' : 'hidden'}>
               <Panel className="h-full p-4">
-                <p className="mb-3 font-mono text-[0.58rem] tracking-[0.22em] text-[var(--env-tint)] uppercase">tty</p>
+                <p className="mb-3 font-mono text-[0.66rem] tracking-[0.22em] text-[var(--env-tint)] uppercase">tty</p>
                 <TypingLines
                   lines={OMARCHY.boot}
                   start={inView}
@@ -74,7 +74,7 @@ export default function Omarchy() {
 
             <motion.div className="col-span-3 sm:col-span-1" custom={2} variants={pane} initial="hidden" animate={inView ? 'shown' : 'hidden'}>
               <Panel className="h-full p-4">
-                <p className="mb-3 font-mono text-[0.58rem] tracking-[0.22em] text-[var(--env-tint)] uppercase">load</p>
+                <p className="mb-3 font-mono text-[0.66rem] tracking-[0.22em] text-[var(--env-tint)] uppercase">load</p>
                 <div className="flex h-[calc(100%-1.75rem)] min-h-[90px] items-end gap-1">
                   {Array.from({ length: 18 }).map((_, i) => (
                     <motion.span
@@ -95,10 +95,10 @@ export default function Omarchy() {
 
             <motion.div className="col-span-3" custom={3} variants={pane} initial="hidden" animate={inView ? 'shown' : 'hidden'}>
               <Panel className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                <span className="font-mono text-[0.62rem] tracking-[0.16em] text-[var(--color-ink-faint)]">
+                <span className="font-mono text-[0.7rem] tracking-[0.16em] text-[var(--color-ink-faint)]">
                   ~/dotfiles · keyboard-first · rebuilt more times than necessary
                 </span>
-                <span className="font-mono text-[0.62rem] tracking-[0.16em] text-[var(--env-accent)]">tiled</span>
+                <span className="font-mono text-[0.7rem] tracking-[0.16em] text-[var(--env-accent)]">tiled</span>
               </Panel>
             </motion.div>
           </div>

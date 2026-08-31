@@ -193,13 +193,20 @@ export default function ParticleField({ mode, accent, ray, intensity }: Particle
     };
 
     const resize = () => {
-      w = window.innerWidth;
-      h = window.innerHeight;
+      // Mobile browsers fire resize every time the address bar slides away.
+      // Rebuilding the field for a 60px height change makes the background
+      // flicker, so small vertical changes are ignored.
+      const nextW = window.innerWidth;
+      const nextH = window.innerHeight;
+      if (w && nextW === w && Math.abs(nextH - h) < 140) return;
+      w = nextW;
+      h = nextH;
       dpr = Math.min(window.devicePixelRatio || 1, w > 900 ? 1.5 : 1.25);
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
+      // The element itself stays 100% of the viewport (see the class list),
+      // so a skipped resize stretches the field imperceptibly instead of
+      // leaving a gap.
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const want = targetCount();
       while (particles.length < want) particles.push(spawn(modeRef.current, w, h, true));

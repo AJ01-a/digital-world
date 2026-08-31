@@ -96,10 +96,10 @@ export default function Automation() {
                     <span key={c} className="h-2.5 w-2.5 rounded-full opacity-60" style={{ background: c }} />
                   ))}
                 </span>
-                <span className="font-mono text-[0.62rem] tracking-[0.18em] text-[var(--color-ink-dim)]">
+                <span className="font-mono text-[0.7rem] tracking-[0.18em] text-[var(--color-ink-dim)]">
                   aj@wsl:~/projects
                 </span>
-                <span className="ml-auto font-mono text-[0.58rem] tracking-[0.18em] text-[var(--env-accent)] uppercase">
+                <span className="ml-auto font-mono text-[0.66rem] tracking-[0.18em] text-[var(--env-accent)] uppercase">
                   {running ? 'running' : finished ? 'done' : 'idle'}
                 </span>
               </div>
@@ -147,7 +147,7 @@ export default function Automation() {
                 <MagneticButton onClick={run} variant={finished ? 'ghost' : 'solid'}>
                   {running ? 'Running…' : finished ? 'Run again' : 'Run simulation'}
                 </MagneticButton>
-                <p className="font-mono text-[0.58rem] tracking-[0.16em] text-[var(--color-ink-faint)] uppercase">
+                <p className="font-mono text-[0.66rem] tracking-[0.16em] text-[var(--color-ink-faint)] uppercase">
                   {AUTOMATION_COPY.disclaimer}
                 </p>
               </div>
@@ -193,13 +193,13 @@ export default function Automation() {
                     </span>
                     <span
                       className={cn(
-                        'font-mono text-[0.62rem] tracking-[0.22em] uppercase transition-colors duration-500',
+                        'font-mono text-[0.7rem] tracking-[0.22em] uppercase transition-colors duration-500',
                         lit ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]',
                       )}
                     >
                       {node.label}
                     </span>
-                    <span className="ml-auto font-mono text-[0.55rem] text-[var(--color-ink-faint)]">
+                    <span className="ml-auto font-mono text-[0.64rem] text-[var(--color-ink-faint)]">
                       {String(i + 1).padStart(2, '0')}
                     </span>
                   </div>

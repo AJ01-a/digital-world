@@ -102,13 +102,13 @@ function WorldCard({
       )}
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 md:p-5">
-        <span className="font-mono text-[0.6rem] tracking-[0.28em] uppercase" style={{ color: world.theme.accent }}>
+        <span className="font-mono text-[0.68rem] tracking-[0.28em] uppercase" style={{ color: world.theme.accent }}>
           {String(index + 1).padStart(2, '0')} · {world.year}
         </span>
         <span className="text-[1.05rem] leading-tight font-medium text-white md:text-[1.15rem]">{world.short}</span>
         <span
           className={cn(
-            'font-mono text-[0.6rem] tracking-[0.2em] uppercase transition-opacity duration-500',
+            'font-mono text-[0.68rem] tracking-[0.2em] uppercase transition-opacity duration-500',
             active ? 'opacity-90' : 'opacity-0 group-hover:opacity-70',
           )}
           style={{ color: world.theme.tint }}
@@ -181,7 +181,7 @@ export default function Games() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="lg:col-span-7">
-              <span className="font-mono text-[0.62rem] tracking-[0.28em] text-[var(--env-accent)] uppercase">
+              <span className="font-mono text-[0.7rem] tracking-[0.28em] text-[var(--env-accent)] uppercase">
                 {world.genre} · {world.year}
               </span>
               <h3 className="display mt-3 text-[clamp(1.7rem,1.2rem+1.8vw,2.6rem)] text-[var(--color-ink)]">
@@ -200,7 +200,7 @@ export default function Games() {
                 {world.atmosphere.map((a) => (
                   <li
                     key={a}
-                    className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_26%,transparent)] px-3 py-1.5 font-mono text-[0.6rem] tracking-[0.18em] text-[var(--env-tint)] uppercase"
+                    className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_26%,transparent)] px-3 py-1.5 font-mono text-[0.68rem] tracking-[0.18em] text-[var(--env-tint)] uppercase"
                   >
                     {a}
                   </li>

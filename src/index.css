@@ -61,7 +61,10 @@ body {
   font-synthesis-weight: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* `clip` rather than `hidden`: hidden would make the body its own scroll
+     container (overflow-y computes to auto), which throws scrollIntoView
+     alignment off by the height of the fixed header. */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -105,13 +108,14 @@ body[data-cursor="custom"] * { cursor: none !important; }
   font-weight: 300;
   letter-spacing: -0.012em;
   line-height: 1.04;
-  font-size: clamp(1.9rem, 1.15rem + 2.5vw, 3.15rem);
+  /* The svh term keeps headings sane on a phone held sideways. */
+  font-size: clamp(1.9rem, min(1.15rem + 2.5vw, 9svh), 3.15rem);
   text-wrap: balance;
 }
 
 @utility eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.72rem;
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: var(--env-tint);
@@ -201,9 +205,11 @@ body[data-cursor="custom"] * { cursor: none !important; }
 }
 
 /* ── the walk ── */
+/* Measured in container units so the dog crosses the panel exactly once,
+   whatever size the panel happens to be. */
 @keyframes dog-walk {
-  0% { transform: translateX(-22%); }
-  100% { transform: translateX(640%); }
+  0% { transform: translateX(-30cqw); }
+  100% { transform: translateX(118cqw); }
 }
 @keyframes dog-bob {
   0%, 100% { transform: translateY(0); }
@@ -226,7 +232,7 @@ body[data-cursor="custom"] * { cursor: none !important; }
   50% { transform: skewX(1.6deg); }
 }
 
-.dog-walk { animation: dog-walk 34s linear infinite; }
+.dog-walk { animation: dog-walk 30s linear infinite; }
 .dog-bob { animation: dog-bob 0.62s ease-in-out infinite; }
 .leg-a { animation: leg-swing-a 0.62s ease-in-out infinite; }
 .leg-b { animation: leg-swing-b 0.62s ease-in-out infinite; }

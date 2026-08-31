@@ -49,7 +49,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
               AJ
             </motion.p>
             <motion.p
-              className="font-mono text-[0.56rem] tracking-[0.34em] text-[var(--color-ink-faint)] uppercase"
+              className="font-mono text-[0.64rem] tracking-[0.34em] text-[var(--color-ink-faint)] uppercase"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.25, duration: 0.8 }}
@@ -66,7 +66,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
             />
           </div>
           <motion.p
-            className="font-mono text-[0.55rem] tracking-[0.3em] text-[var(--color-ink-faint)] uppercase"
+            className="font-mono text-[0.64rem] tracking-[0.3em] text-[var(--color-ink-faint)] uppercase"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.7 }}
             transition={{ delay: 0.5 }}

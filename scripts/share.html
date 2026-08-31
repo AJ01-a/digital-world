@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Inter:wght@200;300&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; box-sizing: border-box; }
+      body {
+        width: 1080px; height: 1080px; overflow: hidden; position: relative;
+        background: #05060b; color: #e8ecf6; font-family: Inter, sans-serif;
+        display: grid; place-items: center;
+      }
+      .sky { position: absolute; inset: 0;
+        background:
+          radial-gradient(85% 60% at 50% -8%, rgba(43,58,120,0.85), transparent 60%),
+          radial-gradient(70% 45% at 50% 108%, rgba(159,180,255,0.30), transparent 62%),
+          linear-gradient(180deg, #0c1226 0%, #070a16 55%, #05060b 100%);
+      }
+      .shafts { position: absolute; inset: 0; opacity: 0.10; mix-blend-mode: screen;
+        background: repeating-linear-gradient(100deg, transparent 0 70px, #9fb4ff 70px 71px, transparent 71px 190px);
+        -webkit-mask-image: radial-gradient(60% 55% at 50% 0%, #000 0%, transparent 78%); }
+      .horizon { position: absolute; left: 0; right: 0; bottom: 178px; height: 1.4px;
+        background: linear-gradient(90deg, transparent, rgba(159,180,255,0.42), transparent); }
+      .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 178px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.85)); }
+      .vig { position: absolute; inset: 0; background: radial-gradient(95% 75% at 50% 42%, transparent 32%, rgba(0,0,0,0.72) 100%); }
+      .grain { position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+      .star { position: absolute; border-radius: 99px; background: #dfe6ff; }
+
+      .wrap { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 36px; padding-bottom: 120px; }
+      .mark { filter: drop-shadow(0 0 26px rgba(159,180,255,0.6)); }
+      .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 17px; letter-spacing: 0.46em; text-transform: uppercase; color: #93a4d2; text-indent: 0.46em; }
+      .line { font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 300;
+        font-size: 96px; line-height: 1.1; letter-spacing: -0.005em; max-width: 15ch; }
+      .line em { font-style: italic; color: #cbd6ff; }
+      .rule { width: 340px; height: 1px; background: linear-gradient(90deg, transparent, rgba(184,200,255,0.75), transparent); }
+      .url { font-family: "JetBrains Mono", monospace; font-size: 19px; letter-spacing: 0.24em; color: #a9b6dd; }
+    </style>
+  </head>
+  <body>
+    <div class="sky"></div>
+    <div id="stars"></div>
+    <div class="shafts"></div>
+    <div class="horizon"></div>
+    <div class="ground"></div>
+    <div class="vig"></div>
+    <div class="grain"></div>
+
+    <div class="wrap">
+      <svg class="mark" width="146" height="146" viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="44" fill="none" stroke="#9fb4ff" stroke-opacity="0.32" stroke-width="1.1" stroke-dasharray="3 9"/>
+        <circle cx="48" cy="48" r="37" fill="none" stroke="#9fb4ff" stroke-opacity="0.14" stroke-width="1"/>
+        <g fill="none" stroke="#eef2ff" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 68 L34 28 L46 68"/><path d="M27 56 H41"/>
+          <path d="M56 28 H76"/><path d="M69 28 V57 C69 66 62 70 54 67"/>
+        </g>
+      </svg>
+
+      <div class="eyebrow">AJ Almachar</div>
+      <div class="line">enter my little world<em>..</em></div>
+      <div class="rule"></div>
+      <div class="url">aj01-a.github.io/digital-world</div>
+    </div>
+
+    <script>
+      const host = document.getElementById('stars');
+      let seed = 21;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      for (let i = 0; i < 130; i++) {
+        const s = document.createElement('i');
+        s.className = 'star';
+        const r = 1 + rnd() * 2.6;
+        const y = rnd() * 900;
+        s.style.cssText = `width:${r}px;height:${r}px;left:${rnd() * 1080}px;top:${y}px;opacity:${0.12 + rnd() * 0.55}`;
+        host.appendChild(s);
+      }
+    </script>
+  </body>
+</html>

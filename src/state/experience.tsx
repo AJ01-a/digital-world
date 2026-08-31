@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { SCENE_MAP, SCENES, type ParticleMode, type SceneId, type Theme } from '../data/worlds';
 import { useIsCompact, useReducedMotion } from '../hooks/useMediaQuery';
+import { scrollToSection } from '../lib/utils';
 
 export interface EnvOverride {
   theme: Theme;
@@ -100,7 +101,10 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     (id: SceneId) => {
       const el = nodes.current.get(id);
       if (!el) return;
-      el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+      // Clicking a button focuses it, and the browser scrolls focused elements
+      // into view — which lands short of the target. Running a frame later
+      // lets that happen first, so this scroll is the one that sticks.
+      requestAnimationFrame(() => scrollToSection(el, !reducedMotion));
     },
     [reducedMotion],
   );

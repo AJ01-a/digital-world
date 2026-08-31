@@ -120,7 +120,12 @@ export default function Tech() {
                       className="absolute -translate-x-1/2 -translate-y-1/2 focus-visible:outline-offset-6"
                       style={{ left: `${t.x * 100}%`, top: `${t.y * 100}%` }}
                       onPointerEnter={() => !compact && setActiveId(t.id)}
-                      onFocus={() => setActiveId(t.id)}
+                      // Only keyboard focus opens a node: a tap focuses the
+                      // button first, which would otherwise make the click
+                      // toggle it straight back off.
+                      onFocus={(e) => {
+                        if (e.currentTarget.matches(':focus-visible')) setActiveId(t.id);
+                      }}
                       onClick={() => setActiveId((cur) => (cur === t.id ? null : t.id))}
                       aria-pressed={isActive}
                       initial={{ opacity: 0, scale: 0.7 }}
@@ -130,7 +135,7 @@ export default function Tech() {
                     >
                       <span
                         className={cn(
-                          'flex items-center gap-2 rounded-full border px-2.5 py-1.5 whitespace-nowrap backdrop-blur-md transition-all duration-400',
+                          'flex items-center gap-2 rounded-full border px-3 py-2.5 whitespace-nowrap backdrop-blur-md transition-all duration-400',
                           isActive
                             ? 'border-[var(--env-accent)] bg-[color-mix(in_oklab,var(--env-accent)_18%,transparent)]'
                             : 'border-[color-mix(in_oklab,var(--env-accent)_22%,transparent)] bg-[color-mix(in_oklab,var(--env-void)_60%,transparent)]',
@@ -149,7 +154,7 @@ export default function Tech() {
                         </span>
                         <span
                           className={cn(
-                            'font-mono text-[0.58rem] tracking-[0.16em] uppercase transition-colors sm:text-[0.65rem]',
+                            'font-mono text-[0.66rem] tracking-[0.16em] uppercase transition-colors sm:text-[0.65rem]',
                             isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]',
                           )}
                         >

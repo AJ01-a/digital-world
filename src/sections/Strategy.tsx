@@ -183,12 +183,12 @@ export default function Strategy() {
                         </motion.span>
                       )}
                       {file === 0 && (
-                        <span className="pointer-events-none absolute top-0.5 left-1 font-mono text-[0.5rem] text-[var(--env-tint)] opacity-40">
+                        <span className="pointer-events-none absolute top-0.5 left-1 font-mono text-[0.58rem] text-[var(--env-tint)] opacity-40">
                           {8 - rank}
                         </span>
                       )}
                       {rank === 7 && (
-                        <span className="pointer-events-none absolute right-1 bottom-0.5 font-mono text-[0.5rem] text-[var(--env-tint)] opacity-40">
+                        <span className="pointer-events-none absolute right-1 bottom-0.5 font-mono text-[0.58rem] text-[var(--env-tint)] opacity-40">
                           {idxToSquare(i)[0]}
                         </span>
                       )}
@@ -221,7 +221,7 @@ export default function Strategy() {
                 </AnimatePresence>
               </div>
 
-              <p className="mt-4 text-center font-mono text-[0.62rem] tracking-[0.2em] text-[var(--env-tint)] uppercase opacity-70">
+              <p className="mt-4 text-center font-mono text-[0.7rem] tracking-[0.2em] text-[var(--env-tint)] uppercase opacity-70">
                 {compact ? 'Tap a white piece, then a square' : 'Click a white piece, then a square'}
               </p>
             </Panel>

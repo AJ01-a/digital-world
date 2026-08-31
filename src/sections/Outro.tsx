@@ -16,7 +16,7 @@ export default function Outro() {
   const { goTo, setTerminalOpen, compact } = useExperience();
 
   return (
-    <SectionShell id="outro" header={false} className="text-center">
+    <SectionShell id="outro" header={false} align="center" className="text-center">
       <div className="mx-auto flex max-w-[760px] flex-col items-center">
         <Reveal>
           <Logo size={56} animate={false} interactive={false} />
@@ -66,7 +66,7 @@ export default function Outro() {
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="text-center sm:text-left">
             <p className="text-[1.05rem] text-[var(--color-ink)]">{OUTRO.thanks}</p>
-            <p className="mt-1 font-mono text-[0.62rem] tracking-[0.26em] text-[var(--env-tint)] uppercase">
+            <p className="mt-1 font-mono text-[0.7rem] tracking-[0.26em] text-[var(--env-tint)] uppercase">
               {IDENTITY.full}
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function Outro() {
             </nav>
           )}
 
-          <p className="font-mono text-[0.58rem] tracking-[0.2em] text-[var(--color-ink-faint)] uppercase">
+          <p className="font-mono text-[0.66rem] tracking-[0.2em] text-[var(--color-ink-faint)] uppercase">
             © {new Date().getFullYear()}
             {!compact && (
               <>

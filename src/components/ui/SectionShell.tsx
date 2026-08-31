@@ -12,10 +12,12 @@ interface Props {
   header?: boolean;
   /** Vertical rhythm preset. */
   size?: 'full' | 'auto';
+  /** Centred chapters keep the rail clearance on both sides. */
+  align?: 'start' | 'center';
   labelledBy?: string;
 }
 
-export default function SectionShell({ id, children, className, header = true, size = 'full', labelledBy }: Props) {
+export default function SectionShell({ id, children, className, header = true, size = 'full', align = 'start', labelledBy }: Props) {
   const { register } = useExperience();
   const scene = SCENE_MAP[id];
 
@@ -34,7 +36,14 @@ export default function SectionShell({ id, children, className, header = true, s
       aria-labelledby={labelledBy}
       className={cn(
         'relative w-full scroll-mt-[4.5rem] px-[var(--shell)]',
-        size === 'full' ? 'flex min-h-[100svh] flex-col justify-center py-24 md:py-28' : 'py-24 md:py-32',
+        // The navigation rail is fixed to the right edge from 861px up, so
+        // the content reserves a lane for it instead of sliding underneath.
+        align === 'center'
+          ? 'min-[861px]:px-[calc(var(--shell)+7rem)]'
+          : 'min-[861px]:pr-[calc(var(--shell)+7rem)]',
+        size === 'full'
+          ? 'flex min-h-[100svh] flex-col justify-center py-24 md:py-28 [@media(max-height:560px)]:py-14'
+          : 'py-24 md:py-32 [@media(max-height:560px)]:py-14',
         className,
       )}
     >

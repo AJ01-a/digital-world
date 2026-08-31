@@ -1,5 +1,6 @@
 import { motion, useMotionValueEvent, useScroll, useSpring } from 'motion/react';
 import { useState } from 'react';
+import { primeAudio } from '../../audio/ambient';
 import { IDENTITY } from '../../data/content';
 import { useExperience } from '../../state/experience';
 import Logo from '../ui/Logo';
@@ -60,7 +61,7 @@ export default function TopBar() {
           <span className="font-mono text-[0.68rem] tracking-[0.34em] text-[var(--color-ink)] uppercase">
             {IDENTITY.short}
           </span>
-          <span className="mt-1 font-mono text-[0.52rem] tracking-[0.28em] text-[var(--env-tint)] uppercase opacity-70">
+          <span className="mt-1 font-mono text-[0.6rem] tracking-[0.28em] text-[var(--env-tint)] uppercase opacity-70">
             Almachar
           </span>
         </button>
@@ -69,10 +70,14 @@ export default function TopBar() {
       <div className="relative z-10 flex items-center gap-2">
         <button
           type="button"
-          onClick={toggleAudio}
+          onClick={() => {
+            // Straight from the gesture, so iOS lets the sound start.
+            if (!audioOn) primeAudio();
+            toggleAudio();
+          }}
           aria-pressed={audioOn}
           className={cn(
-            'glass flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[0.58rem] tracking-[0.2em] uppercase transition-colors duration-300',
+            'glass flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[0.66rem] tracking-[0.2em] uppercase transition-colors duration-300',
             audioOn ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-dim)]',
           )}
           title={audioOn ? 'Ambient sound on' : 'Ambient sound off (nothing plays until you ask)'}
@@ -94,10 +99,10 @@ export default function TopBar() {
           <button
             type="button"
             onClick={() => setTerminalOpen(true)}
-            className="glass flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[0.58rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase transition-colors duration-300 hover:text-[var(--color-ink)]"
+            className="glass flex items-center gap-2 rounded-full px-3.5 py-2 font-mono text-[0.66rem] tracking-[0.2em] text-[var(--color-ink-dim)] uppercase transition-colors duration-300 hover:text-[var(--color-ink)]"
             title="Open the terminal (press /)"
           >
-            <kbd className="rounded border border-white/15 px-1.5 py-0.5 text-[0.55rem] not-italic">/</kbd>
+            <kbd className="rounded border border-white/15 px-1.5 py-0.5 text-[0.64rem] not-italic">/</kbd>
             <span className="hidden sm:inline">Terminal</span>
           </button>
         )}

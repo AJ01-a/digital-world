@@ -53,7 +53,7 @@ export default function NavRail() {
               >
                 <span
                   className={cn(
-                    'font-mono text-[0.62rem] tracking-[0.22em] uppercase transition-all duration-400',
+                    'font-mono text-[0.7rem] tracking-[0.22em] uppercase transition-all duration-400',
                     isActive
                       ? 'text-[var(--color-ink)] opacity-100'
                       : 'translate-x-1 text-[var(--color-ink-dim)] opacity-0 group-hover:translate-x-0 group-hover:opacity-90',
@@ -127,7 +127,7 @@ export default function NavRail() {
                       window.setTimeout(() => goTo(s.id), 180);
                     }}
                   >
-                    <span className="font-mono text-[0.6rem] tracking-[0.2em] text-[var(--env-accent)]">{s.index}</span>
+                    <span className="font-mono text-[0.68rem] tracking-[0.2em] text-[var(--env-accent)]">{s.index}</span>
                     <span
                       className={cn(
                         'display text-[2rem]',
@@ -136,7 +136,7 @@ export default function NavRail() {
                     >
                       {s.label}
                     </span>
-                    <span className="ml-auto font-mono text-[0.58rem] tracking-[0.18em] text-[var(--color-ink-faint)] uppercase">
+                    <span className="ml-auto font-mono text-[0.66rem] tracking-[0.18em] text-[var(--color-ink-faint)] uppercase">
                       {s.mood}
                     </span>
                   </button>
@@ -146,7 +146,7 @@ export default function NavRail() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="mt-10 self-center font-mono text-[0.62rem] tracking-[0.26em] text-[var(--env-tint)] uppercase"
+              className="mt-10 self-center font-mono text-[0.7rem] tracking-[0.26em] text-[var(--env-tint)] uppercase"
             >
               Close
             </button>

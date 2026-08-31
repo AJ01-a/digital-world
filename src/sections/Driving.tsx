@@ -24,7 +24,7 @@ export default function Driving() {
               {DRIVING.cues.map((c) => (
                 <li
                   key={c}
-                  className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_26%,transparent)] px-4 py-2 font-mono text-[0.6rem] tracking-[0.2em] text-[var(--env-tint)] uppercase"
+                  className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_26%,transparent)] px-4 py-2 font-mono text-[0.68rem] tracking-[0.2em] text-[var(--env-tint)] uppercase"
                 >
                   {c}
                 </li>
@@ -43,7 +43,7 @@ export default function Driving() {
                 style={{ background: 'radial-gradient(90% 70% at 50% 42%, transparent 30%, color-mix(in oklab, var(--env-void) 75%, transparent) 100%)' }}
               />
               <motion.p
-                className="absolute inset-x-0 bottom-5 text-center font-mono text-[0.58rem] tracking-[0.26em] text-[var(--env-tint)] uppercase"
+                className="absolute inset-x-0 bottom-5 text-center font-mono text-[0.66rem] tracking-[0.26em] text-[var(--env-tint)] uppercase"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 0.75 }}
                 viewport={{ once: true }}

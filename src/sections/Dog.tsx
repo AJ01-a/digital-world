@@ -89,7 +89,7 @@ export default function Dog() {
               {DOG.cues.map((c) => (
                 <li
                   key={c}
-                  className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-4 py-2 font-mono text-[0.6rem] tracking-[0.2em] text-[var(--env-tint)] uppercase"
+                  className="rounded-full border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-4 py-2 font-mono text-[0.68rem] tracking-[0.2em] text-[var(--env-tint)] uppercase"
                 >
                   {c}
                 </li>
@@ -106,6 +106,9 @@ export default function Dog() {
                 onPointerDown={scatter}
                 role="presentation"
                 style={{
+                  // A query container, so the walk is measured against the
+                  // panel rather than the dog's own width.
+                  containerType: 'inline-size',
                   background:
                     'radial-gradient(120% 90% at 24% 78%, color-mix(in oklab, #ffcf94 45%, transparent) 0%, transparent 55%), linear-gradient(180deg, color-mix(in oklab, var(--env-b) 70%, transparent) 0%, color-mix(in oklab, var(--env-void) 90%, transparent) 100%)',
                 }}
@@ -164,7 +167,7 @@ export default function Dog() {
                 </AnimatePresence>
               </div>
 
-              <p className="pointer-events-none absolute inset-x-0 bottom-4 text-center font-mono text-[0.58rem] tracking-[0.26em] text-[color-mix(in_oklab,var(--color-ink)_70%,var(--env-tint))] uppercase">
+              <p className="pointer-events-none absolute inset-x-0 bottom-4 text-center font-mono text-[0.66rem] tracking-[0.26em] text-[color-mix(in_oklab,var(--color-ink)_70%,var(--env-tint))] uppercase">
                 {compact ? 'Tap the field' : 'Click the field · golden hour'}
               </p>
             </Panel>
