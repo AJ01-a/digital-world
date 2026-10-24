@@ -18,6 +18,16 @@ export const TRACE = 'M68 60 H82 L88 54';
 const FRAME = 'M30 6 H90 L114 30 V90 L90 114 H30 L6 90 V30 Z';
 const FRAME_INNER = 'M33 12 H87 L108 33 V87 L87 108 H33 L12 87 V33 Z';
 
+/*
+ * Colourways. `duality` is the site's own, from the intro — white light on
+ * the left of the mark, red on the right, meeting in the stem. `brand` is
+ * the original icy blue, kept for reference. The orange node stays in both.
+ */
+const TONES = {
+  brand: { stops: ['#f4f9ff', '#8fe6ff', '#5ce1ff', '#9b86ff'], x: [0.1, 0.9], dash: '#8fe6ff', ticks: '#b8d4ff', depth: '#2c2370' },
+  duality: { stops: ['#ffffff', '#e9edf5', '#ff5a5f', '#e0141f'], x: [0.28, 0.72], dash: '#e9edf5', ticks: '#ffd5d7', depth: '#3a0a10' },
+};
+
 interface LogoProps {
   size?: number;
   className?: string;
@@ -31,15 +41,17 @@ interface LogoProps {
   title?: string;
   /** Offset for the draw-on / sweep, in ms. */
   delay?: number;
+  tone?: keyof typeof TONES;
 }
 
-export default function Logo({ size = 44, className, detail = 'full', draw = false, sweep = false, title, delay = 0 }: LogoProps) {
+export default function Logo({ size = 44, className, detail = 'full', draw = false, sweep = false, title, delay = 0, tone = 'duality' }: LogoProps) {
   const uid = useId().replace(/:/g, '');
   const g = `aj-g-${uid}`;
   const s = `aj-s-${uid}`;
   const m = `aj-m-${uid}`;
   const full = detail === 'full';
   const sw = full ? 9 : 10;
+  const t = TONES[tone];
 
   return (
     <svg
@@ -53,11 +65,11 @@ export default function Logo({ size = 44, className, detail = 'full', draw = fal
       style={{ ['--base' as string]: `${delay}ms` }}
     >
       <defs>
-        <linearGradient id={g} x1="0.1" y1="0" x2="0.9" y2="1">
-          <stop offset="0" stopColor="#f4f9ff" />
-          <stop offset="0.4" stopColor="#8fe6ff" />
-          <stop offset="0.62" stopColor="#5ce1ff" />
-          <stop offset="1" stopColor="#9b86ff" />
+        <linearGradient id={g} x1={t.x[0]} y1="0" x2={t.x[1]} y2={tone === 'brand' ? 1 : 0}>
+          <stop offset="0" stopColor={t.stops[0]} />
+          <stop offset="0.4" stopColor={t.stops[1]} />
+          <stop offset="0.62" stopColor={t.stops[2]} />
+          <stop offset="1" stopColor={t.stops[3]} />
         </linearGradient>
         <linearGradient id={s} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#fff" stopOpacity="0" />
@@ -77,8 +89,8 @@ export default function Logo({ size = 44, className, detail = 'full', draw = fal
         <path d={FRAME} stroke={`url(#${g})`} strokeOpacity={full ? 0.5 : 0.7} strokeWidth={full ? 1.4 : 3} />
         {full && (
           <>
-            <path d={FRAME_INNER} stroke="#8fe6ff" strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 4" />
-            <g stroke="#b8d4ff" strokeOpacity="0.7" strokeWidth="1.4">
+            <path d={FRAME_INNER} stroke={t.dash} strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 4" />
+            <g stroke={t.ticks} strokeOpacity="0.7" strokeWidth="1.4">
               <path d="M60 0 V6 M60 114 V120 M0 60 H6 M114 60 H120" />
             </g>
             <rect x="99.5" y="15.5" width="4" height="4" fill="#ff9b52" transform="rotate(45 101.5 17.5)" opacity="0.9" />
@@ -86,8 +98,8 @@ export default function Logo({ size = 44, className, detail = 'full', draw = fal
         )}
       </g>
 
-      {/* Extrusion: the same strokes, offset and deep violet, for depth. */}
-      <g fill="none" stroke="#2c2370" strokeLinejoin="miter" transform="translate(2.6 2.6)" opacity="0.95">
+      {/* Extrusion: the same strokes, offset and in a deep shade of the tone, for depth. */}
+      <g fill="none" stroke={t.depth} strokeLinejoin="miter" transform="translate(2.6 2.6)" opacity="0.95">
         <path d={MARK} strokeWidth={sw} />
         <path d={BAR} strokeWidth={sw - 2} />
       </g>

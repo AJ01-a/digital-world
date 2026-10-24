@@ -40,6 +40,16 @@ function Experience() {
   const [playIntro] = useState(shouldPlayIntro);
   const [introDone, setIntroDone] = useState(!playIntro);
   const finishIntro = useCallback(() => setIntroDone(true), []);
+  /*
+   * The page underneath the intro:
+   *   covered  — built but not rendered, while the intro's sequence plays;
+   *   behind   — rendered, animations paused, once the intro is waiting
+   *              (or a hold begins), so the way in has nothing left to lay out;
+   *   arriving — the intro is opening onto it: the hero makes its entrance.
+   */
+  const [page, setPage] = useState<'covered' | 'behind' | 'arriving'>(playIntro ? 'covered' : 'arriving');
+  const prepare = useCallback(() => setPage((p) => (p === 'covered' ? 'behind' : p)), []);
+  const arrive = useCallback(() => setPage('arriving'), []);
 
   /* The page is rendered underneath the intro from the start, so content is
      never waiting on an animation. Follow a deep link once it can scroll. */
@@ -72,7 +82,7 @@ function Experience() {
     <>
       <BackgroundStage />
       <Ambient />
-      {!introDone && <Intro onDone={finishIntro} />}
+      {!introDone && <Intro onReady={prepare} onLeaving={arrive} onDone={finishIntro} />}
 
       <a
         href="#about"
@@ -81,14 +91,14 @@ function Experience() {
         Skip to content
       </a>
 
-      {/* `inert` while the intro covers the page, so focus can't wander underneath it. */}
-      <div inert={!introDone}>
+      {/* `inert` while the intro is up, so focus can't wander underneath it. */}
+      <div inert={!introDone} className={page === 'arriving' ? undefined : `is-${page}`}>
         <ChromeEnv>
           <TopBar />
           <NavRail />
         </ChromeEnv>
         <main>
-          <Hero introPlayed={playIntro} />
+          <Hero introPlayed={playIntro} arrived={page === 'arriving'} />
           <About />
           <Tech />
           <Omarchy />

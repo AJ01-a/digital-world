@@ -6,9 +6,33 @@
     <title>AJ — Digital World</title>
     <meta name="description" content="AJ's digital world — technology, networks, security and AI, explored with curiosity. Plus games, chess, long drives, and Clover, the site's guide." />
     <meta name="author" content="AJ" />
-    <meta name="theme-color" content="#03040a" />
+    <meta name="theme-color" content="#040405" />
     <meta name="color-scheme" content="dark" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!--
+      The intro's two portraits, fetched alongside the app instead of after it —
+      only when the intro will play (the same check as src/lib/intro.ts), at the
+      same sizes the <img> uses (PORTRAIT_SIZES in src/lib/duality.ts).
+    -->
+    <script>
+      try {
+        if (!location.hash && !sessionStorage.getItem('aj:intro-seen')) {
+          for (const name of ['white', 'red']) {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.type = 'image/avif';
+            link.fetchPriority = 'high';
+            link.setAttribute('imagesrcset', [640, 960, 1312].map((w) => './intro/' + name + '-' + w + '.avif ' + w + 'w').join(', '));
+            link.setAttribute('imagesizes', '(max-aspect-ratio: 9/10) min(116vw, 56.3vh), min(105vh, 59.1vw)');
+            document.head.appendChild(link);
+          }
+        }
+      } catch {
+        /* storage blocked: the images load with the intro instead */
+      }
+    </script>
 
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon-180.png" />
@@ -42,7 +66,7 @@
 
     <style>
       /* Painted before any script runs, so there is never a white flash. */
-      html, body { background: #03040a; color: #eaf0ff; }
+      html, body { background: #040405; color: #eef0f4; }
     </style>
   </head>
   <body>

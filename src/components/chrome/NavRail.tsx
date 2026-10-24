@@ -30,7 +30,7 @@ export default function NavRail() {
           ref={line}
           aria-hidden="true"
           className="absolute top-2 right-0 bottom-2 w-px origin-top scale-y-0"
-          style={{ background: 'linear-gradient(180deg, #8fe6ff, #9b86ff)' }}
+          style={{ background: 'linear-gradient(180deg, #f4f6fb, #ff3444)' }}
         />
         {RAIL_SCENES.map((s) => {
           const isActive = railActive === s.id;

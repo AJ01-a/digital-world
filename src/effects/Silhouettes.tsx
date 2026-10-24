@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { mulberry32 } from '../lib/utils';
+import { canopy } from '../lib/shapes';
 
 /** Gradient ids must be unique per instance: the same artwork can be on
     screen twice (a cross-fade, or a game card over its own backdrop), and
@@ -135,7 +136,7 @@ export const MoonScape = ({ align }: ScapeProps = {}) => {
 );
 };
 
-/** God of War — cold peaks and an old carved ring. */
+/** God of War Ragnarök — cold peaks and an old carved ring. */
 export const NorthScape = ({ align }: ScapeProps = {}) => {
   const u = useSvgId();
   return (
@@ -199,6 +200,36 @@ export const MountainScape = ({ align }: ScapeProps = {}) => {
     </g>
     <path d={ridge(19, 800, 90)} fill="var(--env-void)" opacity="0.92" />
     <path d={ridge(23, 874, 40)} fill="#000" opacity="0.78" />
+  </Frame>
+);
+};
+
+/** Monster Hunter: World — an ancient tree over a forest, something big in the sky. */
+export const WildScape = ({ align, lite }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
+  <Frame align={align}>
+    <defs>
+      <radialGradient id={`${u}wild-sun`} cx="74%" cy="24%" r="42%">
+        <stop offset="0%" stopColor="#ffe2a6" stopOpacity="0.2" />
+        <stop offset="45%" stopColor="var(--env-accent)" stopOpacity="0.08" />
+        <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+      </radialGradient>
+      <linearGradient id={`${u}wild-mist`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="transparent" stopOpacity="0" />
+        <stop offset="55%" stopColor="var(--env-accent)" stopOpacity="0.1" />
+        <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill={`url(#${u}wild-sun)`} />
+    <g fill="color-mix(in oklab, var(--env-a) 70%, var(--env-accent))" opacity="0.3">
+      <path d="M330 900 C352 760 348 600 316 470 C306 430 340 420 352 460 C384 560 408 700 420 900 Z" />
+      <path d={canopy(41, 360, 330, 330, 190, lite ? 7 : 11)} />
+    </g>
+    <path d={ridge(52, 690, 120, 22)} fill="color-mix(in oklab, var(--env-a) 85%, var(--env-accent))" opacity="0.55" />
+    <rect y="560" width="1440" height="170" fill={`url(#${u}wild-mist)`} />
+    <path d={ridge(58, 790, 70, 30)} fill="var(--env-void)" opacity="0.9" />
+    <path d={ridge(61, 876, 40)} fill="#000" opacity="0.75" />
   </Frame>
 );
 };
@@ -330,8 +361,8 @@ export const HorizonScape = ({ align }: ScapeProps = {}) => {
       <linearGradient id={`${u}hz-rim`} x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0" />
         <stop offset="35%" stopColor="var(--env-accent)" stopOpacity="0.55" />
-        <stop offset="65%" stopColor="#9b86ff" stopOpacity="0.5" />
-        <stop offset="100%" stopColor="#9b86ff" stopOpacity="0" />
+        <stop offset="65%" stopColor="var(--env-glow)" stopOpacity="0.5" />
+        <stop offset="100%" stopColor="var(--env-glow)" stopOpacity="0" />
       </linearGradient>
       <linearGradient id={`${u}hz-body`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="var(--env-a)" />

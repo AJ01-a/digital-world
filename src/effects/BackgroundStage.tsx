@@ -11,6 +11,7 @@ import {
   NatureScape,
   NorthScape,
   TreeScape,
+  WildScape,
 } from './Silhouettes';
 
 const SCAPES: Record<ScapeKey, (props?: { align?: string; lite?: boolean }) => ReactElement> = {
@@ -18,6 +19,7 @@ const SCAPES: Record<ScapeKey, (props?: { align?: string; lite?: boolean }) => R
   moon: MoonScape,
   north: NorthScape,
   mountain: MountainScape,
+  wild: WildScape,
   city: CityScape,
   nature: NatureScape,
   circuit: CircuitScape,
@@ -56,7 +58,7 @@ export default function BackgroundStage() {
   }
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#03040a]">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#040405]">
       {layers.map((l, i) => (
         <Atmosphere
           key={l.key}
@@ -88,7 +90,7 @@ function Atmosphere({ layer, fresh, lite, onSettled }: { layer: Layer; fresh: bo
         background: [
           `radial-gradient(80% 55% at 14% 6%, ${alpha(theme.ray, 0.6)} 0%, transparent 70%)`,
           `radial-gradient(55% 45% at 92% 88%, ${alpha(theme.accent, 0.13)} 0%, transparent 70%)`,
-          `radial-gradient(50% 40% at 70% 18%, ${alpha('#5a3fd0', 0.14)} 0%, transparent 70%)`,
+          `radial-gradient(50% 40% at 70% 18%, ${alpha(theme.glow ?? '#5a3fd0', theme.glow ? 0.3 : 0.14)} 0%, transparent 70%)`,
           `radial-gradient(130% 90% at 50% 0%, ${theme.b} 0%, ${theme.a} 42%, ${theme.void} 82%)`,
         ].join(', '),
         animation: fresh ? 'fade-in 1100ms var(--ease-out-expo) both' : undefined,
@@ -103,6 +105,7 @@ function Atmosphere({ layer, fresh, lite, onSettled }: { layer: Layer; fresh: bo
           {
             '--env-accent': theme.accent,
             '--env-ray': theme.ray,
+            '--env-glow': theme.glow ?? '#9b86ff',
             '--env-a': theme.a,
             '--env-b': theme.b,
             '--env-void': theme.void,

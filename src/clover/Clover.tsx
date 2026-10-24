@@ -345,7 +345,7 @@ export default function Clover({ ready }: { ready: boolean }) {
                     className={cn(
                       'max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[0.9rem] leading-relaxed',
                       m.from === 'you'
-                        ? 'rounded-br-md bg-[linear-gradient(120deg,#5ce1ff,#8fb8ff)] text-[#06101c]'
+                        ? 'rounded-br-md bg-[linear-gradient(120deg,#ffffff,#d5d9e2)] text-[#0a0a0d]'
                         : 'rounded-bl-md border border-white/[0.06] bg-white/[0.045] text-[var(--color-ink)]',
                     )}
                   >

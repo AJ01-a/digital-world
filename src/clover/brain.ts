@@ -13,6 +13,7 @@
 import { AUTOMATION_COPY, BUILDS, CLOVER, DRIVING, FACTS, OMARCHY, TECH_COPY, TOPICS } from '../data/content';
 import { GAME_WORLDS, SCENE_MAP, type SceneId } from '../data/worlds';
 import type { Mood } from './CloverArt';
+import { CRUSH_REPLY, CRUSH_SEALED, isCrushFollowUp, isCrushQuestion } from './crush';
 
 export type Action =
   | { label: string; kind: 'goto'; to: SceneId }
@@ -35,6 +36,8 @@ export interface Reply {
 
 export function normalize(input: string) {
   return ` ${input
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[’']/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -83,9 +86,9 @@ export const TOUR: { to: SceneId; line: string }[] = [
   { to: 'tech', line: 'The signal map. Every node is something AJ is learning — hover or tap one and it lights up.' },
   { to: 'automation', line: "The lab: how AJ turns ideas into running code with Claude Code and WSL. The terminal here is a scripted illustration, not a real one." },
   { to: 'projects', line: 'Builds. Everything listed here actually runs on this page — me included.' },
-  { to: 'games', line: 'Games. Pick a world and the whole site changes colour with it. Go on, try one.' },
+  { to: 'games', line: 'Games. Pick a world and the whole site changes colour with it — and Monster Hunter has a whole ecosystem to explore.' },
   { to: 'strategy', line: "Chess puzzles, one move each. I'd help, but I don't have thumbs." },
-  { to: 'driving', line: 'The night drive. On a computer, move your pointer to steer.' },
+  { to: 'driving', line: 'The night drive — a white Envista on an empty road. On a computer, your pointer sets the pace.' },
   { to: 'clover', line: 'And this is my chapter. Hi again! *wags*' },
   { to: 'outro', line: "That's the tour. Thanks for walking with me — ask me anything, any time." },
 ];
@@ -99,10 +102,10 @@ const SUGGEST: Record<SceneId, string[]> = {
   omarchy: ['What is Omarchy?', 'What editor does AJ use?', 'Take me to the lab'],
   automation: ['Is that terminal real?', 'How does AJ use Claude Code?', 'Show me the builds'],
   projects: ['How do you work?', 'How was this site made?', 'Take me to the chess puzzle'],
-  games: ["What's AJ's favourite game?", 'Tell me about Sekiro', 'Why Elden Ring?'],
+  games: ['Tell me about Monster Hunter', "What's AJ's favourite game?", 'Tell me about Sekiro'],
   strategy: ['Give me a hint', 'Is AJ good at chess?', 'Take me to the word puzzle'],
   words: ['Hint for the word puzzle?', 'Where do the words come from?', 'Take me to the drive'],
-  driving: ['Why the drives?', 'Take me to Clover'],
+  driving: ['Why the drives?', 'What car is that?', 'Take me to Clover'],
   clover: ['What breed are you?', 'Do a trick!', 'Are you a real dog?'],
   outro: ['Back to the top', 'How can I contact AJ?', 'Thanks, Clover!'],
 };
@@ -280,7 +283,7 @@ const INTENTS: Intent[] = [
     reply: () => ({
       lines: [
         'This site is React and TypeScript, built with Vite and styled with Tailwind CSS. It is deployed to GitHub Pages by a GitHub Actions workflow.',
-        'The backgrounds, the logo and I are all drawn in code — there are no image downloads for the art.',
+        'The backgrounds, the logo, the car and I are all drawn in code. The only pictures are AJ\'s own portrait artwork in the intro and the game artwork in the Games chapter.',
       ],
       mood: 'idle',
       actions: [go('See the builds', 'projects')],
@@ -302,7 +305,7 @@ const INTENTS: Intent[] = [
     keys: ['games', 'gaming', 'video games', 'favourite game', 'favorite game', 'what does aj play', 'play'],
     reply: () => ({
       lines: [
-        "AJ likes games that feel like an experience — story-driven worlds and difficult combat. The four on the site:",
+        `AJ likes games that feel like an experience — living worlds, stories and difficult combat. The ${GAME_WORLDS.length} on the site:`,
         ...GAME_WORLDS.map((g) => `• ${g.title} — ${g.line}`),
         'There is no single official favourite, but he does think Sekiro has the best combat system ever made.',
       ],
@@ -312,7 +315,7 @@ const INTENTS: Intent[] = [
   },
   ...GAME_WORLDS.map<Intent>((g) => ({
     id: `game-${g.id}`,
-    keys: [g.short.toLowerCase(), g.title.toLowerCase().replace(/[^a-z\s]/g, '')],
+    keys: [g.short.toLowerCase(), g.title.normalize('NFD').toLowerCase().replace(/[^a-z\s]/g, ''), ...(g.aliases ?? [])],
     reply: () => ({ lines: [`${g.title}: "${g.line}"`, `"${g.note}"`], mood: 'idle', actions: [go('Enter the game worlds', 'games')] }),
   })),
   {
@@ -353,7 +356,18 @@ const INTENTS: Intent[] = [
   {
     id: 'driving',
     keys: ['drive', 'driving', 'drives', 'car', 'cars', 'road trip', 'why the drives'],
-    reply: () => ({ lines: [`"${DRIVING.line} ${DRIVING.body}"`], mood: 'idle', actions: [go('Take the drive', 'driving')] }),
+    reply: () => ({ lines: [`"${DRIVING.line} ${DRIVING.body}"`], mood: 'idle', actions: [go('Take the drive', 'driving'), ask('What car is that?')] }),
+  },
+  {
+    id: 'car',
+    keys: ['what car', 'which car', 'what car is that', 'buick', 'envista', 'the car', 'white car', 'vehicle'],
+    reply: () => ({
+      lines: [
+        `That's a ${DRIVING.car} — drawn in code, not a photo. The wheels turn at the speed the road moves, so nothing slides.`,
+      ],
+      mood: 'happy',
+      actions: [go('Take the drive', 'driving')],
+    }),
   },
   {
     id: 'clover',
@@ -497,6 +511,10 @@ const FALLBACKS = [
 ];
 
 export function respond(input: string, active: SceneId): Reply {
+  // The secret comes first, so no other topic can swallow it.
+  if (isCrushQuestion(input)) return { lines: CRUSH_REPLY, mood: 'curious' };
+  if (isCrushFollowUp(input)) return { lines: CRUSH_SEALED, mood: 'curious' };
+
   const text = normalize(input);
 
   // "Take me to …" — or just the name of a chapter on its own.

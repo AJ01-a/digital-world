@@ -5,7 +5,7 @@ const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'Ar
 const SPARKS = Array.from({ length: 18 }, (_, i) => {
   const a = (i / 18) * Math.PI * 2;
   const d = 140 + (i % 4) * 50;
-  return { x: Math.cos(a) * d, y: Math.sin(a) * d - 40, color: i % 3 === 0 ? '#ff9b52' : i % 3 === 1 ? '#5ce1ff' : '#9b86ff' };
+  return { x: Math.cos(a) * d, y: Math.sin(a) * d - 40, color: i % 3 === 0 ? '#ff9b52' : i % 3 === 1 ? '#f4f6fb' : '#ff3444' };
 });
 
 /** Win messages, plus the hidden code. */

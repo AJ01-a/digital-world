@@ -7,7 +7,7 @@ import Logo from '../components/ui/Logo';
 import SectionShell from '../components/ui/SectionShell';
 
 /** Entrance choreography — CSS only, plays once. `--d` is the delay. */
-const enter = (d: number): CSSProperties => ({ animation: `rise-in 1000ms var(--ease-out-expo) ${d}ms both` });
+const rise = (d: number): CSSProperties => ({ animation: `rise-in 1000ms var(--ease-out-expo) ${d}ms both` });
 
 /**
  * The orbital system around the monogram. The rings turn with the page
@@ -20,21 +20,23 @@ function Emblem({ play }: { play: boolean }) {
       {/* glow */}
       <div
         className="absolute inset-[12%] rounded-full"
-        style={{ background: 'radial-gradient(circle, rgba(92,225,255,0.22) 0%, rgba(155,134,255,0.12) 40%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(236,240,248,0.13) 0%, rgba(255,52,68,0.12) 42%, transparent 70%)' }}
       />
       <div className="orbit-scroll absolute inset-0">
         <svg viewBox="0 0 400 400" className="h-full w-full overflow-visible">
           <defs>
-            <linearGradient id="orbit-a" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#8fe6ff" stopOpacity="0.7" />
-              <stop offset="0.5" stopColor="#8fe6ff" stopOpacity="0.05" />
-              <stop offset="1" stopColor="#9b86ff" stopOpacity="0.6" />
+            {/* The intro's orbit: white on the left, red on the right. */}
+            <linearGradient id="orbit-a" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#f4f6fb" stopOpacity="0.7" />
+              <stop offset="0.45" stopColor="#f4f6fb" stopOpacity="0.06" />
+              <stop offset="0.55" stopColor="#ff3444" stopOpacity="0.06" />
+              <stop offset="1" stopColor="#ff3444" stopOpacity="0.65" />
             </linearGradient>
           </defs>
           <circle cx="200" cy="200" r="196" fill="none" stroke="url(#orbit-a)" strokeWidth="1" />
-          <circle cx="200" cy="200" r="182" fill="none" stroke="#b8d4ff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="1 7" />
+          <circle cx="200" cy="200" r="182" fill="none" stroke="#d9dde6" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="1 7" />
           {/* degree ticks */}
-          <g stroke="#b8d4ff" strokeOpacity="0.35">
+          <g stroke="#d9dde6" strokeOpacity="0.3">
             {Array.from({ length: 72 }, (_, i) => {
               const a = (i / 72) * Math.PI * 2;
               const r1 = i % 6 === 0 ? 186 : 190;
@@ -44,29 +46,32 @@ function Emblem({ play }: { play: boolean }) {
             })}
           </g>
           {/* satellites */}
-          <circle cx="200" cy="4" r="4" fill="#5ce1ff" />
-          <circle cx="200" cy="4" r="10" fill="none" stroke="#5ce1ff" strokeOpacity="0.35" />
-          <circle cx={200 + Math.cos(2.4) * 196} cy={200 + Math.sin(2.4) * 196} r="3" fill="#9b86ff" />
+          <circle cx="200" cy="4" r="4" fill="#ff3444" />
+          <circle cx="200" cy="4" r="10" fill="none" stroke="#ff3444" strokeOpacity="0.4" />
+          <circle cx={200 + Math.cos(2.4) * 196} cy={200 + Math.sin(2.4) * 196} r="3" fill="#f4f6fb" />
         </svg>
       </div>
       <div className="orbit-scroll absolute inset-[13%]" style={{ animationDirection: 'reverse' }}>
         <svg viewBox="0 0 300 300" className="h-full w-full overflow-visible">
-          <ellipse cx="150" cy="150" rx="148" ry="148" fill="none" stroke="#9b86ff" strokeOpacity="0.22" strokeDasharray="60 14 4 14" />
+          <ellipse cx="150" cy="150" rx="148" ry="148" fill="none" stroke="#ff3444" strokeOpacity="0.2" strokeDasharray="60 14 4 14" />
           <circle cx={150 + Math.cos(-0.7) * 148} cy={150 + Math.sin(-0.7) * 148} r="4.5" fill="#ff9b52" />
         </svg>
       </div>
-      <div className="absolute inset-[24%] rounded-full border border-white/[0.06]" style={{ background: 'radial-gradient(circle at 50% 35%, rgba(20,30,64,0.9), rgba(4,6,14,0.95) 70%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 80px -30px rgba(0,0,0,0.9)' }} />
-      <div className="relative w-[44%]">
+      <div className="absolute inset-[24%] rounded-full border border-white/[0.06]" style={{ background: 'radial-gradient(circle at 50% 35%, rgba(30,26,32,0.9), rgba(5,5,7,0.96) 70%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 80px -30px rgba(0,0,0,0.9)' }} />
+      {/* The intro's mark flies here on the way in (see Intro.tsx). */}
+      <div className="relative w-[44%]" data-hero-mark>
         <Logo size={400} draw={play} sweep className="h-auto w-full" delay={play ? 200 : 600} />
       </div>
     </div>
   );
 }
 
-export default function Hero({ introPlayed }: { introPlayed: boolean }) {
+export default function Hero({ introPlayed, arrived }: { introPlayed: boolean; arrived: boolean }) {
   const { goTo, openClover } = useActions();
-  // After the intro the page arrives a beat later; without it, straight away.
-  const base = introPlayed ? 0 : 150;
+  // After the intro, the hero rises as the circle opens onto it; until then
+  // it waits, unseen. Without the intro it arrives straight away.
+  const base = introPlayed ? 300 : 150;
+  const enter = (d: number): CSSProperties => (arrived ? rise(d) : { opacity: 0 });
 
   return (
     <SectionShell id="home" header={false} labelledBy="hero-title" className="overflow-hidden">
@@ -116,7 +121,7 @@ export default function Hero({ introPlayed }: { introPlayed: boolean }) {
           </div>
         </div>
 
-        <div className="order-1 flex justify-center lg:order-2 lg:col-span-5 lg:justify-end" style={{ animation: `fade-in 1400ms var(--ease-out-expo) ${base}ms both` }}>
+        <div className="order-1 flex justify-center lg:order-2 lg:col-span-5 lg:justify-end" style={arrived ? { animation: `fade-in ${introPlayed ? 900 : 1400}ms var(--ease-out-expo) ${introPlayed ? 0 : base}ms both` } : { opacity: 0 }}>
           <Emblem play={!introPlayed} />
         </div>
       </div>

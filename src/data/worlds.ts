@@ -19,11 +19,13 @@ export interface Theme {
   accent: string;
   /** Muted text / label tone. */
   tint: string;
-  /** Colour of the nebula light. */
+  /** Colour of the nebula light, top left. */
   ray: string;
+  /** A second light, top right. Defaults to violet. */
+  glow?: string;
 }
 
-export type ScapeKey = 'tree' | 'moon' | 'north' | 'mountain' | 'city' | 'nature' | 'circuit' | 'horizon';
+export type ScapeKey = 'tree' | 'moon' | 'north' | 'mountain' | 'wild' | 'city' | 'nature' | 'circuit' | 'horizon';
 
 export type SceneId =
   | 'home'
@@ -55,9 +57,12 @@ export interface Scene {
 }
 
 /*
- * One palette family — deep space, icy blue, electric cyan, violet — with
- * each chapter leaning on a different part of it. Warm orange is held back
- * for Clover and the game worlds, so it still means something when it shows.
+ * One palette family, from the intro: near-black, white and cool silver, and
+ * crimson. Black anchors every chapter; each leans towards the white side or
+ * the red side — white light from the left (`ray`), red from the right
+ * (`glow`) — and red is kept for accents that matter. The game worlds,
+ * Clover's chapter and the night drive keep environments of their own;
+ * warm orange still belongs to Clover.
  */
 export const SCENES: Scene[] = [
   {
@@ -67,7 +72,7 @@ export const SCENES: Scene[] = [
     index: '00',
     mood: 'Arrival',
     inRail: true,
-    theme: { void: '#03040a', a: '#071024', b: '#0d1c40', accent: '#7fdcff', tint: '#8ea6d6', ray: '#1d4a8f' },
+    theme: { void: '#040405', a: '#0b0a0d', b: '#170d11', accent: '#ff4a57', tint: '#b4b7c0', ray: '#3a3e4a', glow: '#6e0d17' },
   },
   {
     id: 'about',
@@ -76,7 +81,7 @@ export const SCENES: Scene[] = [
     index: '01',
     mood: 'Curiosity',
     inRail: true,
-    theme: { void: '#04050c', a: '#0a1228', b: '#16204a', accent: '#b8d0ff', tint: '#98a8d4', ray: '#2c3f8f' },
+    theme: { void: '#040405', a: '#0b0c0f', b: '#15171d', accent: '#e8ebf2', tint: '#a8acb7', ray: '#3d424f', glow: '#4a0c14' },
   },
   {
     id: 'tech',
@@ -85,7 +90,7 @@ export const SCENES: Scene[] = [
     index: '02',
     mood: 'Signal',
     inRail: true,
-    theme: { void: '#02060a', a: '#06141f', b: '#0b2836', accent: '#5ce1ff', tint: '#8cb6c8', ray: '#0f5a78' },
+    theme: { void: '#050405', a: '#100a0c', b: '#1f0d12', accent: '#ff4a57', tint: '#c2adb0', ray: '#3a1016', glow: '#7a1420' },
   },
   {
     id: 'omarchy',
@@ -94,7 +99,7 @@ export const SCENES: Scene[] = [
     index: '02',
     mood: 'Setup',
     inRail: false,
-    theme: { void: '#03050c', a: '#0a1228', b: '#132045', accent: '#7aa8ff', tint: '#96a8cc', ray: '#25418a' },
+    theme: { void: '#040405', a: '#0c0d10', b: '#181a20', accent: '#cfd5e2', tint: '#a3a8b4', ray: '#363b48', glow: '#4a0c14' },
   },
   {
     id: 'automation',
@@ -103,7 +108,7 @@ export const SCENES: Scene[] = [
     index: '03',
     mood: 'Experiment',
     inRail: true,
-    theme: { void: '#05040e', a: '#120c28', b: '#21164a', accent: '#a48dff', tint: '#ada2dc', ray: '#46309a' },
+    theme: { void: '#060405', a: '#130a0d', b: '#250d14', accent: '#ff6670', tint: '#c4a8ad', ray: '#4a1019', glow: '#8a1626' },
   },
   {
     id: 'projects',
@@ -112,7 +117,7 @@ export const SCENES: Scene[] = [
     index: '04',
     mood: 'Craft',
     inRail: true,
-    theme: { void: '#03060b', a: '#081625', b: '#0f2742', accent: '#8be9ff', tint: '#94b4cc', ray: '#1b4d80' },
+    theme: { void: '#040405', a: '#0b0c0f', b: '#16181e', accent: '#f2f4f8', tint: '#a8acb7', ray: '#40454f', glow: '#55101a' },
   },
   {
     id: 'games',
@@ -130,7 +135,7 @@ export const SCENES: Scene[] = [
     index: '06',
     mood: 'Patience',
     inRail: true,
-    theme: { void: '#05060a', a: '#10131c', b: '#1f2433', accent: '#dfe6f5', tint: '#a3abbd', ray: '#3a4260' },
+    theme: { void: '#040405', a: '#0d0d10', b: '#1b1b21', accent: '#f4f6fb', tint: '#a8abb5', ray: '#3a3e4a', glow: '#7a1420' },
   },
   {
     id: 'words',
@@ -139,7 +144,7 @@ export const SCENES: Scene[] = [
     index: '06',
     mood: 'Play',
     inRail: false,
-    theme: { void: '#02070a', a: '#061719', b: '#0c2a2c', accent: '#6fe3d0', tint: '#8fbcb5', ray: '#145a58' },
+    theme: { void: '#050405', a: '#110a0c', b: '#200d12', accent: '#ff5a66', tint: '#c2adb0', ray: '#3a1016', glow: '#6e0d17' },
   },
   {
     id: 'driving',
@@ -148,7 +153,7 @@ export const SCENES: Scene[] = [
     index: '07',
     mood: 'Freedom',
     inRail: true,
-    theme: { void: '#03050c', a: '#0a1026', b: '#1d0e35', accent: '#6ae0ff', tint: '#9aa8d6', ray: '#2b1d6b' },
+    theme: { void: '#030406', a: '#090b11', b: '#12151f', accent: '#e6ebf5', tint: '#a2a9b8', ray: '#2a3040', glow: '#5c0e16' },
   },
   {
     id: 'clover',
@@ -166,7 +171,7 @@ export const SCENES: Scene[] = [
     index: '09',
     mood: 'Thanks',
     inRail: false,
-    theme: { void: '#04040b', a: '#0e0f24', b: '#1b1a3a', accent: '#d9d2ff', tint: '#aaa6c8', ray: '#3d3480' },
+    theme: { void: '#040405', a: '#0c0b0e', b: '#19141a', accent: '#f2f4f8', tint: '#aeb1bb', ray: '#3a3e4a', glow: '#7a1420' },
   },
 ];
 
@@ -181,6 +186,8 @@ export interface GameWorld {
   id: string;
   title: string;
   short: string;
+  /** Extra words Clover should recognise this game by. */
+  aliases?: string[];
   year: string;
   genre: string;
   /** Headline shown when this world is active. */
@@ -190,17 +197,30 @@ export interface GameWorld {
   /** Three short atmosphere descriptors. */
   atmosphere: [string, string, string];
   theme: Theme;
-  /** Which procedural artwork the card and backdrop compose. */
-  art: 'tree' | 'moon' | 'north' | 'mountain';
+  /** Which procedural artwork the backdrop composes (and the stage falls back to). */
+  art: 'tree' | 'moon' | 'north' | 'mountain' | 'wild';
   /**
-   * Optional custom backdrop image. Drop a file in /public/worlds and set
-   * the path here (e.g. './worlds/elden.jpg') to use your own artwork —
-   * everything else keeps working unchanged.
+   * Where the artwork's subject sits (CSS object-position), so narrow
+   * screens crop around it. The artwork itself comes from the generated
+   * manifest in data/gameArt.ts — see scripts/game-art.py.
    */
-  image?: string;
+  focus: string;
 }
 
 export const GAME_WORLDS: GameWorld[] = [
+  {
+    id: 'monster-hunter-world',
+    title: 'Monster Hunter: World',
+    short: 'Monster Hunter',
+    year: '2018',
+    genre: 'Action RPG',
+    line: 'A world that carries on living whether you are watching or not.',
+    note: 'What I love most is the world itself. Enormous monsters, small wildlife, whole ecosystems — creatures at every scale, living alongside each other and reacting to their surroundings. It feels alive because something is always going on, even when it has nothing to do with you.',
+    atmosphere: ['Ancient canopy', 'Drifting spores', 'Living ecosystem'],
+    theme: { void: '#030805', a: '#0a1a10', b: '#16301f', accent: '#a9e27c', tint: '#b4c8a0', ray: '#2c5a31' },
+    art: 'wild',
+    focus: '50% 66%',
+  },
   {
     id: 'elden-ring',
     title: 'Elden Ring',
@@ -212,6 +232,7 @@ export const GAME_WORLDS: GameWorld[] = [
     atmosphere: ['Golden light', 'Drifting embers', 'Endless horizon'],
     theme: { void: '#080602', a: '#170e05', b: '#301c08', accent: '#f0c063', tint: '#cf9d55', ray: '#6b420f' },
     art: 'tree',
+    focus: '50% 42%',
   },
   {
     id: 'sekiro',
@@ -224,18 +245,21 @@ export const GAME_WORLDS: GameWorld[] = [
     atmosphere: ['Moonlight', 'Falling leaves', 'Held breath'],
     theme: { void: '#080506', a: '#170b0b', b: '#2a1313', accent: '#e8926a', tint: '#bd8c7f', ray: '#63251b' },
     art: 'moon',
+    focus: '50% 30%',
   },
   {
     id: 'god-of-war',
-    title: 'God of War',
+    title: 'God of War Ragnarök',
     short: 'God of War',
-    year: '2018',
+    aliases: ['ragnarok', 'gow'],
+    year: '2022',
     genre: 'Story-driven',
     line: 'Proof a story can carry as much weight as the combat.',
     note: 'A father and a son walking through a cold, quiet world. The fighting is heavy and satisfying, but it is the silences in between that stayed with me long after the credits.',
     atmosphere: ['Cold mist', 'Falling snow', 'Old runes'],
     theme: { void: '#04070c', a: '#0c1a2b', b: '#183044', accent: '#8ec6f0', tint: '#a3bdd2', ray: '#1e5077' },
     art: 'north',
+    focus: '50% 38%',
   },
   {
     id: 'black-myth-wukong',
@@ -248,6 +272,7 @@ export const GAME_WORLDS: GameWorld[] = [
     atmosphere: ['Mountain mist', 'Temple gold', 'Old legend'],
     theme: { void: '#060704', a: '#101a0c', b: '#222b12', accent: '#d9c05e', tint: '#aeb277', ray: '#474615' },
     art: 'mountain',
+    focus: '74% 30%',
   },
 ];
 

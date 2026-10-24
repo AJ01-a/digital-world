@@ -19,9 +19,10 @@ const RESPONSES: Record<string, string[]> = {
   ],
   games: [
     'installed:',
+    '  monster hunter    · a world that carries on without you',
     '  elden ring        · a horizon and no instructions',
     '  sekiro            · rhythm disguised as combat',
-    '  god of war        · the quiet bits hit hardest',
+    '  gow ragnarök      · the quiet bits hit hardest',
     '  black myth wukong · mist, mountains, mythology',
   ],
   tech: [

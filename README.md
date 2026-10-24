@@ -13,6 +13,8 @@ npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check + production build into dist/
 npm run lint     # oxlint
+npm test         # unit tests (Node's built-in runner, no extra dependencies)
+npm run test:e2e # build, serve at /digital-world/ and run the browser suites
 npm run preview  # serve the production build
 ```
 
@@ -43,7 +45,12 @@ the build works from any path without further changes.
 | What | File |
 | --- | --- |
 | All writing — intro, chapters, facts, builds, Clover's facts | `src/data/content.ts` |
-| Chapters, palettes, backdrops, the four game worlds | `src/data/worlds.ts` |
+| Chapters, palettes, backdrops, the game worlds | `src/data/worlds.ts` |
+| The intro (duality composition, glitch sequence) | `src/components/chrome/Intro.tsx`, layout in `src/lib/duality.ts` (+ `.intro`/`.duo-*` in `src/index.css`) |
+| Intro artwork (generated web copies + manifest) | `scripts/profile-art.py` → `public/intro/`, `src/data/introArt.ts` |
+| Game artwork (generated web copies + manifest) | `scripts/game-art.py` → `public/games/`, `src/data/gameArt.ts` |
+| The Monster Hunter ecosystem | `src/effects/Ecosystem.tsx` (+ `.eco-*` in `src/index.css`) |
+| The car on the night drive | `src/effects/Envista.tsx`, animated by `src/effects/RoadCanvas.tsx` |
 | What Clover understands and how he answers | `src/clover/brain.ts` |
 | Clover's artwork (head and full body) | `src/clover/CloverArt.tsx` |
 | The AJ monogram | `src/components/ui/Logo.tsx` (+ `public/favicon.svg`) |
@@ -116,12 +123,47 @@ Things that keep the site smooth — worth keeping in mind when adding to it:
 
 ## Artwork and images
 
-Every backdrop, the logo and Clover are **drawn in code** — nothing to load,
-nothing to license. To use your own photographs on the game cards, drop images
-into `public/worlds/` and set the `image` field on that world in
-`src/data/worlds.ts`. Use pictures you have the right to publish.
+The backdrops, the logo, Clover, the Monster Hunter ecosystem and the car are
+**drawn in code** — nothing to load, nothing to license. The pictures are AJ's
+own artwork in the intro and the game artwork.
 
-The social images are rendered from HTML templates in `scripts/`
+**Intro artwork.** Put the four originals — the white and red rim-lit
+portraits and the white and red chess lineups — in `Profile/` (kept out of
+git) and run:
+
+```bash
+python3 scripts/profile-art.py
+```
+
+The script recognises each image by what it shows (shape: portrait or
+lineup; light: white or red), not by its filename, and skips anything it
+can't place. It writes AVIF + WebP copies to `public/intro/` (portraits at
+640 / 960 / 1312 px, never upscaled) and regenerates `src/data/introArt.ts`.
+It also joins the two lineups into one — white king, queen and knight, then
+red rook, bishop, pawn and signature — at the gap where both put the seam,
+raising the red one 28px so the neon line runs on unbroken. The red portrait
+is mirrored in CSS, not in the file, so the two sit back to back.
+
+**Game artwork.** Put original images in `Games/` (kept out of git — only the
+web copies are published), map each file to a game id in `SOURCES` at the top
+of `scripts/game-art.py`, and run:
+
+```bash
+pip install pillow        # once; needs Pillow 11+ for AVIF
+python3 scripts/game-art.py
+```
+
+It writes resized AVIF + WebP copies (640 / 1280 / 1920 px wide, never
+upscaled, metadata stripped) to `public/games/` and regenerates
+`src/data/gameArt.ts`. The Games chapter serves the smallest file that fits,
+lazy-loads everything off screen, and falls back to the world's procedural
+scene if an image is missing or fails to load. Files not listed in `SOURCES`
+are skipped and reported — images are never matched to games by filename
+guesswork. The game artwork belongs to its studios and publishers; only
+publish images you're comfortable using.
+
+The social images are rendered from HTML templates in `scripts/` (colours in
+`scripts/brand.css` and `scripts/brand.js`)
 (`og.html` → `public/og.jpg` at 1200×630, `share.html` →
 `share/enter-my-little-world.jpg` at 1080×1080, `icon.html` →
 `public/icon-180.png` at 180×180). Open one in a browser at that size and
@@ -132,9 +174,21 @@ so run `npm install` first.
 
 ## Notes
 
-- **The intro** plays once per browser session, is skippable (button, click,
-  Esc, Enter, Space), and never plays with reduced motion or for deep links.
-  The page is rendered underneath it from the start.
+- **The intro** plays once per browser session and never for deep links.
+  Visitors enter by **pressing and holding** the composition (mouse, touch
+  or pen through one Pointer Events path, or holding Space / Enter) for
+  `HOLD_MS` (1.15s, in `Intro.tsx`); letting go early drains the progress.
+  "Skip intro" (the first Tab stop) and Escape go straight in. There is no
+  auto-exit. On entry a circle opens from the AJ mark onto the home page and
+  the mark flies to the hero emblem (`data-hero-mark`); the hero's entrance
+  plays as it opens. With reduced motion the composition is still, the hold
+  ring still fills, and entry is immediate. The page underneath is built
+  from the start, rendered once the intro is waiting (`is-behind`, animations
+  paused), and not rendered before that (`is-covered`) — see `App.tsx`.
+- **Palette**: near-black, white / cool silver, and crimson, from the intro.
+  Each chapter's colours live in `SCENES` in `src/data/worlds.ts` (`ray` is
+  the white light from the left, `glow` the red from the right). The game
+  worlds, Clover's chapter and the drive keep their own environments.
 - **Sound** never plays on its own. The Ambient button generates a soft tone
   live in the browser (Web Audio) — there are no audio files.
 - **Reduced motion** is respected throughout.
@@ -142,3 +196,12 @@ so run `npm install` first.
   the AJ mark five times, or try the Konami code.
 - **Stack**: React 19, Vite, TypeScript, Tailwind CSS v4. No animation library;
   backgrounds are hand-written `<canvas>` and SVG.
+- **Tests**: `tests/*.test.ts`, run by `npm test` through `tests/run.mjs`.
+  `tests/register.mjs` lets Node load the app's TypeScript using the project's
+  own `typescript` package, so no test framework is installed.
+- **Browser tests**: `tests/e2e/`, run by `npm run test:e2e` (add `-- --no-build`
+  to reuse `dist/`). They drive headless Chromium through `playwright-core`;
+  run `npx playwright-core install chromium` once first, or set `CHROME_PATH`.
+  The privacy check reads words that must never appear on the site from
+  `tests/e2e/private-words.txt`, one per line. That file is git-ignored so the
+  words stay local; without it the check is skipped.

@@ -181,10 +181,10 @@ export const BUILDS: Build[] = [
     id: 'art',
     name: 'Procedural worlds',
     kind: 'Artwork',
-    summary: 'Every backdrop — trees, mountains, the city, the starfield — is drawn from code.',
+    summary: 'Every backdrop — trees, mountains, a whole Monster Hunter ecosystem, the car on the night drive — is drawn from code.',
     how: [
       'Seeded random numbers, so the same shapes come back every visit.',
-      'No image downloads, and nothing to license.',
+      'The only pictures on the site are AJ\'s own portrait artwork in the intro and the game artwork.',
     ],
     stack: ['SVG', 'Canvas'],
     try: { label: 'See the network', target: 'tech' },
@@ -195,6 +195,7 @@ export const DRIVING = {
   line: 'Sometimes I just like getting in the car and going for a drive.',
   body: 'No plan, no destination worth mentioning. Music on, roads empty, city lights going past. It is the one place where thinking about nothing in particular actually works.',
   cues: ['No destination', 'Good playlist', 'Empty roads'],
+  car: 'white 2025 Buick Envista',
 };
 
 export const CLOVER = {

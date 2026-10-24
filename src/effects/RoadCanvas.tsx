@@ -1,22 +1,45 @@
 import { useEffect, useRef } from 'react';
-import { clamp, lerp, rand } from '../lib/utils';
-
-interface Dash { z: number }
-interface Post { z: number; side: -1 | 1 }
-interface Car { z: number; lane: number; speed: number }
+import { clamp } from '../lib/utils';
+import Envista, { type EnvistaHandle } from './Envista';
+import { ENVISTA } from './envistaGeometry';
 
 /**
- * A quiet night drive. Everything is drawn from a single vanishing point;
- * moving the pointer (or tilting the section into view) steers gently.
+ * A quiet night drive, filmed side-on: the camera tracks a white Buick
+ * Envista along an empty road. This canvas owns the scene's only animation
+ * loop — it scrolls the road and also turns the car's wheels, settles its
+ * suspension and slides reflections along the paint, so the wheels always
+ * turn at exactly the speed the road moves past.
+ *
+ * Two canvases, one loop: everything that never moves (sky, tarmac, edge
+ * lines, the headlight wash) is painted on resize only; each frame clears
+ * and redraws just the marks that scroll past.
+ *
+ * The pointer sets the pace. With reduced motion the scene is painted once.
  */
-export default function RoadCanvas({ reduced }: { reduced: boolean }) {
+export default function RoadCanvas({ reduced, label }: { reduced: boolean; label: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const still = useRef<HTMLCanvasElement>(null);
+  const car = useRef<EnvistaHandle>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
+    const backdrop = still.current;
+    if (!canvas || !backdrop) return;
     const ctx = canvas.getContext('2d')!;
+    const bg = backdrop.getContext('2d')!;
     const parent = canvas.parentElement!;
+
+    // The reflector glow, drawn once and stamped for every post.
+    const glow = document.createElement('canvas');
+    glow.width = glow.height = 64;
+    {
+      const g = glow.getContext('2d')!;
+      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, 'rgba(255,190,120,0.85)');
+      grad.addColorStop(1, 'rgba(255,190,120,0)');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 64, 64);
+    }
 
     let w = 0;
     let h = 0;
@@ -24,28 +47,55 @@ export default function RoadCanvas({ reduced }: { reduced: boolean }) {
     let last = performance.now();
     let t = 0;
     let visible = true;
-    let steer = 0;
-    let steerTarget = 0;
+    let pace = 1;
+    let paceTarget = 1;
+    // Distance travelled, in px at the car's depth. Everything scrolls from this.
+    let dist = 0;
 
-    const dashes: Dash[] = Array.from({ length: 26 }, (_, i) => ({ z: i / 26 }));
-    const posts: Post[] = Array.from({ length: 22 }, (_, i) => ({ z: i / 22, side: i % 2 === 0 ? -1 : 1 }));
-    const cars: Car[] = Array.from({ length: 3 }, () => ({ z: rand(0.3, 1), lane: rand(-0.55, -0.2), speed: rand(0.16, 0.3) }));
+    // Where the car sits on the canvas, measured from its SVG on resize.
+    let ground = 0;
+    let carLeft = 0;
+    let carRight = 0;
+    let unit = 1; // px per car unit
+    let lampX = 0;
 
     const resize = () => {
       const rect = parent.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
       w = rect.width;
       h = rect.height;
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      for (const [c, x] of [
+        [canvas, ctx],
+        [backdrop, bg],
+      ] as const) {
+        c.width = Math.floor(w * dpr);
+        c.height = Math.floor(h * dpr);
+        c.style.width = `${w}px`;
+        c.style.height = `${h}px`;
+        x.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      const svg = car.current?.svg?.getBoundingClientRect();
+      if (svg && svg.width) {
+        unit = svg.width / ENVISTA.width;
+        ground = svg.top - rect.top + ENVISTA.ground * unit;
+        carLeft = svg.left - rect.left + 20 * unit;
+        carRight = svg.left - rect.left + 627 * unit;
+        lampX = svg.left - rect.left + 618 * unit;
+      } else {
+        unit = (w * 0.6) / ENVISTA.width;
+        ground = h * 0.84;
+        carLeft = w * 0.2;
+        carRight = w * 0.8;
+        lampX = carRight;
+      }
+      paintStill();
+      paint();
     };
 
     const onMove = (e: PointerEvent) => {
       const rect = parent.getBoundingClientRect();
-      steerTarget = clamp(((e.clientX - rect.left) / rect.width - 0.5) * 2, -1, 1);
+      paceTarget = 0.6 + clamp((e.clientX - rect.left) / rect.width, 0, 1) * 0.9;
     };
 
     const start = () => {
@@ -61,138 +111,136 @@ export default function RoadCanvas({ reduced }: { reduced: boolean }) {
 
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (visible) start();
+      if (visible && !reduced) start();
       else stop();
     }, { threshold: 0.05 });
 
-    // Perspective: 0 = horizon, 1 = at the camera.
-    const persp = (z: number) => Math.pow(1 - z, 2.6);
+    /** Repeating marks scrolling left at `factor` × the car's speed. */
+    const scroll = (spacing: number, factor: number, offset = 0) => {
+      const shift = (dist * factor + offset) % spacing;
+      return (i: number) => i * spacing - shift;
+    };
 
     function frame(now: number) {
-      // With reduced motion the scene is painted once and left alone.
-      raf = reduced ? 0 : requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
       if (!visible) return;
       // Clamped: a frame timestamp can predate the last reset, and a
-      // negative delta would run the scene backwards into NaN.
-      const dt = reduced ? 0 : Math.min(Math.max((now - last) / 1000, 0), 0.05);
+      // negative delta would run the scene backwards.
+      const dt = Math.min(Math.max((now - last) / 1000, 0), 0.05);
       last = now;
-      const speed = 0.42;
       t += dt;
-      steer += (steerTarget - steer) * Math.min(1, dt * 2.2);
+      pace += (paceTarget - pace) * Math.min(1, dt * 1.6);
+      // Roughly one car length per second at the default pace.
+      dist += pace * 600 * unit * dt;
+      paint();
+    }
 
-      const horizon = h * 0.4;
-      const vpX = w / 2 + steer * w * 0.07 + Math.sin(t * 0.22) * w * 0.012;
-      const farHalf = w * 0.014;
-      const nearHalf = w * 0.86;
-      const centerAt = (p: number) => lerp(vpX, w / 2 + steer * w * 0.02, p);
-      const halfAt = (p: number) => lerp(farHalf, nearHalf, p);
+    // Lane positions, all measured from where the tyres meet the road.
+    const lanes = () => {
+      const farEdge = ground - h * 0.14;
+      return { farEdge, horizon: farEdge - h * 0.04, centre: ground - h * 0.07, nearEdge: ground + h * 0.045 };
+    };
 
-      ctx.clearRect(0, 0, w, h);
+    function paintStill() {
+      const { farEdge, horizon, nearEdge } = lanes();
+      bg.clearRect(0, 0, w, h);
 
-      // Distant glow on the horizon.
-      const sky = ctx.createLinearGradient(0, horizon - h * 0.3, 0, horizon + h * 0.08);
+      // Glow along the horizon.
+      const sky = bg.createLinearGradient(0, horizon - h * 0.3, 0, farEdge);
       sky.addColorStop(0, 'rgba(0,0,0,0)');
-      sky.addColorStop(1, 'rgba(120,190,255,0.16)');
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, horizon - h * 0.3, w, h * 0.38);
+      sky.addColorStop(0.75, 'rgba(110,180,255,0.12)');
+      sky.addColorStop(1, 'rgba(150,205,255,0.2)');
+      bg.fillStyle = sky;
+      bg.fillRect(0, horizon - h * 0.3, w, farEdge - horizon + h * 0.3);
 
-      // Road surface.
-      ctx.beginPath();
-      ctx.moveTo(vpX - farHalf, horizon);
-      ctx.lineTo(vpX + farHalf, horizon);
-      ctx.lineTo(centerAt(1) + nearHalf, h);
-      ctx.lineTo(centerAt(1) - nearHalf, h);
-      ctx.closePath();
-      const road = ctx.createLinearGradient(0, horizon, 0, h);
-      road.addColorStop(0, 'rgba(18,22,40,0.9)');
-      road.addColorStop(1, 'rgba(6,8,16,0.98)');
-      ctx.fillStyle = road;
-      ctx.fill();
+      // Tarmac, darker toward the camera.
+      const road = bg.createLinearGradient(0, farEdge, 0, h);
+      road.addColorStop(0, 'rgba(22,27,46,0.95)');
+      road.addColorStop(0.5, 'rgba(10,13,24,0.98)');
+      road.addColorStop(1, 'rgba(5,7,13,1)');
+      bg.fillStyle = road;
+      bg.fillRect(0, farEdge, w, h - farEdge);
 
-      // Edge lines.
+      bg.globalCompositeOperation = 'lighter';
+      // Far and near edge lines.
+      bg.fillStyle = 'rgba(120,215,255,0.32)';
+      bg.fillRect(0, farEdge, w, 1.5);
+      bg.fillStyle = 'rgba(120,215,255,0.22)';
+      bg.fillRect(0, nearEdge, w, 2);
+
+      // Headlight wash on the road ahead.
+      const beam = bg.createLinearGradient(lampX, 0, lampX + w * 0.4, 0);
+      beam.addColorStop(0, 'rgba(225,240,255,0.2)');
+      beam.addColorStop(1, 'rgba(225,240,255,0)');
+      bg.fillStyle = beam;
+      bg.beginPath();
+      bg.moveTo(lampX, ground - 92 * unit);
+      bg.lineTo(lampX + w * 0.45, ground - 40 * unit);
+      bg.lineTo(lampX + w * 0.45, ground + 8 * unit);
+      bg.lineTo(lampX, ground - 60 * unit);
+      bg.closePath();
+      bg.fill();
+      bg.globalCompositeOperation = 'source-over';
+    }
+
+    function paint() {
+      const { farEdge, centre, nearEdge } = lanes();
+      ctx.clearRect(0, 0, w, h);
       ctx.globalCompositeOperation = 'lighter';
-      for (const side of [-1, 1] as const) {
-        ctx.beginPath();
-        for (let i = 0; i <= 24; i++) {
-          const p = persp(1 - i / 24);
-          const x = centerAt(p) + side * halfAt(p);
-          const y = horizon + p * (h - horizon);
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = 'rgba(120,215,255,0.28)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+
+      // Reflective posts on the far shoulder — slower, they are further away.
+      const postGap = Math.max(w * 0.42, 180);
+      const post = scroll(postGap, 0.62, postGap * 0.3);
+      let reflect = -1;
+      for (let i = 0; i < Math.ceil(w / postGap) + 2; i++) {
+        const x = post(i);
+        const top = farEdge - h * 0.075;
+        ctx.fillStyle = 'rgba(160,180,220,0.18)';
+        ctx.fillRect(x - 1, top, 2, farEdge - top);
+        ctx.drawImage(glow, x - 16, top + 3 - 16, 32, 32);
+        if (x > carLeft && x < carRight) reflect = (x - carLeft) / (carRight - carLeft);
       }
 
-      // Centre dashes.
-      for (const d of dashes) {
-        d.z -= speed * dt;
-        if (d.z < 0) d.z += 1;
-        const p = persp(d.z);
-        const y = horizon + p * (h - horizon);
-        const cx = centerAt(p);
-        const dw = lerp(0.8, 16, p);
-        const dh = lerp(1.5, 54, p);
-        ctx.fillStyle = `rgba(230,240,255,${(0.1 + p * 0.5).toFixed(3)})`;
-        ctx.fillRect(cx - dw / 2, y, dw, dh);
+      // Centre dashes, one lane over.
+      const dashGap = Math.max(w * 0.22, 110);
+      const dashW = dashGap * 0.45;
+      const dash = scroll(dashGap, 0.86);
+      ctx.fillStyle = 'rgba(230,240,255,0.42)';
+      for (let i = 0; i < Math.ceil(w / dashGap) + 2; i++) ctx.fillRect(dash(i), centre, dashW, Math.max(2, h * 0.007));
+
+      // Grain in the car's own lane: moves at exactly the car's speed, so it
+      // is what the tyres visibly roll over.
+      const grainGap = 22 * unit;
+      const grain = scroll(grainGap, 1);
+      ctx.fillStyle = 'rgba(170,190,230,0.07)';
+      for (let i = 0; i < Math.ceil(w / grainGap) + 2; i++) {
+        const x = grain(i);
+        ctx.fillRect(x, ground + 2, 7 * unit, 1);
+        ctx.fillRect(x + 11 * unit, ground + 7 * unit, 4 * unit, 1);
       }
 
-      // Reflective posts along the shoulder.
-      for (const post of posts) {
-        post.z -= speed * dt;
-        if (post.z < 0) post.z += 1;
-        const p = persp(post.z);
-        const y = horizon + p * (h - horizon);
-        const x = centerAt(p) + post.side * halfAt(p) * 1.06;
-        const r = lerp(0.6, 6, p);
-        const g = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
-        g.addColorStop(0, `rgba(255,190,120,${(0.15 + p * 0.6).toFixed(3)})`);
-        g.addColorStop(1, 'rgba(255,190,120,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(x, y, r * 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      // Rumble strip on the near edge — closest to the camera, so fastest.
+      const tickGap = Math.max(18 * unit, 10);
+      const tick = scroll(tickGap, 1.12);
+      ctx.fillStyle = 'rgba(200,230,255,0.16)';
+      for (let i = 0; i < Math.ceil(w / tickGap) + 2; i++) ctx.fillRect(tick(i), nearEdge + 4, tickGap * 0.4, 3);
 
-      // A couple of cars coming the other way.
-      for (const car of cars) {
-        car.z -= (speed + car.speed) * dt;
-        if (car.z < 0) {
-          car.z += 1;
-          car.lane = rand(-0.6, -0.2);
-          car.speed = rand(0.16, 0.3);
-        }
-        const p = persp(car.z);
-        const y = horizon + p * (h - horizon) - lerp(1, 26, p);
-        const x = centerAt(p) + car.lane * halfAt(p);
-        const spread = lerp(1, 26, p);
-        for (const off of [-spread, spread]) {
-          const g = ctx.createRadialGradient(x + off, y, 0, x + off, y, lerp(2, 34, p));
-          g.addColorStop(0, `rgba(220,240,255,${(0.2 + p * 0.7).toFixed(3)})`);
-          g.addColorStop(1, 'rgba(180,220,255,0)');
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(x + off, y, lerp(2, 34, p), 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
       ctx.globalCompositeOperation = 'source-over';
 
-      // Fade the very bottom so the canvas melts into the section.
-      const fade = ctx.createLinearGradient(0, h * 0.72, 0, h);
-      fade.addColorStop(0, 'rgba(0,0,0,0)');
-      fade.addColorStop(1, 'rgba(4,6,12,0.92)');
-      ctx.fillStyle = fade;
-      ctx.fillRect(0, h * 0.72, w, h * 0.28);
+      // The car: wheels roll the distance travelled; the body floats on its springs.
+      const angle = reduced ? 0 : dist / (ENVISTA.wheelR * unit);
+      const bob = reduced ? 0 : Math.sin(t * 2.3) * 0.45 + Math.sin(t * 7.1) * 0.18;
+      car.current?.pose(angle, bob, reflect);
     }
 
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(parent);
     io.observe(parent);
-    window.addEventListener('pointermove', onMove, { passive: true });
-    start();
+    if (!reduced) {
+      window.addEventListener('pointermove', onMove, { passive: true });
+      start();
+    }
 
     return () => {
       stop();
@@ -202,5 +250,14 @@ export default function RoadCanvas({ reduced }: { reduced: boolean }) {
     };
   }, [reduced]);
 
-  return <canvas ref={ref} aria-hidden="true" className="absolute inset-0 h-full w-full" />;
+  return (
+    <>
+      <canvas ref={still} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+      <canvas ref={ref} aria-hidden="true" className="absolute inset-0 h-full w-full" />
+      <div className="absolute bottom-[12%] left-1/2 w-[84%] -translate-x-1/2 sm:bottom-[13%] sm:w-[60%]">
+        <Envista ref={car} label={label} />
+      </div>
+    </>
+  );
 }
+

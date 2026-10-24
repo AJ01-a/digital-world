@@ -3,8 +3,9 @@
 /* ─────────────────────────────────────────────────────────────
    AJ · Digital World — design tokens
 
-   Deep space surfaces, an icy-blue → cyan → violet light spectrum,
-   and a warm orange held in reserve (Clover, the game worlds).
+   Near-black surfaces; white and cool silver for light and text; crimson
+   for the accents that matter — the two sides of the intro. A warm orange
+   is held in reserve (Clover, the game worlds).
    Type: Unbounded for display, Geist for reading, Geist Mono for
    instrumentation, Instrument Serif for the human moments.
    ───────────────────────────────────────────────────────────── */
@@ -14,13 +15,12 @@
   --font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
-  --color-ink: #eaf0ff;
-  --color-ink-dim: #aab4cf;
-  --color-ink-faint: #7a86a3;
-  --color-space: #03040a;
-  --color-ice: #b8d4ff;
-  --color-cyan: #5ce1ff;
-  --color-violet: #9b86ff;
+  --color-ink: #eef0f4;
+  --color-ink-dim: #adb1bc;
+  --color-ink-faint: #7c818d;
+  --color-space: #040405;
+  --color-silver: #d9dde6;
+  --color-crimson: #ff4a57;
   --color-ember: #ff9b52;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -28,14 +28,14 @@
 }
 
 :root {
-  --env-void: #03040a;
-  --env-a: #071024;
-  --env-b: #0d1c40;
-  --env-accent: #7fdcff;
-  --env-tint: #8ea6d6;
-  --env-ray: #1d4a8f;
+  --env-void: #040405;
+  --env-a: #0b0a0d;
+  --env-b: #170d11;
+  --env-accent: #ff4a57;
+  --env-tint: #b4b7c0;
+  --env-ray: #3a3e4a;
   --shell: clamp(1rem, 5vw, 5.5rem);
-  --spectrum: linear-gradient(100deg, #e8f3ff 0%, #8fe6ff 32%, #5ce1ff 48%, #9b86ff 100%);
+  --spectrum: linear-gradient(100deg, #ffffff 0%, #e4e7ee 40%, #ff6670 68%, #e0141f 100%);
   color-scheme: dark;
   accent-color: var(--env-accent);
 }
@@ -236,8 +236,8 @@ section .grid > * { min-width: 0; }
 }
 .btn:active { transform: scale(0.97); }
 .btn-solid {
-  color: #050813;
-  background: linear-gradient(100deg, color-mix(in oklab, var(--env-accent) 70%, white), var(--env-accent));
+  color: #0a0a0d;
+  background: linear-gradient(100deg, color-mix(in oklab, var(--env-accent) 88%, white), var(--env-accent));
   box-shadow: 0 10px 40px -14px var(--env-accent), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 .btn-solid:hover { box-shadow: 0 14px 50px -12px var(--env-accent), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
@@ -342,29 +342,35 @@ section .grid > * { min-width: 0; }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Intro — the first-entry sequence. All CSS, all finite.
+   Intro — the first-entry sequence: AJ's two portraits, white and
+   red, built by the glitch. All finite except the slow orbit ticks.
+   Timeline (ms): 0 dark · 250 signals · 760 portraits · 1500 boundary
+   · 1700 orbit · 2300 chess · 2900 mark · 3200 decode · 3300 hold hint.
+   Then it waits to be held. Layout is set inline from src/lib/duality.ts.
+   Entrances fill `backwards` and rest in their final state, so once an
+   animation has played the browser can let go of its layer — the waiting
+   composition then costs almost nothing to show.
    ───────────────────────────────────────────────────────────── */
 .intro {
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(70% 60% at 50% 45%, #0a1230 0%, #04060f 55%, #020308 100%);
-  transition: opacity 650ms var(--ease-out-expo), visibility 0s linear 650ms;
+  overflow: hidden;
+  --hold: 1150ms; /* set inline from HOLD_MS in Intro.tsx */
 }
-.intro.is-leaving { opacity: 0; visibility: hidden; }
-.intro.is-leaving .intro-stage { transform: scale(1.35); opacity: 0; transition: transform 700ms var(--ease-in-out-quint), opacity 500ms ease; }
+.intro.is-leaving { pointer-events: none; }
+/* Everything the way in opens through. Pointer events pass to the hold area beneath. */
+.duo-stage { position: absolute; inset: 0; overflow: hidden; background: #000; pointer-events: none; }
 
 .intro-scan {
   position: absolute;
   inset-inline: 0;
   top: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(140, 230, 255, 0.9), transparent);
-  box-shadow: 0 0 24px 4px rgba(92, 225, 255, 0.35);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9) 28%, rgba(255, 255, 255, 0.55) 47%, rgba(255, 64, 76, 0.6) 53%, rgba(255, 52, 68, 0.95) 72%, transparent);
+  box-shadow: 0 0 22px 3px rgba(255, 255, 255, 0.12);
   opacity: 0;
-  animation: intro-scan 900ms var(--ease-in-out-quint) 150ms forwards;
+  animation: intro-scan 900ms var(--ease-in-out-quint) 150ms backwards;
 }
 @keyframes intro-scan {
   0% { transform: translateY(0); opacity: 0; }
@@ -376,17 +382,17 @@ section .grid > * { min-width: 0; }
 .intro-lines {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px);
-  opacity: 0;
-  animation: fade-in 500ms ease 100ms forwards;
+  pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px);
 }
 
 .intro-frag {
   position: absolute;
   height: 2px;
+  pointer-events: none;
   background: currentColor;
   opacity: 0;
-  animation: intro-frag 520ms steps(4, jump-none) forwards;
+  animation: intro-frag 520ms steps(4, jump-none) backwards;
 }
 @keyframes intro-frag {
   0% { opacity: 0; transform: scaleX(0.2); }
@@ -395,12 +401,159 @@ section .grid > * { min-width: 0; }
   100% { opacity: 0; transform: scaleX(0) translateX(-10px); }
 }
 
-.intro-stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1.75rem; }
+/* Stage 2 — a white signal from the left, a red one from the right. */
+.duo-signal {
+  position: absolute;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  animation: duo-signal 1100ms var(--ease-out-expo) 250ms backwards;
+}
+.duo-signal-w { left: 0; transform-origin: left; background: linear-gradient(90deg, transparent, #fff); box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); }
+.duo-signal-r { right: 0; transform-origin: right; background: linear-gradient(90deg, #ff3444, transparent); box-shadow: 0 0 10px rgba(255, 52, 68, 0.7); }
+@keyframes duo-signal {
+  0% { opacity: 1; transform: scaleX(0); }
+  40% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+.duo-spark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, #fff 0 35%, #ff4a55 60%, transparent 72%);
+  opacity: 0;
+  animation: duo-spark 700ms ease-out 680ms backwards;
+}
+@keyframes duo-spark {
+  0% { opacity: 0; transform: scale(0.2); }
+  25% { opacity: 1; transform: scale(3.2); }
+  100% { opacity: 0; transform: scale(0.6); }
+}
 
-/* RGB-split glitch copies of the mark, sliced into bands. */
+/* Stage 3 — the portraits. Each half is clipped to its side of the boundary. */
+.duo-side { position: absolute; inset: 0; pointer-events: none; transition: transform 800ms var(--ease-in-out-quint); }
+.duo-flip { transform: scaleX(-1); }
+.duo-img {
+  -webkit-mask-image: linear-gradient(180deg, #000 48%, transparent 88%);
+  mask-image: linear-gradient(180deg, #000 48%, transparent 88%);
+}
+.duo-reveal { animation: duo-reveal 900ms linear 760ms backwards; }
+.duo-red .duo-reveal { animation-delay: 880ms; }
+@keyframes duo-reveal {
+  0% { opacity: 0; }
+  12% { opacity: 0.55; }
+  18% { opacity: 0.08; }
+  30% { opacity: 0.8; }
+  37% { opacity: 0.3; }
+  58%, 100% { opacity: 1; }
+}
+
+/* Glitch slices: brief, sideways, some of them in the other colour. */
+.duo-slice { opacity: 0; animation: duo-slice-a 620ms steps(1, end) backwards; }
+.duo-slice-b { animation-name: duo-slice-b; }
+.duo-slice-c { animation-name: duo-slice-c; }
+@keyframes duo-slice-a {
+  0% { opacity: 1; transform: translateX(-3%); }
+  20% { transform: translateX(2.2%); }
+  45% { opacity: 0.9; transform: translateX(-1.2%); }
+  70% { opacity: 0.5; transform: translateX(3.4%); }
+  100% { opacity: 0; transform: none; }
+}
+@keyframes duo-slice-b {
+  0% { opacity: 0.9; transform: translateX(2.6%); }
+  25% { transform: translateX(-4%); }
+  50% { opacity: 0.8; transform: translateX(1%); }
+  75% { opacity: 0.4; transform: translateX(-1.6%); }
+  100% { opacity: 0; transform: none; }
+}
+@keyframes duo-slice-c {
+  0% { opacity: 1; transform: translateX(-5%); }
+  30% { transform: translateX(1.4%); }
+  60% { opacity: 0.6; transform: translateX(-2.2%); }
+  100% { opacity: 0; transform: none; }
+}
+
+/* Each side's own light, behind the head. */
+.duo-glow { pointer-events: none; border-radius: 50%; animation: fade-in 1400ms ease 900ms backwards; }
+.duo-white .duo-glow { background: radial-gradient(closest-side, rgba(236, 242, 255, 0.11), transparent); }
+.duo-red .duo-glow { background: radial-gradient(closest-side, rgba(255, 40, 60, 0.18), transparent); }
+
+/* Interaction — the side under the pointer brightens; its partner dims a
+   touch. The brighter copy (brightness keeps the black black and lifts the
+   rim light) is painted once and only its opacity changes. */
+.duo-portrait { transition: opacity 600ms var(--ease-out-expo); }
+.duo-lit { opacity: 0; transition: opacity 500ms var(--ease-out-expo); }
+.duo-lit-img { filter: brightness(1.5); }
+.intro[data-side='white'] .duo-white .duo-lit,
+.intro[data-side='red'] .duo-red .duo-lit { opacity: 0.55; }
+.intro[data-side='white'] .duo-red .duo-portrait,
+.intro[data-side='red'] .duo-white .duo-portrait { opacity: 0.72; }
+/* A tap: that side flares, then the other answers. */
+.pulse-white .duo-white .duo-lit,
+.pulse-red .duo-red .duo-lit { animation: duo-flare 1100ms ease-out; }
+.pulse-white .duo-red .duo-glow,
+.pulse-red .duo-white .duo-glow { animation: duo-answer 1100ms ease-out 200ms both; }
+@keyframes duo-flare { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes duo-answer { 0% { opacity: 1; transform: none; } 40% { opacity: 1; transform: scale(1.25); } 100% { opacity: 1; transform: none; } }
+
+/* Stage 4 — light runs down the boundary, and the orbit closes. */
+.duo-line { z-index: 0; }
+.duo-edge { stroke-dasharray: 1; animation: duo-draw 900ms var(--ease-in-out-quint) 1500ms backwards; }
+.duo-run { stroke-dasharray: 0.08 1.2; stroke-dashoffset: 0.08; opacity: 0; animation: duo-run 1300ms var(--ease-in-out-quint) 1750ms; }
+.pulse-white .duo-run,
+.pulse-red .duo-run { animation: duo-run-again 1000ms var(--ease-in-out-quint); }
+@keyframes duo-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes duo-run { 0% { opacity: 1; stroke-dashoffset: 0.08; } 100% { opacity: 1; stroke-dashoffset: -1; } }
+@keyframes duo-run-again { 0% { opacity: 1; stroke-dashoffset: 0.08; } 100% { opacity: 1; stroke-dashoffset: -1; } }
+
+.duo-ring { pointer-events: none; animation: duo-ring 1400ms var(--ease-out-expo) 1700ms backwards; }
+@keyframes duo-ring { from { opacity: 0; transform: scale(0.94) rotate(-8deg); } to { opacity: 1; transform: none; } }
+
+/* Stacked (tall screens): the button moves to the empty top-right corner. */
+.is-stacked .intro-skip { top: max(1rem, env(safe-area-inset-top)); bottom: auto; }
+
+/* Stage 5 — the chess lineup lights outward from the seam. */
+.duo-chess {
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  mix-blend-mode: screen;
+  animation: fade-in 500ms ease 2300ms backwards;
+  transition: transform 800ms var(--ease-in-out-quint);
+  -webkit-tap-highlight-color: transparent;
+}
+.duo-chess:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.5); outline-offset: 4px; }
+.duo-cover { position: absolute; top: 0; bottom: 0; background: #000; }
+.duo-cover-l { left: 0; transform: translateX(-101%); animation: duo-part-l 1100ms var(--ease-in-out-quint) 2350ms backwards; }
+.duo-cover-r { right: 0; transform: translateX(101%); animation: duo-part-r 1100ms var(--ease-in-out-quint) 2350ms backwards; }
+@keyframes duo-part-l { from { transform: none; } to { transform: translateX(-101%); } }
+@keyframes duo-part-r { from { transform: none; } to { transform: translateX(101%); } }
+.duo-sweep {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -18%;
+  width: 16%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  mix-blend-mode: color-dodge;
+  opacity: 0;
+}
+.chess-play .duo-sweep { animation: duo-sweep 1300ms var(--ease-in-out-quint); }
+@keyframes duo-sweep { 0% { opacity: 1; transform: none; } 100% { opacity: 1; transform: translateX(780%); } }
+
+/* Stage 6 — the AJ mark, where both sides meet. */
+.duo-mark-halo { inset: -45%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.55) 60%, transparent); animation: fade-in 700ms ease 2800ms backwards; }
+.duo-mark { transition: transform 800ms var(--ease-in-out-quint), opacity 500ms ease; }
 .glitch { position: absolute; inset: 0; opacity: 0; mix-blend-mode: screen; }
-.glitch-c { color: #4fe3ff; animation: glitch-a 760ms steps(1, end) 380ms forwards; }
-.glitch-o { color: #ff8a3d; animation: glitch-b 760ms steps(1, end) 380ms forwards; }
+.glitch-w { color: #f4f6fb; animation: glitch-a 760ms steps(1, end) 2900ms forwards; }
+.glitch-r { color: #ff3444; animation: glitch-b 760ms steps(1, end) 2900ms forwards; }
 @keyframes glitch-a {
   0% { opacity: 0.9; clip-path: inset(10% 0 62% 0); transform: translate(-9px, 0); }
   14% { clip-path: inset(48% 0 30% 0); transform: translate(7px, 0); }
@@ -421,16 +574,120 @@ section .grid > * { min-width: 0; }
   85% { opacity: 0.25; clip-path: inset(0); transform: translate(1px, 0); }
   100% { opacity: 0; clip-path: inset(0); transform: none; }
 }
-
 /* The mark itself materialises after the glitch has had its moment. */
-.intro-mark { opacity: 0; animation: intro-mark 900ms var(--ease-out-expo) 700ms forwards; }
+.intro-mark { position: relative; animation: intro-mark 900ms var(--ease-out-expo) 3220ms backwards; }
 @keyframes intro-mark {
   0% { opacity: 0; transform: scale(1.12); filter: brightness(2.2); }
   35% { opacity: 1; }
   100% { opacity: 1; transform: none; filter: none; }
 }
-.intro-word { opacity: 0; animation: rise-in 800ms var(--ease-out-expo) 1450ms forwards; }
-.intro-skip { opacity: 0; animation: fade-in 400ms ease 300ms forwards; }
+.intro-word { animation: rise-in 800ms var(--ease-out-expo) 3250ms backwards; }
+.duo-decode { background: linear-gradient(90deg, #f4f6fb 0 46%, #ff4a55 54% 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.intro-skip { animation: fade-in 400ms ease 300ms backwards; }
+
+/* The page waits underneath: first built but not rendered at all, then —
+   once the intro is waiting — rendered with its animations paused. */
+.is-covered { content-visibility: hidden; }
+.is-behind *,
+.is-behind *::before,
+.is-behind *::after { animation-play-state: paused !important; }
+
+/* ── Hold to enter ─────────────────────────────────────────── */
+/* The whole composition is the hold area. No scrolling, selecting or long-press menus on it. */
+.duo-hold {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.duo-hold:focus-visible { outline: none; }
+.duo-hold:focus-visible ~ .duo-hold-ring circle { stroke-opacity: 0.5; }
+.duo-hold:focus-visible ~ .duo-hint { color: #fff; }
+
+.duo-hint {
+  color: #f4f6fb;
+  text-shadow: 0 0 12px #000, 0 0 4px #000;
+  opacity: 0;
+  /* Arrives, then breathes slowly until it is held. */
+  animation: fade-in 700ms ease 3300ms forwards, hint-breathe 2.6s ease-in-out 4000ms infinite alternate;
+}
+@keyframes hint-breathe { from { opacity: 1; } to { opacity: 0.45; } }
+.is-holding .duo-hint { animation: none; opacity: 1; }
+.duo-hold-ring { animation: fade-in 700ms ease 3300ms backwards; filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.35)); }
+
+/* While held: a white arc and a red arc close around the mark… */
+/* Dash maths needs plain strokes: no vector-effect on these. */
+.hold-arc { stroke-dasharray: 1 1; stroke-dashoffset: 1; transition: stroke-dashoffset 380ms var(--ease-out-expo); }
+.is-holding .hold-arc,
+.is-leaving .hold-arc { stroke-dashoffset: 0; transition: stroke-dashoffset var(--hold) linear; }
+.is-holding .duo-hold-ring { animation: none; opacity: 1; }
+/* …the boundary charges, both portraits brighten, the mark leans in. */
+.duo-charge { opacity: 0; transition: opacity 380ms var(--ease-out-expo); }
+.is-holding .duo-charge,
+.is-leaving .duo-charge { opacity: 1; transition: opacity var(--hold) ease-in; }
+.intro.is-holding .duo-side .duo-portrait,
+.intro.is-leaving .duo-side .duo-portrait { opacity: 1; }
+.intro.is-holding .duo-side .duo-lit,
+.intro.is-leaving .duo-side .duo-lit { opacity: 0.8; transition: opacity var(--hold) ease-in; }
+.duo-glow { transition: transform 600ms var(--ease-out-expo); }
+.is-holding .duo-glow { transform: scale(1.3); transition: transform var(--hold) var(--ease-out-expo); }
+.is-holding .duo-mark { transform: scale(1.07); transition: transform var(--hold) var(--ease-out-expo); }
+/* …and partway through, one brief flicker. */
+.hold-ghost { animation: none; }
+.is-holding .hold-ghost-w { animation: glitch-a 300ms steps(1, end) 720ms both; }
+.is-holding .hold-ghost-r { animation: glitch-b 300ms steps(1, end) 760ms both; }
+
+/* ── The way in ─────────────────────────────────────────────── */
+/* A circle opens from the mark. Its radius in px (--irisn) is animated from
+   script — it depends on the screen — as a registered property so it
+   interpolates, on the intro itself so the edge below can read it too. */
+@property --irisn { syntax: '<number>'; inherits: true; initial-value: 0; }
+.is-leaving .duo-stage {
+  -webkit-mask-image: radial-gradient(circle at var(--ix) var(--iy), transparent calc(var(--irisn) * 1px), #000 calc(var(--irisn) * 1px + 1px));
+  mask-image: radial-gradient(circle at var(--ix) var(--iy), transparent calc(var(--irisn) * 1px), #000 calc(var(--irisn) * 1px + 1px));
+}
+/* Its edge: white on one side, red on the other, riding just outside it. */
+.duo-iris-edge {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: conic-gradient(#ff3444 0 50%, #f4f6fb 50% 100%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 93%, #000 95.5%, transparent 99%);
+  mask-image: radial-gradient(closest-side, transparent 93%, #000 95.5%, transparent 99%);
+  transform: scale(calc((var(--irisn) + 6) / 100));
+  will-change: transform, opacity;
+}
+.is-stacked .duo-iris-edge { background: conic-gradient(from 90deg, #ff3444 0 50%, #f4f6fb 50% 100%); }
+/* First the two lights converge on the mark, and it flickers once. */
+.is-leaving .duo-signal { animation: duo-converge 460ms var(--ease-in-out-quint) both; }
+@keyframes duo-converge {
+  0% { opacity: 1; transform: scaleX(0); }
+  70% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+.is-leaving .hold-ghost-w { animation: glitch-a 380ms steps(1, end) 120ms both; }
+.is-leaving .hold-ghost-r { animation: glitch-b 380ms steps(1, end) 150ms both; }
+.is-leaving .duo-white { transform: translate3d(1.5%, 0, 0); }
+.is-leaving .duo-red { transform: translate3d(-1.5%, 0, 0); }
+.is-stacked.is-leaving .duo-white { transform: translate3d(1%, 1.2%, 0); }
+.is-stacked.is-leaving .duo-red { transform: translate3d(-1%, -1.2%, 0); }
+.is-leaving .duo-hint,
+.is-leaving .duo-hold-ring,
+.is-leaving .intro-skip { animation: duo-out 360ms ease 200ms both; }
+.is-leaving .duo-mark-halo { animation: duo-out 500ms ease 300ms both; }
+@keyframes duo-out { from { opacity: 1; } to { opacity: 0; } }
+/* The home page's emblem waits while the mark flies to it. */
+.mark-in-flight [data-hero-mark] { opacity: 0; }
 
 /* ─────────────────────────────────────────────────────────────
    Logo — draw-on and the light sweep. Both run once.
@@ -467,6 +724,167 @@ section .grid > * { min-width: 0; }
 .clover-tongue { transform-box: fill-box; transform-origin: top; transform: scaleY(0); transition: transform 300ms var(--ease-out-expo); }
 .mood-happy .clover-tongue { transform: none; }
 
+/* ─────────────────────────────────────────────────────────────
+   Games: the stage
+   ───────────────────────────────────────────────────────────── */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+.stage-in { animation: stage-in 1100ms var(--ease-out-expo) both; }
+.stage-in-living { animation-duration: 1600ms; }
+@keyframes stage-in { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+
+.stage-sweep {
+  background: linear-gradient(100deg, transparent, color-mix(in oklab, var(--env-accent) 22%, transparent) 45%, rgba(255, 255, 255, 0.16) 50%, transparent 58%);
+  animation: stage-sweep 1100ms var(--ease-out-expo) both;
+}
+@keyframes stage-sweep { from { transform: translateX(0); opacity: 1; } to { transform: translateX(420%); opacity: 0; } }
+
+/* The artwork leans away from the pointer (desktop) and drifts very slowly. */
+.stage-art { transform: translate3d(calc(var(--mx, 0) * -12px), calc(var(--my, 0) * -8px), 0); transition: transform 600ms var(--ease-out-expo); }
+.art-drift { animation: art-drift 28s ease-in-out infinite alternate; }
+@keyframes art-drift { from { transform: scale(1.02); } to { transform: scale(1.09) translate3d(-1.2%, -0.8%, 0); } }
+
+/* Ambient particles: embers rise, petals and snow fall, motes hang in the air.
+   Each particle rides a full-height column, so travel is `translateY(±100%)`
+   with literal values — keyframes that read var() or container units can't
+   run on the compositor. */
+.drift-col { position: absolute; top: 0; bottom: 0; width: 0; animation: 12s linear infinite; will-change: transform, opacity; }
+.drift-col.up { animation-name: drift-up-0; }
+.drift-col.up.x1 { animation-name: drift-up-1; }
+.drift-col.up.x2 { animation-name: drift-up-2; }
+.drift-col.down { animation-name: drift-down-0; }
+.drift-col.down.x1 { animation-name: drift-down-1; }
+.drift-col.down.x2 { animation-name: drift-down-2; }
+@keyframes drift-up-0 { 0% { transform: translate3d(0, 4%, 0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate3d(-40px, -92%, 0); opacity: 0; } }
+@keyframes drift-up-1 { 0% { transform: translate3d(0, 4%, 0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate3d(30px, -85%, 0); opacity: 0; } }
+@keyframes drift-up-2 { 0% { transform: translate3d(0, 4%, 0); opacity: 0; } 12% { opacity: 1; } 100% { transform: translate3d(60px, -95%, 0); opacity: 0; } }
+@keyframes drift-down-0 { 0% { transform: translate3d(0, -4%, 0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate3d(-50px, 104%, 0); opacity: 0.2; } }
+@keyframes drift-down-1 { 0% { transform: translate3d(0, -4%, 0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate3d(35px, 104%, 0); opacity: 0.2; } }
+@keyframes drift-down-2 { 0% { transform: translate3d(0, -4%, 0); opacity: 0; } 10% { opacity: 1; } 100% { transform: translate3d(80px, 104%, 0); opacity: 0.2; } }
+.drift { position: absolute; left: 0; width: var(--s); height: var(--s); border-radius: 999px; }
+.up .drift { bottom: 0; }
+.down .drift { top: 0; }
+.drift-embers { background: #ffcf7a; box-shadow: 0 0 8px 1px rgba(255, 170, 70, 0.7); }
+.drift-motes { background: rgba(240, 220, 150, 0.7); }
+.drift-snow { background: rgba(240, 248, 255, 0.85); }
+.drift-petals { width: calc(var(--s) * 1.8); border-radius: 80% 0; background: #e2675a; opacity: 0.85; }
+.stage { container-type: size; }
+
+/* ─────────────────────────────────────────────────────────────
+   Games: Monster Hunter: World — the living ecosystem
+   One 26s cycle ties the creatures together: the wyvern crosses,
+   its shadow sweeps the herd, they look up, the critter hides,
+   and the birds lift off the tree.
+   ───────────────────────────────────────────────────────────── */
+.eco-scene { container-type: size; }
+.eco-card { background: rgba(4, 12, 8, 0.72); border: 1px solid rgba(201, 242, 159, 0.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+
+.eco-fly { animation: eco-fly 26s linear infinite; }
+@keyframes eco-fly {
+  0% { transform: translate3d(175%, 25%, 0); }
+  35% { transform: translate3d(-375%, -12%, 0); }
+  100% { transform: translate3d(-375%, -12%, 0); }
+}
+.eco-shadow { animation: eco-shadow 26s linear infinite; }
+@keyframes eco-shadow {
+  0% { transform: translate3d(233%, 0, 0) scaleX(1.15); }
+  35% { transform: translate3d(-500%, 0, 0) scaleX(0.9); }
+  100% { transform: translate3d(-500%, 0, 0); }
+}
+.eco-wing { animation: eco-wing 3.2s ease-in-out infinite; }
+@keyframes eco-wing {
+  0%, 100% { transform: scaleY(1); }
+  22% { transform: scaleY(-0.55); }
+  46% { transform: scaleY(1); }
+  70% { transform: scaleY(0.9); }
+}
+
+.eco-alert { animation: eco-alert 26s ease-in-out infinite; }
+@keyframes eco-alert {
+  0%, 3.6% { transform: rotate(0deg); }
+  7.5%, 25% { transform: rotate(-18deg); }
+  31%, 100% { transform: rotate(0deg); }
+}
+.eco-graze { animation: eco-graze 7s ease-in-out infinite; }
+@keyframes eco-graze {
+  0%, 30% { transform: rotate(0deg); }
+  42%, 78% { transform: rotate(52deg); }
+  60% { transform: rotate(48deg); }
+  90%, 100% { transform: rotate(0deg); }
+}
+
+.eco-critter { animation: eco-critter 26s ease-in-out infinite; }
+@keyframes eco-critter {
+  0%, 4% { transform: none; }
+  6.5%, 34% { transform: translate3d(0, 70%, 0); }
+  39%, 62% { transform: none; }
+  64% { transform: translate3d(0, 6%, 0) rotate(-6deg); }
+  66%, 100% { transform: none; }
+}
+
+.eco-birds { animation: eco-birds 26s ease-in-out infinite; }
+@keyframes eco-birds {
+  0%, 19% { transform: none; opacity: 1; }
+  30% { transform: translate3d(-35%, -70%, 0) scale(0.8); opacity: 0.85; }
+  42% { transform: translate3d(-60%, -110%, 0) scale(0.6); opacity: 0; }
+  60% { transform: translate3d(30%, -20%, 0) scale(0.9); opacity: 0; }
+  76%, 100% { transform: none; opacity: 1; }
+}
+
+.eco-breathe { animation: eco-breathe 7s ease-in-out infinite; }
+@keyframes eco-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.06); } }
+.eco-head { animation: eco-head 18s ease-in-out infinite; }
+@keyframes eco-head {
+  0%, 55% { transform: none; }
+  64%, 80% { transform: rotate(9deg); }
+  90%, 100% { transform: none; }
+}
+.eco-eye { animation: eco-eye 18s ease-in-out infinite; }
+@keyframes eco-eye { 0%, 58% { opacity: 0; } 64%, 84% { opacity: 1; } 90%, 100% { opacity: 0; } }
+
+.eco-rays { animation: eco-rays 11s ease-in-out infinite alternate; }
+@keyframes eco-rays { from { opacity: 0.55; } to { opacity: 1; } }
+
+.eco-fog {
+  background:
+    radial-gradient(28% 55% at 12% 55%, rgba(205, 232, 212, 0.34), transparent 70%),
+    radial-gradient(22% 45% at 33% 40%, rgba(205, 232, 212, 0.24), transparent 70%),
+    radial-gradient(30% 60% at 62% 60%, rgba(205, 232, 212, 0.3), transparent 70%),
+    radial-gradient(20% 40% at 86% 45%, rgba(205, 232, 212, 0.22), transparent 70%);
+  background-size: 50% 100%;
+  background-repeat: repeat-x;
+  animation: eco-fog 70s linear infinite;
+}
+.eco-fog-low { animation-duration: 48s; animation-direction: reverse; }
+@keyframes eco-fog { to { transform: translate3d(-50%, 0, 0); } }
+
+.eco-sway { animation: eco-sway 6.5s ease-in-out infinite; }
+@keyframes eco-sway { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.6deg); } }
+
+.eco-spore { background: rgba(232, 246, 200, 0.75); box-shadow: 0 0 6px rgba(220, 255, 180, 0.6); animation: eco-spore-0 linear infinite; }
+/* Literal values, not var(): animations that read custom properties can't run on the compositor. */
+.eco-spore-1 { animation-name: eco-spore-1; }
+.eco-spore-2 { animation-name: eco-spore-2; }
+@keyframes eco-spore-0 { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 15% { opacity: 0.9; } 85% { opacity: 0.7; } 100% { transform: translate3d(-34px, -90px, 0); opacity: 0; } }
+@keyframes eco-spore-1 { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 15% { opacity: 0.9; } 85% { opacity: 0.7; } 100% { transform: translate3d(22px, -80px, 0); opacity: 0; } }
+@keyframes eco-spore-2 { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 15% { opacity: 0.9; } 85% { opacity: 0.7; } 100% { transform: translate3d(40px, -100px, 0); opacity: 0; } }
+
+.eco-fly-wrap {
+  transform: translate3d(calc(var(--fx) + var(--ox)), calc(var(--fy) + var(--oy)), 0);
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.eco-scoutfly {
+  width: 7px; height: 7px; margin: -3.5px; border-radius: 999px;
+  background: #d8ffb0; box-shadow: 0 0 10px 3px rgba(150, 255, 120, 0.55);
+  animation: eco-hover 1.8s ease-in-out infinite alternate;
+}
+@keyframes eco-hover { from { transform: translate3d(-4px, 3px, 0); opacity: 0.7; } to { transform: translate3d(4px, -4px, 0); opacity: 1; } }
+
+/* Reduced motion: a still, composed scene — every creature in its resting pose. */
+.eco-still [class*='eco-'] { animation: none !important; }
+
 .clover-msg { animation: pop-in 380ms var(--ease-out-expo) both; }
 .typing-dot { animation: twinkle 600ms ease-in-out infinite alternate; }
 
@@ -483,4 +901,7 @@ section .grid > * { min-width: 0; }
     transition-delay: 0ms !important;
   }
   .reveal, .rw > span, .draw-x { opacity: 1; transform: none; }
+  /* Progress, not motion: the hold ring still fills over the hold. */
+  .intro .hold-arc { transition-duration: 200ms !important; }
+  .intro.is-holding .hold-arc { transition-duration: var(--hold) !important; }
 }

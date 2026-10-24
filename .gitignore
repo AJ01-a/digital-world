@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Original game artwork — web-sized copies live in public/games
+# (regenerate with scripts/game-art.py). Kept out of the repo so the
+# multi-megabyte sources are not published twice.
+/Games/
+
+# AJ's original profile artwork — web-sized copies live in public/intro
+# (regenerate with scripts/profile-art.py).
+/Profile/
+
+# Words the browser tests check never appear on the site (kept local).
+/tests/e2e/private-words.txt
