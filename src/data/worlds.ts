@@ -8,19 +8,6 @@
  * component. Nothing else needs to know about it.
  */
 
-export type ParticleMode =
-  | 'motes'
-  | 'embers'
-  | 'leaves'
-  | 'snow'
-  | 'mist'
-  | 'chess'
-  | 'letters'
-  | 'road'
-  | 'pollen'
-  | 'grid'
-  | 'neural';
-
 export interface Theme {
   /** Deepest background tone. */
   void: string;
@@ -32,21 +19,24 @@ export interface Theme {
   accent: string;
   /** Muted text / label tone. */
   tint: string;
-  /** Colour of the volumetric light rays. */
+  /** Colour of the nebula light. */
   ray: string;
 }
+
+export type ScapeKey = 'tree' | 'moon' | 'north' | 'mountain' | 'city' | 'nature' | 'circuit' | 'horizon';
 
 export type SceneId =
   | 'home'
   | 'about'
-  | 'games'
-  | 'strategy'
-  | 'words'
   | 'tech'
   | 'omarchy'
   | 'automation'
+  | 'projects'
+  | 'games'
+  | 'strategy'
+  | 'words'
   | 'driving'
-  | 'dog'
+  | 'clover'
   | 'outro';
 
 export interface Scene {
@@ -58,110 +48,125 @@ export interface Scene {
   /** One word mood, used in the section header. */
   mood: string;
   theme: Theme;
-  particles: ParticleMode;
+  /** Which procedural backdrop sits behind the chapter. */
+  scape: ScapeKey;
   /** Scenes hidden from the rail still own a full environment. */
   inRail: boolean;
 }
 
+/*
+ * One palette family — deep space, icy blue, electric cyan, violet — with
+ * each chapter leaning on a different part of it. Warm orange is held back
+ * for Clover and the game worlds, so it still means something when it shows.
+ */
 export const SCENES: Scene[] = [
   {
     id: 'home',
+    scape: 'horizon',
     label: 'Home',
     index: '00',
-    mood: 'Welcome',
+    mood: 'Arrival',
     inRail: true,
-    particles: 'motes',
-    theme: { void: '#05060b', a: '#0a1020', b: '#161d3a', accent: '#9fb4ff', tint: '#8fa1d0', ray: '#2b3a78' },
+    theme: { void: '#03040a', a: '#071024', b: '#0d1c40', accent: '#7fdcff', tint: '#8ea6d6', ray: '#1d4a8f' },
   },
   {
     id: 'about',
+    scape: 'horizon',
     label: 'About',
     index: '01',
     mood: 'Curiosity',
     inRail: true,
-    particles: 'motes',
-    theme: { void: '#06070d', a: '#0d1224', b: '#1b2140', accent: '#b9c6ff', tint: '#94a2ce', ray: '#33407f' },
-  },
-  {
-    id: 'games',
-    label: 'Games',
-    index: '02',
-    mood: 'Wonder',
-    inRail: true,
-    particles: 'embers',
-    theme: { void: '#080503', a: '#150a04', b: '#291306', accent: '#e9b15c', tint: '#c99257', ray: '#5a2b0e' },
-  },
-  {
-    id: 'strategy',
-    label: 'Strategy',
-    index: '03',
-    mood: 'Patience',
-    inRail: true,
-    particles: 'chess',
-    theme: { void: '#07070a', a: '#12131a', b: '#23252f', accent: '#dbe0ea', tint: '#a3a9b8', ray: '#3a3e4d' },
-  },
-  {
-    id: 'words',
-    label: 'Words',
-    index: '03',
-    mood: 'Play',
-    inRail: false,
-    particles: 'letters',
-    theme: { void: '#05080a', a: '#0c1613', b: '#17281f', accent: '#7fd1a6', tint: '#93b8a7', ray: '#215040' },
+    theme: { void: '#04050c', a: '#0a1228', b: '#16204a', accent: '#b8d0ff', tint: '#98a8d4', ray: '#2c3f8f' },
   },
   {
     id: 'tech',
+    scape: 'circuit',
     label: 'Tech',
-    index: '04',
-    mood: 'Craft',
+    index: '02',
+    mood: 'Signal',
     inRail: true,
-    particles: 'grid',
-    theme: { void: '#04070a', a: '#08141f', b: '#0f2634', accent: '#58c8e6', tint: '#8fb2c2', ray: '#14506b' },
+    theme: { void: '#02060a', a: '#06141f', b: '#0b2836', accent: '#5ce1ff', tint: '#8cb6c8', ray: '#0f5a78' },
   },
   {
     id: 'omarchy',
-    label: 'Omarchy',
-    index: '04',
+    scape: 'circuit',
+    label: 'Setup',
+    index: '02',
     mood: 'Setup',
     inRail: false,
-    particles: 'grid',
-    theme: { void: '#05060c', a: '#0b1226', b: '#141f3f', accent: '#79a8ff', tint: '#96a8cc', ray: '#28407e' },
+    theme: { void: '#03050c', a: '#0a1228', b: '#132045', accent: '#7aa8ff', tint: '#96a8cc', ray: '#25418a' },
   },
   {
     id: 'automation',
-    label: 'Automation',
-    index: '05',
+    scape: 'circuit',
+    label: 'Lab',
+    index: '03',
     mood: 'Experiment',
     inRail: true,
-    particles: 'neural',
-    theme: { void: '#060510', a: '#130c26', b: '#221540', accent: '#a98cff', tint: '#b0a3dd', ray: '#442a86' },
+    theme: { void: '#05040e', a: '#120c28', b: '#21164a', accent: '#a48dff', tint: '#ada2dc', ray: '#46309a' },
+  },
+  {
+    id: 'projects',
+    scape: 'circuit',
+    label: 'Builds',
+    index: '04',
+    mood: 'Craft',
+    inRail: true,
+    theme: { void: '#03060b', a: '#081625', b: '#0f2742', accent: '#8be9ff', tint: '#94b4cc', ray: '#1b4d80' },
+  },
+  {
+    id: 'games',
+    scape: 'tree',
+    label: 'Games',
+    index: '05',
+    mood: 'Wonder',
+    inRail: true,
+    theme: { void: '#080503', a: '#150a04', b: '#291306', accent: '#f0b45c', tint: '#c99257', ray: '#5a2b0e' },
+  },
+  {
+    id: 'strategy',
+    scape: 'horizon',
+    label: 'Chess',
+    index: '06',
+    mood: 'Patience',
+    inRail: true,
+    theme: { void: '#05060a', a: '#10131c', b: '#1f2433', accent: '#dfe6f5', tint: '#a3abbd', ray: '#3a4260' },
+  },
+  {
+    id: 'words',
+    scape: 'horizon',
+    label: 'Words',
+    index: '06',
+    mood: 'Play',
+    inRail: false,
+    theme: { void: '#02070a', a: '#061719', b: '#0c2a2c', accent: '#6fe3d0', tint: '#8fbcb5', ray: '#145a58' },
   },
   {
     id: 'driving',
-    label: 'Driving',
-    index: '06',
+    scape: 'city',
+    label: 'Drive',
+    index: '07',
     mood: 'Freedom',
     inRail: true,
-    particles: 'road',
-    theme: { void: '#04060c', a: '#0a1026', b: '#1d0e35', accent: '#6ae0ff', tint: '#9aa8d6', ray: '#2b1d6b' },
+    theme: { void: '#03050c', a: '#0a1026', b: '#1d0e35', accent: '#6ae0ff', tint: '#9aa8d6', ray: '#2b1d6b' },
   },
   {
-    id: 'dog',
-    label: 'Walks',
-    index: '07',
+    id: 'clover',
+    scape: 'nature',
+    label: 'Clover',
+    index: '08',
     mood: 'Warmth',
     inRail: true,
-    particles: 'pollen',
-    theme: { void: '#090604', a: '#1d0e08', b: '#3a1d0f', accent: '#f2a65a', tint: '#cfa17f', ray: '#6d3813' },
+    theme: { void: '#080503', a: '#1a0d07', b: '#341a0c', accent: '#ff9b52', tint: '#d4a582', ray: '#6d3513' },
   },
   {
     id: 'outro',
+    scape: 'horizon',
     label: 'End',
-    index: '08',
+    index: '09',
     mood: 'Thanks',
     inRail: false,
-    particles: 'motes',
-    theme: { void: '#06060a', a: '#121220', b: '#1f1d2e', accent: '#e7e2d6', tint: '#b3aea2', ray: '#463f57' },
+    theme: { void: '#04040b', a: '#0e0f24', b: '#1b1a3a', accent: '#d9d2ff', tint: '#aaa6c8', ray: '#3d3480' },
   },
 ];
 
@@ -185,7 +190,6 @@ export interface GameWorld {
   /** Three short atmosphere descriptors. */
   atmosphere: [string, string, string];
   theme: Theme;
-  particles: ParticleMode;
   /** Which procedural artwork the card and backdrop compose. */
   art: 'tree' | 'moon' | 'north' | 'mountain';
   /**
@@ -207,7 +211,6 @@ export const GAME_WORLDS: GameWorld[] = [
     note: 'What hooked me was the silence. No arrows, no checklist — just a horizon and the feeling that something is out there. Every discovery feels like it belongs to you, because nobody handed it to you.',
     atmosphere: ['Golden light', 'Drifting embers', 'Endless horizon'],
     theme: { void: '#080602', a: '#170e05', b: '#301c08', accent: '#f0c063', tint: '#cf9d55', ray: '#6b420f' },
-    particles: 'embers',
     art: 'tree',
   },
   {
@@ -220,7 +223,6 @@ export const GAME_WORLDS: GameWorld[] = [
     note: 'It punishes hesitation more than mistakes. Learning a boss here is less grinding and more learning a rhythm — and the moment it finally clicks is one of the best feelings in games.',
     atmosphere: ['Moonlight', 'Falling leaves', 'Held breath'],
     theme: { void: '#080506', a: '#170b0b', b: '#2a1313', accent: '#e8926a', tint: '#bd8c7f', ray: '#63251b' },
-    particles: 'leaves',
     art: 'moon',
   },
   {
@@ -233,7 +235,6 @@ export const GAME_WORLDS: GameWorld[] = [
     note: 'A father and a son walking through a cold, quiet world. The fighting is heavy and satisfying, but it is the silences in between that stayed with me long after the credits.',
     atmosphere: ['Cold mist', 'Falling snow', 'Old runes'],
     theme: { void: '#04070c', a: '#0c1a2b', b: '#183044', accent: '#8ec6f0', tint: '#a3bdd2', ray: '#1e5077' },
-    particles: 'snow',
     art: 'north',
   },
   {
@@ -246,7 +247,6 @@ export const GAME_WORLDS: GameWorld[] = [
     note: 'Mist, mountains, temples, and a legend I only half knew before playing. One of the few games where I stopped mid-fight just to look at where I was standing.',
     atmosphere: ['Mountain mist', 'Temple gold', 'Old legend'],
     theme: { void: '#060704', a: '#101a0c', b: '#222b12', accent: '#d9c05e', tint: '#aeb277', ray: '#474615' },
-    particles: 'mist',
     art: 'mountain',
   },
 ];

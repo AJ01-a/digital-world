@@ -1,8 +1,12 @@
-import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useState } from 'react';
-import { useActions, useCeremony, useDevice } from '../../state/experience';
+import { useEffect, useState, type CSSProperties } from 'react';
+import { useActions, useCeremony, useDevice } from '../../state/hooks';
 
 const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+const SPARKS = Array.from({ length: 18 }, (_, i) => {
+  const a = (i / 18) * Math.PI * 2;
+  const d = 140 + (i % 4) * 50;
+  return { x: Math.cos(a) * d, y: Math.sin(a) * d - 40, color: i % 3 === 0 ? '#ff9b52' : i % 3 === 1 ? '#5ce1ff' : '#9b86ff' };
+});
 
 /** Win messages, plus the hidden code. */
 export default function Ceremony() {
@@ -30,61 +34,42 @@ export default function Ceremony() {
     return () => window.removeEventListener('keydown', onKey);
   }, [celebrate]);
 
+  useEffect(() => {
+    if (!burst) return;
+    const t = window.setTimeout(() => setBurst(0), 1600);
+    return () => window.clearTimeout(t);
+  }, [burst]);
+
   return (
     <>
-      <AnimatePresence>
+      <div className="pointer-events-none fixed inset-x-0 top-[max(5rem,11vh)] z-50 flex justify-center px-4" role="status" aria-live="polite">
         {ceremony && (
-          <motion.div
-            className="pointer-events-none fixed inset-x-0 top-[max(5.5rem,12vh)] z-50 flex justify-center px-4"
-            initial={{ opacity: 0, y: -16, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -12, filter: 'blur(10px)' }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            role="status"
-            aria-live="polite"
-          >
-            <div className="glass flex items-center gap-3 rounded-full px-6 py-3">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--env-accent)] shadow-[0_0_12px_var(--env-accent)]" />
-              <p className="text-center text-[0.95rem] text-[var(--color-ink)]">{ceremony}</p>
-            </div>
-          </motion.div>
+          <div key={ceremony} className="surface flex items-center gap-3 rounded-full px-6 py-3" style={{ animation: 'pop-in 420ms var(--ease-out-expo) both', background: 'color-mix(in oklab, var(--env-void) 92%, transparent)' }}>
+            <span aria-hidden="true" className="h-1.5 w-1.5 rotate-45 bg-[var(--env-accent)] shadow-[0_0_12px_var(--env-accent)]" />
+            <p className="text-center text-[0.95rem] text-[var(--color-ink)]">{ceremony}</p>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
 
-      <AnimatePresence>
-        {burst > 0 && !reducedMotion && (
-          <motion.div
-            key={burst}
-            className="pointer-events-none fixed inset-0 z-[55] grid place-items-center"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 2.6, ease: 'easeOut' }}
-            onAnimationComplete={() => setBurst(0)}
-          >
-            <motion.span
-              className="absolute h-40 w-40 rounded-full"
-              style={{ background: 'radial-gradient(circle, var(--env-accent), transparent 62%)' }}
-              initial={{ scale: 0.2, opacity: 0.7 }}
-              animate={{ scale: 14, opacity: 0 }}
-              transition={{ duration: 2, ease: 'easeOut' }}
+      {burst > 0 && !reducedMotion && (
+        <div key={burst} aria-hidden="true" className="pointer-events-none fixed inset-0 z-[55] grid place-items-center">
+          {SPARKS.map((s, i) => (
+            <span
+              key={i}
+              className="absolute h-1.5 w-1.5 rounded-full"
+              style={
+                {
+                  background: s.color,
+                  boxShadow: `0 0 10px ${s.color}`,
+                  animation: 'spark 1.3s var(--ease-out-expo) both',
+                  '--sx': `${s.x}px`,
+                  '--sy': `${s.y}px`,
+                } as CSSProperties
+              }
             />
-            {Array.from({ length: 38 }).map((_, i) => {
-              const a = (i / 38) * Math.PI * 2;
-              const d = 180 + (i % 7) * 60;
-              return (
-                <motion.span
-                  key={i}
-                  className="absolute h-1.5 w-1.5 rounded-full bg-[var(--env-accent)]"
-                  style={{ boxShadow: '0 0 12px var(--env-accent)' }}
-                  initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-                  animate={{ x: Math.cos(a) * d, y: Math.sin(a) * d - 60, opacity: 0, scale: 0.4 }}
-                  transition={{ duration: 1.6 + (i % 5) * 0.2, ease: 'easeOut' }}
-                />
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
+      )}
     </>
   );
 }

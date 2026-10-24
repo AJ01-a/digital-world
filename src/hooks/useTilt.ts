@@ -1,27 +1,39 @@
-import { useMotionValue, useSpring, useTransform } from 'motion/react';
+import { useCallback, useRef } from 'react';
 import { useFinePointer } from './useMediaQuery';
 
-/** Pointer-driven 3D tilt for cards. Disabled on touch. */
-export function useTilt(max = 8) {
+/**
+ * Pointer-driven 3D tilt for cards. Writes straight to the element's style
+ * once per frame — no React state, no spring loop left running afterwards.
+ * The easing back to rest is a plain CSS transition.
+ */
+export function useTilt<T extends HTMLElement>(max = 7) {
   const fine = useFinePointer();
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const spring = { stiffness: 180, damping: 20, mass: 0.5 };
-  const rotateX = useSpring(useTransform(py, [-0.5, 0.5], [max, -max]), spring);
-  const rotateY = useSpring(useTransform(px, [-0.5, 0.5], [-max, max]), spring);
-  const glareX = useTransform(px, [-0.5, 0.5], ['15%', '85%']);
-  const glareY = useTransform(py, [-0.5, 0.5], ['10%', '90%']);
+  const raf = useRef(0);
 
-  const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
-    if (!fine) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    px.set((e.clientX - r.left) / r.width - 0.5);
-    py.set((e.clientY - r.top) / r.height - 0.5);
-  };
-  const onPointerLeave = () => {
-    px.set(0);
-    py.set(0);
-  };
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<T>) => {
+      if (!fine) return;
+      const el = e.currentTarget;
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      cancelAnimationFrame(raf.current);
+      raf.current = requestAnimationFrame(() => {
+        el.style.setProperty('--rx', `${(-py * max).toFixed(2)}deg`);
+        el.style.setProperty('--ry', `${(px * max).toFixed(2)}deg`);
+        el.style.setProperty('--gx', `${((px + 0.5) * 100).toFixed(1)}%`);
+        el.style.setProperty('--gy', `${((py + 0.5) * 100).toFixed(1)}%`);
+      });
+    },
+    [fine, max],
+  );
 
-  return { rotateX, rotateY, glareX, glareY, onPointerMove, onPointerLeave, enabled: fine };
+  const onPointerLeave = useCallback((e: React.PointerEvent<T>) => {
+    cancelAnimationFrame(raf.current);
+    const s = e.currentTarget.style;
+    s.setProperty('--rx', '0deg');
+    s.setProperty('--ry', '0deg');
+  }, []);
+
+  return { onPointerMove, onPointerLeave, enabled: fine };
 }

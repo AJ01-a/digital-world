@@ -1,59 +1,21 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
-import { SCENE_MAP, SCENES, type ParticleMode, type SceneId, type Theme } from '../data/worlds';
-import { useIsCompact, useReducedMotion } from '../hooks/useMediaQuery';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { SCENE_MAP, SCENES, type SceneId } from '../data/worlds';
+import { useFinePointer, useIsCompact, useReducedMotion } from '../hooks/useMediaQuery';
 import { scrollToSection } from '../lib/utils';
-
-export interface EnvOverride {
-  theme: Theme;
-  particles: ParticleMode;
-}
-
-/**
- * State is split across several small contexts on purpose.
- *
- * With one context, every scroll that changed the active chapter re-rendered
- * the entire page — around 800ms of scripting on a mid-range phone, which is
- * exactly the stutter you feel during a world transition. Now a scene change
- * only re-renders the things that actually depend on the scene.
- */
-interface EnvValue {
-  active: SceneId;
-  theme: Theme;
-  particles: ParticleMode;
-  override: EnvOverride | null;
-}
-
-interface DeviceValue {
-  reducedMotion: boolean;
-  compact: boolean;
-  /** 0 = decorative motion off, 1 = full effects. */
-  intensity: number;
-}
-
-interface ActionsValue {
-  goTo: (id: SceneId) => void;
-  register: (id: SceneId, el: HTMLElement | null) => void;
-  setOverride: (o: EnvOverride | null) => void;
-  setTerminalOpen: (v: boolean) => void;
-  toggleAudio: () => void;
-  celebrate: (label: string) => void;
-}
-
-const EnvCtx = createContext<EnvValue | null>(null);
-const DeviceCtx = createContext<DeviceValue | null>(null);
-const ActionsCtx = createContext<ActionsValue | null>(null);
-const AudioCtx = createContext<boolean>(false);
-const TerminalCtx = createContext<boolean>(false);
-const CeremonyCtx = createContext<string | null>(null);
+import {
+  ActionsCtx,
+  AudioCtx,
+  CeremonyCtx,
+  CloverCtx,
+  DeviceCtx,
+  EnvCtx,
+  TerminalCtx,
+  type ActionsValue,
+  type CloverValue,
+  type DeviceValue,
+  type EnvOverride,
+  type EnvValue,
+} from './contexts';
 
 export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<SceneId>('home');
@@ -61,10 +23,11 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const [audioOn, setAudioOn] = useState(false);
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [ceremony, setCeremony] = useState<string | null>(null);
+  const [clover, setClover] = useState<CloverValue>({ open: false, pending: null, nonce: 0 });
 
   const reducedMotion = useReducedMotion();
   const compact = useIsCompact();
-  const intensity = reducedMotion ? 0 : compact ? 0.45 : 1;
+  const finePointer = useFinePointer();
 
   const nodes = useRef(new Map<SceneId, HTMLElement>());
   const ratios = useRef(new Map<SceneId, number>());
@@ -89,7 +52,7 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
         }
         if (best && bestRatio > 0.02) setActive((current) => (current === best ? current : best));
       },
-      { threshold: [0, 0.08, 0.2, 0.35, 0.5, 0.7, 0.9, 1], rootMargin: '-10% 0px -10% 0px' },
+      { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1], rootMargin: '-10% 0px -10% 0px' },
     );
     return observer.current;
   };
@@ -126,36 +89,39 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
 
   const toggleAudio = useCallback(() => setAudioOn((v) => !v), []);
 
+  const ceremonyTimer = useRef<number | undefined>(undefined);
   const celebrate = useCallback((label: string) => {
     setCeremony(label);
-    window.setTimeout(() => setCeremony((c) => (c === label ? null : c)), 2800);
+    window.clearTimeout(ceremonyTimer.current);
+    ceremonyTimer.current = window.setTimeout(() => setCeremony(null), 2800);
   }, []);
+  useEffect(() => () => window.clearTimeout(ceremonyTimer.current), []);
+
+  const openClover = useCallback((ask?: string) => {
+    setClover((c) => ({ open: true, pending: ask ?? null, nonce: c.nonce + 1 }));
+  }, []);
+  const closeClover = useCallback(() => setClover((c) => ({ ...c, open: false, pending: null })), []);
 
   const scene = SCENE_MAP[active];
   /* A game world only owns the environment while the Games section is on
      screen — leaving the section hands the environment straight back. */
   const override = active === 'games' ? worldOverride : null;
   const theme = override?.theme ?? scene.theme;
-  const particles = override?.particles ?? scene.particles;
+  const scape = override?.scape ?? scene.scape;
 
-  /* Paint the environment onto the document. The properties are registered
-     with @property, so every change cross-fades instead of snapping. */
+  /* Only the browser chrome colour follows the chapter here. Page content
+     carries its own palette per section (SectionShell), and the floating UI
+     reads the active one from <ChromeEnv> — nothing touches :root, because
+     changing an inherited property there restyles every element on the page. */
   useEffect(() => {
-    const s = document.documentElement.style;
-    s.setProperty('--env-void', theme.void);
-    s.setProperty('--env-a', theme.a);
-    s.setProperty('--env-b', theme.b);
-    s.setProperty('--env-accent', theme.accent);
-    s.setProperty('--env-tint', theme.tint);
-    s.setProperty('--env-ray', theme.ray);
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.void);
   }, [theme]);
 
-  const env = useMemo<EnvValue>(() => ({ active, theme, particles, override }), [active, theme, particles, override]);
-  const device = useMemo<DeviceValue>(() => ({ reducedMotion, compact, intensity }), [reducedMotion, compact, intensity]);
+  const env = useMemo<EnvValue>(() => ({ active, theme, scape }), [active, theme, scape]);
+  const device = useMemo<DeviceValue>(() => ({ reducedMotion, compact, finePointer }), [reducedMotion, compact, finePointer]);
   const actions = useMemo<ActionsValue>(
-    () => ({ goTo, register, setOverride, setTerminalOpen, toggleAudio, celebrate }),
-    [goTo, register, toggleAudio, celebrate],
+    () => ({ goTo, register, setOverride, setTerminalOpen, toggleAudio, celebrate, openClover, closeClover }),
+    [goTo, register, toggleAudio, celebrate, openClover, closeClover],
   );
 
   return (
@@ -164,7 +130,9 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
         <AudioCtx.Provider value={audioOn}>
           <TerminalCtx.Provider value={terminalOpen}>
             <CeremonyCtx.Provider value={ceremony}>
-              <EnvCtx.Provider value={env}>{children}</EnvCtx.Provider>
+              <CloverCtx.Provider value={clover}>
+                <EnvCtx.Provider value={env}>{children}</EnvCtx.Provider>
+              </CloverCtx.Provider>
             </CeremonyCtx.Provider>
           </TerminalCtx.Provider>
         </AudioCtx.Provider>
@@ -172,26 +140,3 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     </ActionsCtx.Provider>
   );
 }
-
-const missing = (what: string) => {
-  throw new Error(`${what} must be used inside <ExperienceProvider>`);
-};
-
-/** The current chapter and its environment. Re-renders on every scene change. */
-export function useEnv() {
-  return useContext(EnvCtx) ?? missing('useEnv');
-}
-
-/** Device capabilities. Effectively constant for a visit. */
-export function useDevice() {
-  return useContext(DeviceCtx) ?? missing('useDevice');
-}
-
-/** Stable callbacks — subscribing to these never causes a re-render. */
-export function useActions() {
-  return useContext(ActionsCtx) ?? missing('useActions');
-}
-
-export const useAudioOn = () => useContext(AudioCtx);
-export const useTerminalOpen = () => useContext(TerminalCtx);
-export const useCeremony = () => useContext(CeremonyCtx);

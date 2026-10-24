@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import {
   GLYPHS,
@@ -9,11 +8,11 @@ import {
   parseFen,
   type Board,
 } from '../lib/chess';
-import MagneticButton from '../components/ui/MagneticButton';
+import Button from '../components/ui/Button';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useActions, useDevice } from '../state/experience';
+import { useActions, useDevice } from '../state/hooks';
 import { cn } from '../lib/utils';
 
 type Status = 'idle' | 'wrong' | 'solved';
@@ -93,33 +92,26 @@ export default function Strategy() {
           </Reveal>
 
           <Reveal delay={0.3} className="mt-9 flex flex-wrap items-center gap-3">
-            <MagneticButton onClick={() => setShowHint((v) => !v)}>
+            <Button onClick={() => setShowHint((v) => !v)}>
               {showHint ? 'Hide hint' : 'Need a hint?'}
-            </MagneticButton>
-            <MagneticButton variant="quiet" onClick={() => load((puzzleIndex + 1) % PUZZLES.length)}>
+            </Button>
+            <Button variant="quiet" onClick={() => load((puzzleIndex + 1) % PUZZLES.length)}>
               Another position →
-            </MagneticButton>
+            </Button>
           </Reveal>
 
           <div className="mt-5 min-h-[3rem]">
-            <AnimatePresence>
-              {showHint && (
-                <motion.p
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  className="max-w-[42ch] text-sm text-[var(--color-ink-dim)] italic"
-                >
-                  {puzzle.hint}
-                </motion.p>
-              )}
-            </AnimatePresence>
+            {showHint && (
+              <p className="serif max-w-[42ch] text-[1.1rem] text-[var(--color-ink-dim)]" style={{ animation: 'rise-in 400ms var(--ease-out-expo) both' }}>
+                {puzzle.hint}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="lg:col-span-7">
           <Reveal delay={0.15}>
-            <Panel className="p-4 sm:p-6">
+            <Panel brackets className="p-4 sm:p-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <span className="eyebrow">
                   Position {String(puzzleIndex + 1).padStart(2, '0')} / {String(PUZZLES.length).padStart(2, '0')}
@@ -159,17 +151,17 @@ export default function Strategy() {
                       )}
                     >
                       {isTarget && (
-                        <motion.span
-                          layout
+                        <span
                           className={cn(
                             'pointer-events-none absolute rounded-full',
                             piece ? 'inset-[8%] border-2 border-[var(--env-accent)] opacity-60' : 'h-[18%] w-[18%] bg-[var(--env-accent)] opacity-45',
                           )}
+                          style={{ animation: 'fade-in 200ms ease both' }}
                         />
                       )}
                       {piece && (
-                        <motion.span
-                          layoutId={`piece-${i}-${piece}-${puzzleIndex}`}
+                        <span
+                          key={`${piece}-${puzzleIndex}`}
                           className="relative z-10 select-none"
                           style={{
                             fontSize: 'clamp(1.5rem, 4.6vw, 2.6rem)',
@@ -181,7 +173,7 @@ export default function Strategy() {
                           }}
                         >
                           {GLYPHS[piece]}
-                        </motion.span>
+                        </span>
                       )}
                       {file === 0 && (
                         <span className="pointer-events-none absolute top-0.5 left-1 font-mono text-[0.58rem] text-[var(--env-tint)] opacity-40">
@@ -197,29 +189,22 @@ export default function Strategy() {
                   );
                 })}
 
-                <AnimatePresence>
-                  {status === 'solved' && (
-                    <motion.div
-                      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 backdrop-blur-sm"
-                      style={{ background: 'color-mix(in oklab, var(--env-void) 72%, transparent)' }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                {status === 'solved' && (
+                    <div
+                      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4"
+                      style={{ background: 'color-mix(in oklab, var(--env-void) 84%, transparent)', animation: 'fade-in 300ms ease both' }}
                     >
-                      <motion.p
-                        className="display px-6 text-center text-[clamp(1.4rem,1rem+1.6vw,2.2rem)] text-[var(--color-ink)]"
-                        initial={{ y: 14, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.1 }}
+                      <p
+                        className="display px-6 text-center text-[clamp(1.2rem,0.9rem+1.4vw,1.9rem)] text-[var(--color-ink)]"
+                        style={{ animation: 'rise-in 500ms var(--ease-out-expo) 100ms both' }}
                       >
                         {puzzle.success}
-                      </motion.p>
-                      <MagneticButton onClick={() => load((puzzleIndex + 1) % PUZZLES.length)}>
+                      </p>
+                      <Button onClick={() => load((puzzleIndex + 1) % PUZZLES.length)}>
                         Next position →
-                      </MagneticButton>
-                    </motion.div>
+                      </Button>
+                    </div>
                   )}
-                </AnimatePresence>
               </div>
 
               <p className="mt-4 text-center font-mono text-[0.7rem] tracking-[0.2em] text-[var(--env-tint)] uppercase opacity-70">

@@ -21,5 +21,16 @@ export const SCROLL_OFFSET = 72;
  */
 export function scrollToSection(el: HTMLElement, smooth = true) {
   const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET);
-  window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+  // 'instant', not 'auto': with `scroll-behavior: smooth` on <html>, 'auto'
+  // would still animate.
+  window.scrollTo({ top, behavior: smooth ? 'smooth' : 'instant' });
 }
+
+/** Small seeded PRNG — the same "random" artwork comes back every visit. */
+export const mulberry32 = (seed: number) => () => {
+  seed |= 0;
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};

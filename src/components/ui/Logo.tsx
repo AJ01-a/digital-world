@@ -1,141 +1,125 @@
-import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useId } from 'react';
 import { cn } from '../../lib/utils';
+
+/*
+ * The AJ monogram.
+ *
+ * A ligature rather than two letters side by side: the A's right side is a
+ * vertical stem, and that same stem carries on below the baseline and hooks
+ * left into the J — so the J cradles the A. The crossbar runs on through the
+ * stem as a thin circuit trace and ends in a warm node, the one touch of
+ * Clover-orange in the brand.
+ *
+ * Geometry is on a 120-unit grid and shared with public/favicon.svg.
+ */
+export const MARK = 'M28 80 L54 24 H68 V76 Q68 94 50 94 H40';
+export const BAR = 'M37 60 H68';
+export const TRACE = 'M68 60 H82 L88 54';
+const FRAME = 'M30 6 H90 L114 30 V90 L90 114 H30 L6 90 V30 Z';
+const FRAME_INNER = 'M33 12 H87 L108 33 V87 L87 108 H33 L12 87 V33 Z';
 
 interface LogoProps {
   size?: number;
   className?: string;
-  /** Draw-in animation on first paint. */
-  animate?: boolean;
-  onSecret?: () => void;
-  onClick?: () => void;
-  /** Accessible name when the mark itself is the button. */
-  label?: string;
-  interactive?: boolean;
+  /** `full` adds the inner frame, ticks and bevel; `compact` stays legible at icon sizes. */
+  detail?: 'full' | 'compact';
+  /** Draw the strokes on when mounted. Runs once. */
+  draw?: boolean;
+  /** Pass a light sweep through the mark once. */
+  sweep?: boolean;
+  /** Accessible name. Omit when the mark sits next to a visible "AJ". */
+  title?: string;
+  /** Offset for the draw-on / sweep, in ms. */
+  delay?: number;
 }
 
-/**
- * The AJ mark. Strokes are drawn on mount, the ring rotates slowly, and the
- * whole thing tilts a little toward the pointer. Colour comes from the active
- * environment, so it re-tints itself as you move through the site.
- */
-export default function Logo({ size = 44, className, animate = true, onSecret, onClick, label, interactive = true }: LogoProps) {
-  const clicks = useRef(0);
-  const timer = useRef<number | undefined>(undefined);
-  const [pulse, setPulse] = useState(0);
-
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const rx = useSpring(useTransform(my, (v) => v * -14), { stiffness: 120, damping: 14 });
-  const ry = useSpring(useTransform(mx, (v) => v * 14), { stiffness: 120, damping: 14 });
-
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-
-  const onMove = (e: React.PointerEvent) => {
-    if (!interactive) return;
-    const r = e.currentTarget.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
-  };
-
-  const handleClick = () => {
-    onClick?.();
-    if (!onSecret) return;
-    clicks.current += 1;
-    setPulse((p) => p + 1);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => (clicks.current = 0), 1400);
-    if (clicks.current >= 5) {
-      clicks.current = 0;
-      onSecret();
-    }
-  };
-
-  const stroke = { stroke: 'var(--env-accent)', strokeWidth: 5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
-  const draw = animate
-    ? { initial: { pathLength: 0, opacity: 0 }, animate: { pathLength: 1, opacity: 1 } }
-    : {};
-
-  const isButton = Boolean(onSecret || onClick);
-  const Tag = isButton ? motion.button : motion.div;
+export default function Logo({ size = 44, className, detail = 'full', draw = false, sweep = false, title, delay = 0 }: LogoProps) {
+  const uid = useId().replace(/:/g, '');
+  const g = `aj-g-${uid}`;
+  const s = `aj-s-${uid}`;
+  const m = `aj-m-${uid}`;
+  const full = detail === 'full';
+  const sw = full ? 9 : 10;
 
   return (
-    <Tag
-      className={cn('relative grid place-items-center', isButton && 'cursor-pointer', className)}
-      style={{ width: size, height: size, perspective: 400, background: 'none', border: 0, padding: 0 }}
-      onPointerMove={onMove}
-      onPointerLeave={() => {
-        mx.set(0);
-        my.set(0);
-      }}
-      onClick={isButton ? handleClick : undefined}
-      aria-label={isButton ? (label ?? 'AJ — back to the top') : undefined}
-      whileTap={isButton ? { scale: 0.94 } : undefined}
+    <svg
+      viewBox="0 0 120 120"
+      width={size}
+      height={size}
+      className={cn('shrink-0 overflow-visible', draw && 'aj-draw', sweep && 'aj-sweep-run', className)}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+      style={{ ['--base' as string]: `${delay}ms` }}
     >
-      <motion.svg
-        viewBox="0 0 96 96"
-        width={size}
-        height={size}
-        style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d', overflow: 'visible' }}
-      >
-        <defs>
-          <filter id="aj-glow" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="2.6" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+      <defs>
+        <linearGradient id={g} x1="0.1" y1="0" x2="0.9" y2="1">
+          <stop offset="0" stopColor="#f4f9ff" />
+          <stop offset="0.4" stopColor="#8fe6ff" />
+          <stop offset="0.62" stopColor="#5ce1ff" />
+          <stop offset="1" stopColor="#9b86ff" />
+        </linearGradient>
+        <linearGradient id={s} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id={m} maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120">
+          <g fill="none" stroke="#fff" strokeLinejoin="miter">
+            <path d={MARK} strokeWidth={sw} />
+            <path d={BAR} strokeWidth={sw - 2} />
+          </g>
+        </mask>
+      </defs>
 
-        <motion.circle
-          cx="48"
-          cy="48"
-          r="44"
-          fill="none"
-          stroke="var(--env-accent)"
-          strokeOpacity="0.28"
-          strokeWidth="1.2"
-          strokeDasharray="3 9"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 42, repeat: Infinity, ease: 'linear' }}
-          style={{ transformOrigin: '48px 48px' }}
-        />
-        <motion.circle
-          cx="48"
-          cy="48"
-          r="37"
-          fill="none"
-          stroke="var(--env-accent)"
-          strokeOpacity="0.14"
-          strokeWidth="1"
-          animate={{ scale: [1, 1.045, 1] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ transformOrigin: '48px 48px' }}
-        />
-
-        <g filter="url(#aj-glow)">
-          <motion.path d="M22 68 L34 28 L46 68" {...stroke} {...draw} transition={{ duration: 1.1, delay: 0.15, ease: 'easeInOut' }} />
-          <motion.path d="M27 56 H41" {...stroke} {...draw} transition={{ duration: 0.5, delay: 0.9, ease: 'easeInOut' }} />
-          <motion.path d="M56 28 H76" {...stroke} {...draw} transition={{ duration: 0.5, delay: 0.5, ease: 'easeInOut' }} />
-          <motion.path d="M69 28 V57 C69 66 62 70 54 67" {...stroke} {...draw} transition={{ duration: 1, delay: 0.7, ease: 'easeInOut' }} />
-        </g>
-
-        {pulse > 0 && (
-          <motion.circle
-            key={pulse}
-            cx="48"
-            cy="48"
-            r="40"
-            fill="none"
-            stroke="var(--env-accent)"
-            initial={{ opacity: 0.5, scale: 0.9 }}
-            animate={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            style={{ transformOrigin: '48px 48px' }}
-          />
+      {/* Frame: a chamfered octagon with precision ticks. */}
+      <g className="aj-frame" fill="none">
+        <path d={FRAME} stroke={`url(#${g})`} strokeOpacity={full ? 0.5 : 0.7} strokeWidth={full ? 1.4 : 3} />
+        {full && (
+          <>
+            <path d={FRAME_INNER} stroke="#8fe6ff" strokeOpacity="0.18" strokeWidth="0.8" strokeDasharray="2 4" />
+            <g stroke="#b8d4ff" strokeOpacity="0.7" strokeWidth="1.4">
+              <path d="M60 0 V6 M60 114 V120 M0 60 H6 M114 60 H120" />
+            </g>
+            <rect x="99.5" y="15.5" width="4" height="4" fill="#ff9b52" transform="rotate(45 101.5 17.5)" opacity="0.9" />
+          </>
         )}
-      </motion.svg>
-    </Tag>
+      </g>
+
+      {/* Extrusion: the same strokes, offset and deep violet, for depth. */}
+      <g fill="none" stroke="#2c2370" strokeLinejoin="miter" transform="translate(2.6 2.6)" opacity="0.95">
+        <path d={MARK} strokeWidth={sw} />
+        <path d={BAR} strokeWidth={sw - 2} />
+      </g>
+
+      {/* The mark. */}
+      <g fill="none" stroke={`url(#${g})`} strokeLinejoin="miter">
+        <path className="aj-stroke" pathLength={1} d={MARK} strokeWidth={sw} />
+        <path className="aj-stroke" pathLength={1} d={BAR} strokeWidth={sw - 2} style={{ ['--dd' as string]: '320ms' }} />
+        <path className="aj-stroke" pathLength={1} d={TRACE} strokeWidth={full ? 2.2 : 3} strokeLinecap="round" style={{ ['--dd' as string]: '520ms' }} />
+      </g>
+      <g className="aj-node">
+        {full && <circle cx="91" cy="51" r="6.5" fill="none" stroke="#ff9b52" strokeOpacity="0.4" strokeWidth="1" />}
+        <circle cx="91" cy="51" r={full ? 3.4 : 4.4} fill="#ff9b52" />
+      </g>
+
+      {/* Bevel highlight, kept inside the strokes by the mask. */}
+      {full && (
+        <g mask={`url(#${m})`}>
+          <g fill="none" stroke="#fff" strokeOpacity="0.55" strokeWidth="1.3" transform="translate(-2.4 -2.2)">
+            <path d={MARK} />
+            <path d="M46 60 H68" />
+          </g>
+        </g>
+      )}
+
+      {sweep && (
+        <g mask={`url(#${m})`}>
+          <g transform="skewX(-18)">
+            <rect className="aj-sweep" x="0" y="0" width="34" height="140" fill={`url(#${s})`} />
+          </g>
+        </g>
+      )}
+    </svg>
   );
 }

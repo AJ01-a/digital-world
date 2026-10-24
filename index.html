@@ -3,45 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>AJ — Games, Technology &amp; Everything In Between</title>
-    <meta name="description" content="A small interactive window into AJ's world — games, strategy, technology, AI, automation, and the things he enjoys." />
+    <title>AJ — Digital World</title>
+    <meta name="description" content="AJ's digital world — technology, networks, security and AI, explored with curiosity. Plus games, chess, long drives, and Clover, the site's guide." />
     <meta name="author" content="AJ" />
-    <meta name="theme-color" content="#05060b" />
+    <meta name="theme-color" content="#03040a" />
     <meta name="color-scheme" content="dark" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
 
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon-180.png" />
     <link rel="canonical" href="%VITE_SITE_URL%/" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AJ" />
-    <meta property="og:title" content="AJ — Games, Technology &amp; Everything In Between" />
-    <meta property="og:description" content="A small interactive window into AJ's world — games, strategy, technology, AI, automation, and the things he enjoys." />
+    <meta property="og:site_name" content="AJ — Digital World" />
+    <meta property="og:title" content="AJ — Digital World" />
+    <meta property="og:description" content="Technology, networks, security and AI — explored with curiosity. Come in; Clover will show you around." />
     <meta property="og:url" content="%VITE_SITE_URL%/" />
     <meta property="og:image" content="%VITE_SITE_URL%/og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="AJ — an interactive personal experience" />
+    <meta property="og:image:alt" content="The AJ monogram inside an octagonal frame, with the words Digital World" />
     <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="AJ — Games, Technology &amp; Everything In Between" />
-    <meta name="twitter:description" content="A small interactive window into AJ's world — games, strategy, technology, AI, automation, and the things he enjoys." />
+    <meta name="twitter:title" content="AJ — Digital World" />
+    <meta name="twitter:description" content="Technology, networks, security and AI — explored with curiosity. Come in; Clover will show you around." />
     <meta name="twitter:image" content="%VITE_SITE_URL%/og.jpg" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AJ — Digital World",
+        "url": "%VITE_SITE_URL%/",
+        "author": { "@type": "Person", "name": "AJ" }
+      }
+    </script>
+
+    <style>
+      /* Painted before any script runs, so there is never a white flash. */
+      html, body { background: #03040a; color: #eaf0ff; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <noscript>
-      <div style="padding:3rem;font-family:system-ui;color:#dfe4f0;background:#05060b">
-        <h1>AJ</h1>
-        <p>This is an interactive experience — please enable JavaScript to explore it.</p>
+      <div style="max-width:40rem;margin:0 auto;padding:4rem 1.5rem;font-family:system-ui,sans-serif;line-height:1.7;color:#dfe6f7">
+        <h1 style="font-weight:300;font-size:3rem;margin:0">AJ</h1>
+        <p style="font-style:italic;color:#9fb2d8">Welcome to my little corner of the internet.</p>
+        <p>
+          I'm AJ — curious about how technology works underneath: Linux, networking, cybersecurity, systems and AI.
+          Outside of that it's story-driven games, chess, long drives and walks with my dog, Clover.
+        </p>
+        <p style="color:#9fb2d8">
+          This site is an interactive experience built with JavaScript. Turn it on to explore the chapters, the games and
+          Clover, the site's guide.
+        </p>
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

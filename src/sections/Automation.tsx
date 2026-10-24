@@ -1,11 +1,10 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AUTOMATION_COPY, AUTOMATION_STEPS, PIPELINE } from '../data/content';
-import MagneticButton from '../components/ui/MagneticButton';
+import Button from '../components/ui/Button';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useDevice } from '../state/experience';
+import { useDevice } from '../state/hooks';
 import { cn } from '../lib/utils';
 
 type Line = { kind: 'cmd' | 'out' | 'ok'; text: string };
@@ -69,7 +68,7 @@ export default function Automation() {
     }
 
     if (cancelled.current) return;
-    setLines((l) => [...l, { kind: 'ok', text: '✓ complete — idea is now a thing that runs' }]);
+    setLines((l) => [...l, { kind: 'ok', text: '✓ idea → something that runs (in real life, this part takes longer)' }]);
     setStage(4);
     setRunning(false);
     setFinished(true);
@@ -89,38 +88,36 @@ export default function Automation() {
 
         <div className="lg:col-span-7">
           <Reveal delay={0.15}>
-            <Panel className="overflow-hidden">
+            <Panel brackets className="overflow-hidden">
               <div className="flex items-center gap-3 border-b border-[color-mix(in_oklab,var(--env-accent)_14%,transparent)] px-4 py-3">
                 <span className="flex gap-1.5">
                   {['#ff6b6b', '#f5c26b', '#7fd1a6'].map((c) => (
                     <span key={c} className="h-2.5 w-2.5 rounded-full opacity-60" style={{ background: c }} />
                   ))}
                 </span>
-                <span className="font-mono text-[0.7rem] tracking-[0.18em] text-[var(--color-ink-dim)]">
-                  aj@wsl:~/projects
+                <span className="font-mono text-[0.7rem] tracking-[0.12em] text-[var(--color-ink-dim)]">
+                  ~/projects
                 </span>
-                <span className="ml-auto font-mono text-[0.66rem] tracking-[0.18em] text-[var(--env-accent)] uppercase">
-                  {running ? 'running' : finished ? 'done' : 'idle'}
+                <span className="label ml-auto rounded-full border border-[color-mix(in_oklab,var(--env-accent)_40%,transparent)] px-2.5 py-1 text-[0.58rem] text-[var(--env-accent)]">
+                  Simulated
                 </span>
               </div>
 
               <div
                 ref={logRef}
-                className="h-[300px] overflow-y-auto px-4 py-4 font-mono text-[0.72rem] leading-[1.9] sm:h-[360px] sm:text-[0.8rem]"
-                aria-live="polite"
+                className="h-[280px] overflow-y-auto px-4 py-4 font-mono text-[0.72rem] leading-[1.9] sm:h-[340px] sm:text-[0.8rem]"
+                role="log"
+                aria-label="Illustrated terminal output"
               >
                 {lines.length === 0 && !running && (
                   <p className="text-[var(--color-ink-faint)]">
                     <span className="text-[var(--env-accent)]">$</span> waiting for an idea…
                   </p>
                 )}
-                <AnimatePresence initial={false}>
-                  {lines.map((l, i) => (
-                    <motion.p
+                {lines.map((l, i) => (
+                    <p
                       key={i}
-                      initial={{ opacity: 0, x: -6 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.25 }}
+                      style={{ animation: 'fade-in 250ms ease both' }}
                       className={cn(
                         'break-words whitespace-pre-wrap',
                         l.kind === 'cmd' && 'text-[var(--color-ink)]',
@@ -131,9 +128,8 @@ export default function Automation() {
                       {l.kind === 'cmd' && <span className="mr-2 text-[var(--env-accent)]">$</span>}
                       {l.kind === 'out' && <span className="mr-2 opacity-50">›</span>}
                       {l.text}
-                    </motion.p>
+                    </p>
                   ))}
-                </AnimatePresence>
                 {typing && (
                   <p className="break-words whitespace-pre-wrap text-[var(--color-ink)]">
                     <span className="mr-2 text-[var(--env-accent)]">$</span>
@@ -144,10 +140,10 @@ export default function Automation() {
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[color-mix(in_oklab,var(--env-accent)_14%,transparent)] px-4 py-4">
-                <MagneticButton onClick={run} variant={finished ? 'ghost' : 'solid'}>
-                  {running ? 'Running…' : finished ? 'Run again' : 'Run simulation'}
-                </MagneticButton>
-                <p className="font-mono text-[0.66rem] tracking-[0.16em] text-[var(--color-ink-faint)] uppercase">
+                <Button onClick={run} variant={finished ? 'ghost' : 'solid'} disabled={running}>
+                  {running ? 'Playing…' : finished ? 'Play again' : 'Play the illustration'}
+                </Button>
+                <p className="max-w-[34ch] text-[0.78rem] leading-snug text-[var(--color-ink-faint)]">
                   {AUTOMATION_COPY.disclaimer}
                 </p>
               </div>

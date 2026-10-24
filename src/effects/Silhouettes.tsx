@@ -1,16 +1,16 @@
+import { useId } from 'react';
+import { mulberry32 } from '../lib/utils';
+
+/** Gradient ids must be unique per instance: the same artwork can be on
+    screen twice (a cross-fade, or a game card over its own backdrop), and
+    `url(#id)` resolves to whichever copy comes first in the document. */
+const useSvgId = () => useId().replace(/[^a-zA-Z0-9]/g, '');
+
 /**
  * Original, procedurally drawn environment art. Nothing here is traced from
  * or hotlinked to anyone's artwork — every shape is generated from code, so
  * it is safe to ship and cheap to render.
  */
-
-const mulberry32 = (seed: number) => () => {
-  seed |= 0;
-  seed = (seed + 0x6d2b79f5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
 
 interface Branch { d: string; w: number; depth: number }
 
@@ -81,21 +81,23 @@ const Frame = ({ children, align = 'xMidYMax slice' }: { children: React.ReactNo
 );
 
 /** Elden Ring — a vast, distant, glowing tree. */
-export const TreeScape = ({ align, lite }: ScapeProps = {}) => (
+export const TreeScape = ({ align, lite }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
   <Frame align={align}>
     <defs>
-      <radialGradient id="tree-halo" cx="50%" cy="72%" r="46%">
+      <radialGradient id={`${u}tree-halo`} cx="50%" cy="72%" r="46%">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.15" />
         <stop offset="60%" stopColor="var(--env-ray)" stopOpacity="0.07" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </radialGradient>
-      <linearGradient id="tree-fade" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={`${u}tree-fade`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.85" />
         <stop offset="100%" stopColor="var(--env-accent)" stopOpacity="0.25" />
       </linearGradient>
     </defs>
-    <rect width="1440" height="900" fill="url(#tree-halo)" />
-    <g stroke="url(#tree-fade)" fill="none" strokeLinecap="round" className="art-glow">
+    <rect width="1440" height="900" fill={`url(#${u}tree-halo)`} />
+    <g stroke={`url(#${u}tree-fade)`} fill="none" strokeLinecap="round">
       {(lite ? TREE_LITE : TREE_FULL).map((b, i) => (
         <path key={i} d={b.d} strokeWidth={b.w} opacity={0.12 + b.depth * 0.03} />
       ))}
@@ -104,18 +106,21 @@ export const TreeScape = ({ align, lite }: ScapeProps = {}) => (
     <path d={ridge(11, 872, 46)} fill="#000" opacity="0.7" />
   </Frame>
 );
+};
 
 /** Sekiro — moonlight over distant ridges. */
-export const MoonScape = ({ align }: ScapeProps = {}) => (
+export const MoonScape = ({ align }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
   <Frame align={align}>
     <defs>
-      <radialGradient id="moon-glow" cx="80%" cy="20%" r="30%">
+      <radialGradient id={`${u}moon-glow`} cx="80%" cy="20%" r="30%">
         <stop offset="0%" stopColor="#ffe9d8" stopOpacity="0.34" />
         <stop offset="45%" stopColor="var(--env-accent)" stopOpacity="0.14" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </radialGradient>
     </defs>
-    <rect width="1440" height="900" fill="url(#moon-glow)" />
+    <rect width="1440" height="900" fill={`url(#${u}moon-glow)`} />
     <circle cx="1148" cy="176" r="62" fill="#ffeadb" opacity="0.34" />
     <circle cx="1148" cy="176" r="62" fill="none" stroke="var(--env-accent)" strokeOpacity="0.3" strokeWidth="1.2" />
     <path d={ridge(3, 700, 150)} fill="var(--env-a)" opacity="0.85" />
@@ -128,17 +133,20 @@ export const MoonScape = ({ align }: ScapeProps = {}) => (
     <path d={ridge(15, 880, 40)} fill="#000" opacity="0.75" />
   </Frame>
 );
+};
 
 /** God of War — cold peaks and an old carved ring. */
-export const NorthScape = ({ align }: ScapeProps = {}) => (
+export const NorthScape = ({ align }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
   <Frame align={align}>
     <defs>
-      <linearGradient id="north-haze" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={`${u}north-haze`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.16" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </linearGradient>
     </defs>
-    <rect y="220" width="1440" height="480" fill="url(#north-haze)" />
+    <rect y="220" width="1440" height="480" fill={`url(#${u}north-haze)`} />
     <g opacity="0.22" stroke="var(--env-accent)" fill="none" strokeWidth="1.4">
       <circle cx="720" cy="330" r="152" />
       <circle cx="720" cy="330" r="126" strokeDasharray="7 13" />
@@ -160,27 +168,30 @@ export const NorthScape = ({ align }: ScapeProps = {}) => (
     <path d={ridge(31, 878, 44)} fill="#000" opacity="0.8" />
   </Frame>
 );
+};
 
 /** Black Myth: Wukong — layered peaks lost in mist. */
-export const MountainScape = ({ align }: ScapeProps = {}) => (
+export const MountainScape = ({ align }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
   <Frame align={align}>
     <defs>
-      <radialGradient id="peak-glow" cx="68%" cy="34%" r="46%">
+      <radialGradient id={`${u}peak-glow`} cx="68%" cy="34%" r="46%">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.22" />
         <stop offset="60%" stopColor="var(--env-ray)" stopOpacity="0.08" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </radialGradient>
-      <linearGradient id="mist-band" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id={`${u}mist-band`} x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stopColor="transparent" stopOpacity="0" />
         <stop offset="50%" stopColor="var(--env-accent)" stopOpacity="0.13" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </linearGradient>
     </defs>
-    <rect width="1440" height="900" fill="url(#peak-glow)" />
+    <rect width="1440" height="900" fill={`url(#${u}peak-glow)`} />
     <path d={peaks(2, 640, 330, 5)} fill="color-mix(in oklab, var(--env-void) 72%, black)" opacity="0.75" />
-    <rect y="520" width="1440" height="150" fill="url(#mist-band)" />
+    <rect y="520" width="1440" height="150" fill={`url(#${u}mist-band)`} />
     <path d={peaks(12, 760, 250, 6)} fill="color-mix(in oklab, var(--env-void) 88%, black)" opacity="0.92" />
-    <rect y="660" width="1440" height="130" fill="url(#mist-band)" />
+    <rect y="660" width="1440" height="130" fill={`url(#${u}mist-band)`} />
     <g opacity="0.55" fill="var(--env-void)">
       <path d="M1140 792 L1140 700 L1128 700 L1176 664 L1224 700 L1212 700 L1212 792 Z" />
       <path d="M1104 706 h144 l-16 20 h-112 Z" />
@@ -190,9 +201,11 @@ export const MountainScape = ({ align }: ScapeProps = {}) => (
     <path d={ridge(23, 874, 40)} fill="#000" opacity="0.78" />
   </Frame>
 );
+};
 
 /** Driving — a city seen from the road at night. */
 export const CityScape = ({ align, lite }: ScapeProps = {}) => {
+  const u = useSvgId();
   const rnd = mulberry32(77);
   const towers = Array.from({ length: lite ? 16 : 26 }, (_, i) => {
     const w = 26 + rnd() * 58;
@@ -203,12 +216,12 @@ export const CityScape = ({ align, lite }: ScapeProps = {}) => {
   return (
     <Frame align={align}>
       <defs>
-        <linearGradient id="city-glow" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`${u}city-glow`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="transparent" stopOpacity="0" />
           <stop offset="100%" stopColor="var(--env-accent)" stopOpacity="0.2" />
         </linearGradient>
       </defs>
-      <rect y="380" width="1440" height="300" fill="url(#city-glow)" />
+      <rect y="380" width="1440" height="300" fill={`url(#${u}city-glow)`} />
       <g>
         {towers.map((t, i) => (
           <g key={i}>
@@ -236,17 +249,18 @@ export const CityScape = ({ align, lite }: ScapeProps = {}) => {
 
 /** Walks — hills, trees and late sun. */
 export const NatureScape = ({ align, lite }: ScapeProps = {}) => {
+  const u = useSvgId();
   const rnd = mulberry32(41);
   return (
     <Frame align={align}>
       <defs>
-        <radialGradient id="sun" cx="26%" cy="62%" r="30%">
+        <radialGradient id={`${u}sun`} cx="26%" cy="62%" r="30%">
           <stop offset="0%" stopColor="#ffd9a0" stopOpacity="0.55" />
           <stop offset="45%" stopColor="var(--env-accent)" stopOpacity="0.18" />
           <stop offset="100%" stopColor="transparent" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <rect width="1440" height="900" fill="url(#sun)" />
+      <rect width="1440" height="900" fill={`url(#${u}sun)`} />
       <circle cx="374" cy="558" r="60" fill="#ffca86" opacity="0.42" />
       <path d={ridge(6, 700, 70)} fill="var(--env-a)" opacity="0.8" />
       <g fill="var(--env-void)" opacity="0.85">
@@ -300,22 +314,38 @@ export const CircuitScape = ({ align, lite }: ScapeProps = {}) => {
 };
 
 /** Home, About, Outro — no landmark, just distance. */
-export const HorizonScape = ({ align }: ScapeProps = {}) => (
+/* Deep space: the curved limb of a planet low in the frame, its atmosphere
+   catching the chapter's light. Layered strokes give the soft rim without a
+   blur filter. */
+export const HorizonScape = ({ align }: ScapeProps = {}) => {
+  const u = useSvgId();
+  return (
   <Frame align={align}>
     <defs>
-      <radialGradient id="hz-glow" cx="50%" cy="104%" r="62%">
-        <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.2" />
-        <stop offset="55%" stopColor="var(--env-ray)" stopOpacity="0.09" />
+      <radialGradient id={`${u}hz-glow`} cx="50%" cy="100%" r="70%">
+        <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0.16" />
+        <stop offset="50%" stopColor="var(--env-ray)" stopOpacity="0.08" />
         <stop offset="100%" stopColor="transparent" stopOpacity="0" />
       </radialGradient>
-      <linearGradient id="hz-line" x1="0" y1="0" x2="1" y2="0">
+      <linearGradient id={`${u}hz-rim`} x1="0" y1="0" x2="1" y2="0">
         <stop offset="0%" stopColor="var(--env-accent)" stopOpacity="0" />
-        <stop offset="50%" stopColor="var(--env-accent)" stopOpacity="0.3" />
-        <stop offset="100%" stopColor="var(--env-accent)" stopOpacity="0" />
+        <stop offset="35%" stopColor="var(--env-accent)" stopOpacity="0.55" />
+        <stop offset="65%" stopColor="#9b86ff" stopOpacity="0.5" />
+        <stop offset="100%" stopColor="#9b86ff" stopOpacity="0" />
+      </linearGradient>
+      <linearGradient id={`${u}hz-body`} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="var(--env-a)" />
+        <stop offset="35%" stopColor="#020309" />
       </linearGradient>
     </defs>
-    <rect width="1440" height="900" fill="url(#hz-glow)" />
-    <rect x="0" y="742" width="1440" height="1.4" fill="url(#hz-line)" />
-    <rect x="0" y="744" width="1440" height="156" fill="#000" opacity="0.4" />
+    <rect width="1440" height="900" fill={`url(#${u}hz-glow)`} />
+    <g fill="none" stroke={`url(#${u}hz-rim)`}>
+      <circle cx="720" cy="2620" r="1830" strokeWidth="40" strokeOpacity="0.05" />
+      <circle cx="720" cy="2620" r="1830" strokeWidth="16" strokeOpacity="0.12" />
+      <circle cx="720" cy="2620" r="1830" strokeWidth="5" strokeOpacity="0.35" />
+    </g>
+    <circle cx="720" cy="2620" r="1828" fill={`url(#${u}hz-body)`} />
+    <circle cx="720" cy="2620" r="1830" fill="none" stroke={`url(#${u}hz-rim)`} strokeWidth="1.2" />
   </Frame>
 );
+};

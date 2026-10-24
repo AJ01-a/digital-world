@@ -15,14 +15,15 @@ interface Voice {
 const VOICES: Record<SceneId, Voice> = {
   home: { root: 110, filter: 720, noise: 0.05, wave: 'sine' },
   about: { root: 110, filter: 760, noise: 0.05, wave: 'sine' },
-  games: { root: 98, filter: 460, noise: 0.1, wave: 'sine' },
-  strategy: { root: 130.81, filter: 940, noise: 0.03, wave: 'sine' },
-  words: { root: 146.83, filter: 1050, noise: 0.03, wave: 'sine' },
   tech: { root: 123.47, filter: 1500, noise: 0.055, wave: 'triangle' },
   omarchy: { root: 123.47, filter: 1400, noise: 0.05, wave: 'triangle' },
   automation: { root: 116.54, filter: 1250, noise: 0.045, wave: 'triangle' },
+  projects: { root: 130.81, filter: 1300, noise: 0.045, wave: 'triangle' },
+  games: { root: 98, filter: 460, noise: 0.1, wave: 'sine' },
+  strategy: { root: 130.81, filter: 940, noise: 0.03, wave: 'sine' },
+  words: { root: 146.83, filter: 1050, noise: 0.03, wave: 'sine' },
   driving: { root: 87.31, filter: 360, noise: 0.17, wave: 'sine' },
-  dog: { root: 164.81, filter: 640, noise: 0.075, wave: 'sine' },
+  clover: { root: 164.81, filter: 640, noise: 0.075, wave: 'sine' },
   outro: { root: 110, filter: 700, noise: 0.04, wave: 'sine' },
 };
 
@@ -137,6 +138,18 @@ function build(ctx: AudioContext): Graph {
   return { ctx, master, noiseGain, noiseFilter, padFilter, oscs, teardown };
 }
 
+/** Glide the running graph toward a chapter's voice. */
+function applyVoice(g: Graph, v: Voice) {
+  const t = g.ctx.currentTime;
+  g.noiseFilter.frequency.setTargetAtTime(v.filter, t, 1.2);
+  g.noiseGain.gain.setTargetAtTime(v.noise, t, 1.2);
+  g.padFilter.frequency.setTargetAtTime(Math.max(420, v.filter * 0.9), t, 1.2);
+  for (const { osc, ratio } of g.oscs) {
+    osc.type = v.wave;
+    osc.frequency.setTargetAtTime(v.root * ratio, t, 1.6);
+  }
+}
+
 export function useAmbient(on: boolean, scene: SceneId) {
   const graph = useRef<Graph | null>(null);
 
@@ -153,16 +166,6 @@ export function useAmbient(on: boolean, scene: SceneId) {
 
   /* Move the voice toward whichever world is on screen. */
   useEffect(() => {
-    const g = graph.current;
-    if (!g) return;
-    const v = VOICES[scene];
-    const t = g.ctx.currentTime;
-    g.noiseFilter.frequency.setTargetAtTime(v.filter, t, 1.2);
-    g.noiseGain.gain.setTargetAtTime(v.noise, t, 1.2);
-    g.padFilter.frequency.setTargetAtTime(Math.max(420, v.filter * 0.9), t, 1.2);
-    for (const { osc, ratio } of g.oscs) {
-      osc.type = v.wave;
-      osc.frequency.setTargetAtTime(v.root * ratio, t, 1.6);
-    }
+    if (graph.current) applyVoice(graph.current, VOICES[scene]);
   }, [scene, on]);
 }

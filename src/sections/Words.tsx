@@ -1,10 +1,10 @@
-import { AnimatePresence, motion, useInView } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import MagneticButton from '../components/ui/MagneticButton';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useInView } from '../hooks/useInView';
+import Button from '../components/ui/Button';
 import Panel from '../components/ui/Panel';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
-import { useActions, useTerminalOpen } from '../state/experience';
+import { useActions, useTerminalOpen } from '../state/hooks';
 import { cn, pick } from '../lib/utils';
 
 /** Words that mean something to me — the puzzle picks one at random. */
@@ -39,10 +39,9 @@ function score(guess: string, answer: string): Mark[] {
 export default function Words() {
   const terminalOpen = useTerminalOpen();
   const { celebrate } = useActions();
-  const boardRef = useRef<HTMLDivElement>(null);
   // Typing should work as soon as the board is on screen — waiting for this
   // to become the "active" chapter made the puzzle feel broken.
-  const onScreen = useInView(boardRef, { amount: 0.12 });
+  const [boardRef, onScreen] = useInView<HTMLDivElement>('-8% 0px');
   const [answer, setAnswer] = useState(() => pick(WORDS));
   const [guesses, setGuesses] = useState<string[]>([]);
   const [draft, setDraft] = useState('');
@@ -130,13 +129,13 @@ export default function Words() {
 
   return (
     <SectionShell id="words" labelledBy="words-title">
-      <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 [&>*]:min-w-0">
         <div className="lg:col-span-5">
           <h2 id="words-title" className="h-section">
             <RevealWords text="Can you guess the word?" />
           </h2>
           <Reveal delay={0.12} as="p" className="prose-lede mt-7">
-            A word puzzle is part of most of my mornings. Same idea here, built from scratch for this page —
+            I enjoy a good word puzzle. Here's one built from scratch for this page —
             five letters, six tries, and a small list of words that mean something to me.
           </Reveal>
           <Reveal delay={0.2} className="mt-8">
@@ -159,12 +158,11 @@ export default function Words() {
 
         <div className="lg:col-span-7">
           <Reveal delay={0.15}>
-            <Panel className="mx-auto max-w-[520px] p-5 sm:p-6">
+            <Panel brackets className="mx-auto max-w-[520px] p-4 sm:p-6">
               <div ref={boardRef}>
-              <motion.div
+              <div
                 key={shake}
-                animate={shake ? { x: [0, -8, 8, -5, 0] } : undefined}
-                transition={{ duration: 0.35 }}
+                style={shake ? { animation: 'shake 350ms ease both' } : undefined}
                 className="mx-auto grid w-full max-w-[330px] gap-2"
               >
                 {rows.map((row, r) => (
@@ -174,11 +172,8 @@ export default function Words() {
                       const mark = row.marks?.[c];
                       const filled = ch.trim().length > 0;
                       return (
-                        <motion.div
+                        <div
                           key={c}
-                          initial={false}
-                          animate={row.settled ? { rotateX: [0, 90, 0] } : { scale: filled ? [1, 1.06, 1] : 1 }}
-                          transition={row.settled ? { duration: 0.5, delay: c * 0.09 } : { duration: 0.18 }}
                           className={cn(
                             'grid aspect-square place-items-center rounded-md text-[clamp(1.1rem,3.2vw,1.6rem)] font-medium',
                             !mark && 'border',
@@ -187,56 +182,46 @@ export default function Words() {
                             mark === 'near' && 'border-2 border-[var(--env-accent)] text-[var(--env-accent)]',
                             mark === 'miss' && 'border border-white/8 bg-white/[0.03] text-[var(--color-ink-faint)]',
                           )}
-                          style={{ transformStyle: 'preserve-3d' }}
+                          style={row.settled ? { animation: `flip-in 450ms var(--ease-out-expo) ${c * 90}ms both` } : undefined}
                           aria-label={mark ? `${ch}: ${mark === 'exact' ? 'correct' : mark === 'near' ? 'present' : 'absent'}` : ch.trim() || 'empty'}
                         >
                           {ch.trim()}
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 ))}
-              </motion.div>
+              </div>
 
               <div className="mt-6 min-h-[2.25rem] text-center">
-                <AnimatePresence mode="wait">
-                  {done ? (
-                    <motion.div
-                      key="result"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="flex flex-col items-center gap-3"
-                    >
+                {done ? (
+                    <div className="flex flex-col items-center gap-3" style={{ animation: 'rise-in 400ms var(--ease-out-expo) both' }} role="status">
                       <p className="text-[1.05rem] text-[var(--color-ink)]">
                         {won ? 'Nice. You might fit in here.' : `It was ${answer}. Close enough.`}
                       </p>
-                      <MagneticButton onClick={reset}>Play another</MagneticButton>
-                    </motion.div>
+                      <Button onClick={reset}>Play another</Button>
+                    </div>
                   ) : (
-                    <motion.p
+                    <p
                       key={note ?? 'idle'}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      style={{ animation: 'fade-in 250ms ease both' }}
                       className="font-mono text-[0.65rem] tracking-[0.22em] text-[var(--env-tint)] uppercase"
                     >
                       {note ?? `Attempt ${guesses.length + 1} of ${ROWS}`}
-                    </motion.p>
+                    </p>
                   )}
-                </AnimatePresence>
               </div>
 
               {/* On-screen keys, so this works on a phone too. */}
               <div className="mt-5 flex flex-col items-center gap-1.5" aria-label="Letter keyboard">
                 {KEYS.map((row, i) => (
-                  <div key={row} className="flex w-full justify-center gap-1.5">
+                  <div key={row} className="flex w-full justify-center gap-1 sm:gap-1.5">
                     {i === 2 && (
                       <button
                         type="button"
                         onClick={submit}
                         disabled={done}
-                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-3 py-3 font-mono text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
+                        className="shrink-0 rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-2 py-3 font-mono sm:px-3 text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
                       >
                         Enter
                       </button>
@@ -251,7 +236,7 @@ export default function Words() {
                           disabled={done}
                           aria-label={`Letter ${k}`}
                           className={cn(
-                            'min-w-[30px] flex-1 rounded-md py-3 text-[0.85rem] font-medium transition-colors duration-200 disabled:opacity-35 sm:min-w-[36px]',
+                            'min-w-0 flex-1 rounded-md py-3 text-[0.85rem] font-medium transition-colors duration-200 disabled:opacity-35 sm:min-w-[36px]',
                             !st && 'bg-white/[0.05] text-[var(--color-ink-dim)] hover:bg-white/10',
                             st === 'exact' && 'bg-[var(--env-accent)] text-[#06110c]',
                             st === 'near' && 'border border-[var(--env-accent)] text-[var(--env-accent)]',
@@ -268,7 +253,7 @@ export default function Words() {
                         onClick={back}
                         disabled={done}
                         aria-label="Delete letter"
-                        className="rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-3 py-3 font-mono text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
+                        className="shrink-0 rounded-md border border-[color-mix(in_oklab,var(--env-accent)_28%,transparent)] px-2 py-3 font-mono sm:px-3 text-[0.66rem] tracking-[0.1em] text-[var(--color-ink-dim)] uppercase transition-colors hover:bg-white/5 disabled:opacity-35"
                       >
                         Del
                       </button>

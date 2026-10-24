@@ -1,82 +1,48 @@
-import { motion, type Variants } from 'motion/react';
-import type { ReactNode } from 'react';
-import { useReducedMotion } from '../../hooks/useMediaQuery';
+import type { CSSProperties, ReactNode } from 'react';
+import { useReveal } from '../../hooks/useInView';
+import { cn } from '../../lib/utils';
 
-const variants: Variants = {
-  hidden: (d: number) => ({ opacity: 0, y: 26, filter: 'blur(6px)', transition: { delay: d } }),
-  shown: (d: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: 'blur(0px)',
-    transition: { duration: 0.85, delay: d, ease: [0.16, 1, 0.3, 1] },
-  }),
-};
+type Tag = 'div' | 'span' | 'li' | 'p' | 'h2' | 'h3' | 'ul' | 'ol';
 
+/**
+ * Fades and lifts its children in the first time they scroll into view.
+ * The motion itself is a CSS transition (`.reveal` in index.css), so once it
+ * has played there is nothing left running.
+ */
 export default function Reveal({
   children,
   delay = 0,
   className,
-  as = 'div',
-  amount = 0.25,
+  as: Comp = 'div',
 }: {
   children: ReactNode;
   delay?: number;
   className?: string;
-  as?: 'div' | 'span' | 'li' | 'p' | 'h2' | 'h3';
-  amount?: number;
+  as?: Tag;
 }) {
-  const reduced = useReducedMotion();
-  const Comp = motion[as];
-  if (reduced) return <Comp className={className}>{children}</Comp>;
+  const ref = useReveal<HTMLElement>();
   return (
-    <Comp
-      className={className}
-      custom={delay}
-      variants={variants}
-      initial="hidden"
-      whileInView="shown"
-      viewport={{ once: true, amount }}
-    >
+    <Comp ref={ref as never} className={cn('reveal', className)} style={{ '--d': `${delay * 1000}ms` } as CSSProperties}>
       {children}
     </Comp>
   );
 }
 
-/** Splits a line into words that rise into place one after another. */
-export function RevealWords({
-  text,
-  className,
-  delay = 0,
-  step = 0.055,
-}: {
-  text: string;
-  className?: string;
-  delay?: number;
-  step?: number;
-}) {
-  const reduced = useReducedMotion();
-  if (reduced) return <span className={className}>{text}</span>;
+/**
+ * Splits a line into words that rise into place one after another — but
+ * observes only the line, not every word.
+ */
+export function RevealWords({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
+  const ref = useReveal<HTMLSpanElement>();
   return (
-    <span className={className}>
+    <span ref={ref} className={className} style={{ '--d': `${delay * 1000}ms` } as CSSProperties}>
       {text.split(' ').map((word, i) => (
-        // The mask is what gets observed: the word inside it starts fully
-        // clipped, so observing the word itself would never intersect.
-        <motion.span
-          key={`${word}-${i}`}
-          className="inline-block overflow-hidden align-bottom"
-          initial="hidden"
-          whileInView="shown"
-          viewport={{ once: true, amount: 0.2 }}
-        >
-          <motion.span
-            className="inline-block"
-            variants={{ hidden: { y: '115%', opacity: 0 }, shown: { y: '0%', opacity: 1 } }}
-            transition={{ duration: 0.9, delay: delay + i * step, ease: [0.16, 1, 0.3, 1] }}
-          >
+        <span key={`${word}-${i}`} className="rw">
+          <span style={{ '--i': i } as CSSProperties}>
             {word}
-            {'\u00A0'}
-          </motion.span>
-        </motion.span>
+            {' '}
+          </span>
+        </span>
       ))}
     </span>
   );

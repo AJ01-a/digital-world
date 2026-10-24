@@ -1,132 +1,133 @@
-import { motion } from 'motion/react';
+import type { CSSProperties } from 'react';
 import { IDENTITY } from '../data/content';
-import { useActions } from '../state/experience';
-import MagneticButton from '../components/ui/MagneticButton';
+import { SCENES } from '../data/worlds';
+import { useActions } from '../state/hooks';
+import Button, { Arrow } from '../components/ui/Button';
+import Logo from '../components/ui/Logo';
 import SectionShell from '../components/ui/SectionShell';
-import { useReducedMotion } from '../hooks/useMediaQuery';
 
-export default function Hero() {
-  const { goTo } = useActions();
-  const reduced = useReducedMotion();
+/** Entrance choreography — CSS only, plays once. `--d` is the delay. */
+const enter = (d: number): CSSProperties => ({ animation: `rise-in 1000ms var(--ease-out-expo) ${d}ms both` });
+
+/**
+ * The orbital system around the monogram. The rings turn with the page
+ * scroll (a scroll-driven CSS animation) rather than on a timer, so at rest
+ * they cost nothing.
+ */
+function Emblem({ play }: { play: boolean }) {
+  return (
+    <div className="relative grid aspect-square w-[min(62vw,40svh,420px)] place-items-center lg:w-[min(36vw,480px)]" aria-hidden="true">
+      {/* glow */}
+      <div
+        className="absolute inset-[12%] rounded-full"
+        style={{ background: 'radial-gradient(circle, rgba(92,225,255,0.22) 0%, rgba(155,134,255,0.12) 40%, transparent 70%)' }}
+      />
+      <div className="orbit-scroll absolute inset-0">
+        <svg viewBox="0 0 400 400" className="h-full w-full overflow-visible">
+          <defs>
+            <linearGradient id="orbit-a" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#8fe6ff" stopOpacity="0.7" />
+              <stop offset="0.5" stopColor="#8fe6ff" stopOpacity="0.05" />
+              <stop offset="1" stopColor="#9b86ff" stopOpacity="0.6" />
+            </linearGradient>
+          </defs>
+          <circle cx="200" cy="200" r="196" fill="none" stroke="url(#orbit-a)" strokeWidth="1" />
+          <circle cx="200" cy="200" r="182" fill="none" stroke="#b8d4ff" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="1 7" />
+          {/* degree ticks */}
+          <g stroke="#b8d4ff" strokeOpacity="0.35">
+            {Array.from({ length: 72 }, (_, i) => {
+              const a = (i / 72) * Math.PI * 2;
+              const r1 = i % 6 === 0 ? 186 : 190;
+              return (
+                <line key={i} x1={200 + Math.cos(a) * r1} y1={200 + Math.sin(a) * r1} x2={200 + Math.cos(a) * 196} y2={200 + Math.sin(a) * 196} />
+              );
+            })}
+          </g>
+          {/* satellites */}
+          <circle cx="200" cy="4" r="4" fill="#5ce1ff" />
+          <circle cx="200" cy="4" r="10" fill="none" stroke="#5ce1ff" strokeOpacity="0.35" />
+          <circle cx={200 + Math.cos(2.4) * 196} cy={200 + Math.sin(2.4) * 196} r="3" fill="#9b86ff" />
+        </svg>
+      </div>
+      <div className="orbit-scroll absolute inset-[13%]" style={{ animationDirection: 'reverse' }}>
+        <svg viewBox="0 0 300 300" className="h-full w-full overflow-visible">
+          <ellipse cx="150" cy="150" rx="148" ry="148" fill="none" stroke="#9b86ff" strokeOpacity="0.22" strokeDasharray="60 14 4 14" />
+          <circle cx={150 + Math.cos(-0.7) * 148} cy={150 + Math.sin(-0.7) * 148} r="4.5" fill="#ff9b52" />
+        </svg>
+      </div>
+      <div className="absolute inset-[24%] rounded-full border border-white/[0.06]" style={{ background: 'radial-gradient(circle at 50% 35%, rgba(20,30,64,0.9), rgba(4,6,14,0.95) 70%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 80px -30px rgba(0,0,0,0.9)' }} />
+      <div className="relative w-[44%]">
+        <Logo size={400} draw={play} sweep className="h-auto w-full" delay={play ? 200 : 600} />
+      </div>
+    </div>
+  );
+}
+
+export default function Hero({ introPlayed }: { introPlayed: boolean }) {
+  const { goTo, openClover } = useActions();
+  // After the intro the page arrives a beat later; without it, straight away.
+  const base = introPlayed ? 0 : 150;
 
   return (
-    <SectionShell id="home" header={false} align="center" className="items-center text-center">
-      <div className="relative mx-auto flex max-w-[900px] flex-col items-center">
-        <motion.p
-          className="eyebrow mb-7 [@media(max-height:560px)]:mb-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.9 }}
-        >
-          Personal site · Est. curiosity
-        </motion.p>
+    <SectionShell id="home" header={false} labelledBy="hero-title" className="overflow-hidden">
+      <div className="grid items-center gap-6 pt-4 lg:grid-cols-12 lg:gap-6 lg:pt-0">
+        <div className="order-2 flex flex-col items-center text-center lg:order-1 lg:col-span-7 lg:items-start lg:text-left">
+          <p className="eyebrow mb-6 flex items-center gap-3" style={enter(base + 100)}>
+            <span aria-hidden="true" className="h-px w-8 bg-[var(--env-accent)] opacity-70" />
+            Welcome to the digital world of
+          </p>
 
-        <h1 id="hero-title" className="sr-only">
-          AJ Almachar — personal website
-        </h1>
+          <h1 id="hero-title" className="relative" style={enter(base + 180)}>
+            <span className="sr-only">AJ — Digital World</span>
+            <span
+              aria-hidden="true"
+              className="text-spectrum block font-sans text-[clamp(6rem,min(26vw,32svh),14rem)] leading-[0.8] font-[200] tracking-[-0.07em]"
+            >
+              AJ
+            </span>
+          </h1>
 
-        <div aria-hidden="true" className="relative">
-          <div className="flex justify-center">
-            {'AJ'.split('').map((ch, i) => (
-              <motion.span
-                key={ch}
-                className="inline-block text-[clamp(3.4rem,min(15vw,26svh),10.5rem)] leading-[0.86] font-light tracking-[0.02em] text-[var(--color-ink)]"
-                initial={reduced ? undefined : { opacity: 0, y: '0.4em', filter: 'blur(16px)' }}
-                animate={reduced ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
-                transition={{ delay: 0.3 + i * 0.12, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {ch}
-              </motion.span>
+          <p className="serif mt-6 max-w-[30ch] text-[clamp(1.35rem,1.1rem+1.1vw,2.05rem)] leading-[1.25] text-[var(--color-ink)]" style={enter(base + 300)}>
+            “{IDENTITY.greeting}”
+          </p>
+
+          <p className="prose-lede mt-5 max-w-[48ch] text-[var(--color-ink-dim)]" style={enter(base + 400)}>
+            {IDENTITY.intro}
+          </p>
+
+          <ul className="mt-7 flex flex-wrap justify-center gap-2 lg:justify-start" style={enter(base + 480)}>
+            {IDENTITY.keywords.map((k) => (
+              <li key={k} className="chip">
+                <span aria-hidden="true" className="h-1 w-1 rotate-45 bg-[var(--env-accent)]" />
+                {k}
+              </li>
             ))}
+          </ul>
+
+          <div className="mt-9 flex flex-col items-center gap-3 sm:flex-row" style={enter(base + 560)}>
+            <Button variant="solid" onClick={() => goTo('about')}>
+              {IDENTITY.enter}
+              <Arrow />
+            </Button>
+            <Button variant="ghost" onClick={() => openClover()}>
+              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#ff9b52] shadow-[0_0_10px_#ff9b52]" />
+              Ask Clover
+            </Button>
           </div>
-          <div className="mt-3 flex justify-center sm:mt-5 [@media(max-height:560px)]:mt-2">
-            {'ALMACHAR'.split('').map((ch, i) => (
-              <motion.span
-                key={`${ch}-${i}`}
-                className="inline-block text-[clamp(0.85rem,min(3.4vw,5svh),1.9rem)] font-light tracking-[0.42em] text-[color-mix(in_oklab,var(--color-ink)_78%,var(--env-tint))]"
-                initial={reduced ? undefined : { opacity: 0, y: 12 }}
-                animate={reduced ? undefined : { opacity: 1, y: 0 }}
-                transition={{ delay: 0.75 + i * 0.05, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              >
-                {ch}
-              </motion.span>
-            ))}
-          </div>
-          {/* A single slow light sweep across the wordmark. */}
-          {!reduced && (
-            <motion.span
-              className="pointer-events-none absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0], x: ['-40%', '40%'] }}
-              transition={{ delay: 1.5, duration: 2.4, ease: 'easeInOut' }}
-              style={{
-                background: 'linear-gradient(100deg, transparent 42%, color-mix(in oklab, var(--env-accent) 55%, white) 50%, transparent 58%)',
-                mixBlendMode: 'overlay',
-              }}
-            />
-          )}
         </div>
 
-        <motion.div
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 [@media(max-height:560px)]:mt-5"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.05, duration: 1 }}
-        >
-          {IDENTITY.keywords.map((k, i) => (
-            <span key={k} className="flex items-center gap-4">
-              {i > 0 && <span className="h-1 w-1 rounded-full bg-[var(--env-accent)] opacity-60" />}
-              <span className="font-mono text-[0.68rem] tracking-[0.32em] text-[var(--env-tint)] uppercase">{k}</span>
-            </span>
-          ))}
-        </motion.div>
-
-        <motion.p
-          className="mt-9 [@media(max-height:560px)]:mt-3 max-w-[34ch] text-[clamp(1.05rem,min(1rem+0.6vw,3.6svh),1.5rem)] leading-relaxed text-[color-mix(in_oklab,var(--color-ink)_80%,var(--env-tint))] italic"
-          style={{ fontFamily: 'var(--font-display)' }}
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.25, duration: 1 }}
-        >
-          “{IDENTITY.greeting}”
-        </motion.p>
-
-        <motion.div
-          className="mt-12 flex flex-col items-center gap-5 sm:flex-row [@media(max-height:560px)]:mt-5"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.45, duration: 0.9 }}
-        >
-          <MagneticButton variant="solid" onClick={() => goTo('about')}>
-            {IDENTITY.enter}
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M1 7h11M7.5 2.5 12 7l-4.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </MagneticButton>
-          <MagneticButton variant="quiet" onClick={() => goTo('games')}>
-            Skip to the games
-          </MagneticButton>
-        </motion.div>
+        <div className="order-1 flex justify-center lg:order-2 lg:col-span-5 lg:justify-end" style={{ animation: `fade-in 1400ms var(--ease-out-expo) ${base}ms both` }}>
+          <Emblem play={!introPlayed} />
+        </div>
       </div>
 
-      <motion.div
-        className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-3 [@media(max-height:560px)]:hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1.2 }}
-        aria-hidden="true"
-      >
-        <span className="font-mono text-[0.68rem] tracking-[0.32em] text-[var(--env-tint)] uppercase opacity-70">
-          Scroll
+      <div className="pointer-events-none absolute inset-x-0 bottom-6 hidden items-center justify-center gap-3 lg:flex [@media(max-height:700px)]:hidden" aria-hidden="true" style={enter(base + 900)}>
+        <span className="label text-[var(--env-tint)] opacity-70">Scroll</span>
+        <span className="relative h-10 w-px overflow-hidden bg-[color-mix(in_oklab,var(--env-accent)_20%,transparent)]">
+          <span className="absolute inset-x-0 h-3 bg-[var(--env-accent)]" style={{ animation: 'scroll-cue 2.4s var(--ease-in-out-quint) 3' }} />
         </span>
-        <span className="relative h-12 w-px overflow-hidden bg-[color-mix(in_oklab,var(--env-accent)_20%,transparent)]">
-          <motion.span
-            className="absolute inset-x-0 h-4 bg-[var(--env-accent)]"
-            animate={reduced ? undefined : { y: ['-100%', '300%'] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        </span>
-      </motion.div>
+        <span className="label text-[var(--env-tint)] opacity-70">{SCENES.length} chapters</span>
+      </div>
     </SectionShell>
   );
 }

@@ -1,11 +1,11 @@
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { useEffect, useMemo } from 'react';
-import { useDevice, useEnv } from '../state/experience';
-import ParticleField from './ParticleField';
+import { useEffect, useRef, useState, type CSSProperties, type ReactElement } from 'react';
+import type { ScapeKey, Theme } from '../data/worlds';
+import { useDevice, useEnv } from '../state/hooks';
+import { mulberry32 } from '../lib/utils';
 import {
   CircuitScape,
-  HorizonScape,
   CityScape,
+  HorizonScape,
   MoonScape,
   MountainScape,
   NatureScape,
@@ -13,12 +13,7 @@ import {
   TreeScape,
 } from './Silhouettes';
 
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
-
-type ScapeKey = 'tree' | 'moon' | 'north' | 'mountain' | 'city' | 'nature' | 'circuit' | 'horizon' | 'none';
-
-const SCAPES: Record<Exclude<ScapeKey, 'none'>, (props?: { align?: string; lite?: boolean }) => React.ReactElement> = {
+const SCAPES: Record<ScapeKey, (props?: { align?: string; lite?: boolean }) => ReactElement> = {
   tree: TreeScape,
   moon: MoonScape,
   north: NorthScape,
@@ -29,158 +24,207 @@ const SCAPES: Record<Exclude<ScapeKey, 'none'>, (props?: { align?: string; lite?
   horizon: HorizonScape,
 };
 
+/** `#rrggbb` + alpha (0–1) → `#rrggbbaa`. */
+const alpha = (hex: string, a: number) => `${hex}${Math.round(a * 255).toString(16).padStart(2, '0')}`;
+
+interface Layer {
+  key: number;
+  theme: Theme;
+  scape: ScapeKey;
+}
+
+/**
+ * The world behind the page.
+ *
+ * Performance notes — this layer used to cost a full frame of work on every
+ * frame, even with nobody touching the page. Now:
+ *  - The starfield is painted to canvas once (and on real resizes), never per frame.
+ *  - Its parallax is a scroll-driven CSS animation, so it costs nothing at
+ *    rest and runs off the main thread while scrolling.
+ *  - A chapter change mounts one new layer that fades in with a single opacity
+ *    animation; the gradients are painted once rather than every frame.
+ */
 export default function BackgroundStage() {
-  const { active, override, theme, particles } = useEnv();
-  const { intensity, reducedMotion, compact } = useDevice();
+  const { theme, scape } = useEnv();
+  const { compact, finePointer, reducedMotion } = useDevice();
 
-  const scape: Exclude<ScapeKey, 'none'> = useMemo(() => {
-    if (active === 'games') return override ? (override.particles === 'embers' ? 'tree' : override.particles === 'leaves' ? 'moon' : override.particles === 'snow' ? 'north' : 'mountain') : 'tree';
-    if (active === 'driving') return 'city';
-    if (active === 'dog') return 'nature';
-    if (active === 'tech' || active === 'omarchy' || active === 'automation') return 'circuit';
-    return 'horizon';
-  }, [active, override]);
-
-  // Pointer parallax — small enough to feel like depth, not movement.
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 40, damping: 20, mass: 0.6 });
-  const sy = useSpring(my, { stiffness: 40, damping: 20, mass: 0.6 });
-  const artX = useTransform(sx, (v) => `${v * -16}px`);
-  const artY = useTransform(sy, (v) => `${v * -10}px`);
-  const glowX = useTransform(sx, (v) => `${v * 28}px`);
-  const glowY = useTransform(sy, (v) => `${v * 18}px`);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const onMove = (e: PointerEvent) => {
-      mx.set((e.clientX / window.innerWidth) * 2 - 1);
-      my.set((e.clientY / window.innerHeight) * 2 - 1);
-    };
-    window.addEventListener('pointermove', onMove, { passive: true });
-    return () => window.removeEventListener('pointermove', onMove);
-  }, [mx, my, reducedMotion]);
-
-  const Scape = SCAPES[scape];
+  // Keep the outgoing layer underneath while the incoming one fades in.
+  const [layers, setLayers] = useState<Layer[]>([{ key: 0, theme, scape }]);
+  const top = layers[layers.length - 1];
+  if (top.theme !== theme || top.scape !== scape) {
+    setLayers([top, { key: top.key + 1, theme, scape }]);
+  }
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      {/*
-        Only this subtree carries the animating palette. A change to an
-        inherited custom property invalidates the style of everything below
-        it, so the heavy layers (artwork, particles) deliberately sit outside
-        as siblings with their own fixed colours.
-      */}
-      <div
-        className="env-stage absolute inset-0"
-        style={
-          {
-            '--env-void': theme.void,
-            '--env-a': theme.a,
-            '--env-b': theme.b,
-            '--env-accent': theme.accent,
-            '--env-tint': theme.tint,
-            '--env-ray': theme.ray,
-          } as React.CSSProperties
-        }
-      >
-        {/* Base atmosphere */}
-        <div
-          className="absolute inset-0"
-          style={{
-            // The light pools are baked into this single full-screen paint on
-            // phones: as separate layers they either need an expensive blur or
-            // show an edge of their own.
-            background: [
-              'radial-gradient(75% 45% at 16% 10%, color-mix(in oklab, var(--env-ray) 50%, transparent) 0%, transparent 72%)',
-              'radial-gradient(65% 40% at 88% 90%, color-mix(in oklab, var(--env-accent) 18%, transparent) 0%, transparent 70%)',
-              'radial-gradient(120% 85% at 50% 4%, var(--env-b) 0%, var(--env-a) 42%, var(--env-void) 78%, var(--env-void) 100%)',
-            ].join(', '),
-          }}
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-[#03040a]">
+      {layers.map((l, i) => (
+        <Atmosphere
+          key={l.key}
+          layer={l}
+          fresh={i > 0}
+          lite={compact}
+          // Once the new world has faded in, the old one is fully covered — drop it.
+          onSettled={i > 0 ? () => setLayers((ls) => (ls[ls.length - 1].key === l.key ? [l] : ls)) : undefined}
         />
-
-        {/* Drifting light pools — desktop only, where a large blur is affordable */}
-        <motion.div className="absolute inset-0 hidden md:block" style={{ x: glowX, y: glowY }}>
-          <div
-            className="env-blob absolute -top-[22%] left-[8%] h-[70vmax] w-[70vmax] rounded-full opacity-30 will-change-transform md:blur-[60px]"
-            style={{
-              // Multi-stop falloff rather than a blur filter: the softness is
-              // baked into the gradient, so phones get no hard edge and no
-              // expensive re-rasterisation when the palette moves.
-              background:
-                'radial-gradient(circle, var(--env-ray) 0%, color-mix(in oklab, var(--env-ray) 55%, transparent) 26%, color-mix(in oklab, var(--env-ray) 20%, transparent) 48%, color-mix(in oklab, var(--env-ray) 5%, transparent) 68%, transparent 84%)',
-              animation: 'float-a 26s ease-in-out infinite',
-            }}
-          />
-          <div
-            className="env-blob absolute right-[2%] bottom-[-30%] h-[60vmax] w-[60vmax] rounded-full opacity-24 will-change-transform md:blur-[60px]"
-            style={{
-              background:
-                'radial-gradient(circle, var(--env-accent) 0%, color-mix(in oklab, var(--env-accent) 52%, transparent) 24%, color-mix(in oklab, var(--env-accent) 18%, transparent) 46%, color-mix(in oklab, var(--env-accent) 4%, transparent) 66%, transparent 82%)',
-              animation: 'float-b 34s ease-in-out infinite',
-            }}
-          />
-        </motion.div>
-
-        {/* Volumetric shafts */}
-        <div
-          className="absolute inset-x-0 top-0 hidden h-[85vh] opacity-[0.13] mix-blend-screen md:block"
-          style={{
-            background:
-              'repeating-linear-gradient(102deg, transparent 0 60px, color-mix(in oklab, var(--env-accent) 55%, transparent) 60px 61px, transparent 61px 150px)',
-            maskImage: 'radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)',
-            WebkitMaskImage: 'radial-gradient(70% 60% at 50% 0%, #000 0%, transparent 75%)',
-          }}
-        />
-
-        {/* Cinematic scrim: keeps type readable over any environment */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, color-mix(in oklab, var(--env-void) 70%, transparent) 0%, transparent 30%, transparent 58%, color-mix(in oklab, var(--env-void) 72%, transparent) 100%)',
-          }}
-        />
-      </div>
-
-      {/* World artwork — a whole layer per world, cross-faded by the compositor */}
-      <motion.div className="absolute inset-0" style={{ x: artX, y: artY, scale: 1.08, translateY: '4%' }}>
-        <AnimatePresence mode="sync">
-          <motion.div
-            key={`${scape}-${theme.accent}`}
-            className="absolute inset-0"
-            style={
-              {
-                '--env-accent': theme.accent,
-                '--env-ray': theme.ray,
-                '--env-a': theme.a,
-                '--env-b': theme.b,
-                '--env-void': theme.void,
-              } as React.CSSProperties
-            }
-            initial={{ opacity: 0, scale: 1.04 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: reducedMotion ? 0.001 : compact ? 0.7 : 1.1, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <Scape lite={compact} />
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-
-      {intensity > 0 && (
-        <ParticleField mode={particles} accent={theme.accent} ray={theme.ray} intensity={intensity} />
-      )}
-
-      {/* Depth + grain */}
+      ))}
+      <Starfield compact={compact} />
+      {finePointer && !reducedMotion && <Spotlight color={theme.accent} />}
+      {/* Depth: a vignette that keeps the edges in deep space. */}
       <div
         className="absolute inset-0"
-        style={{ background: 'radial-gradient(100% 78% at 50% 42%, transparent 28%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0.78) 100%)' }}
-      />
-      <div
-        className="absolute inset-0 hidden opacity-[0.045] mix-blend-overlay md:block"
-        style={{ backgroundImage: GRAIN, backgroundSize: '140px 140px' }}
+        style={{ background: 'radial-gradient(110% 80% at 50% 40%, transparent 35%, rgba(1,2,6,0.5) 72%, rgba(1,2,6,0.85) 100%)' }}
       />
     </div>
+  );
+}
+
+function Atmosphere({ layer, fresh, lite, onSettled }: { layer: Layer; fresh: boolean; lite: boolean; onSettled?: () => void }) {
+  const { theme, scape } = layer;
+  const Scape = SCAPES[scape];
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        background: [
+          `radial-gradient(80% 55% at 14% 6%, ${alpha(theme.ray, 0.6)} 0%, transparent 70%)`,
+          `radial-gradient(55% 45% at 92% 88%, ${alpha(theme.accent, 0.13)} 0%, transparent 70%)`,
+          `radial-gradient(50% 40% at 70% 18%, ${alpha('#5a3fd0', 0.14)} 0%, transparent 70%)`,
+          `radial-gradient(130% 90% at 50% 0%, ${theme.b} 0%, ${theme.a} 42%, ${theme.void} 82%)`,
+        ].join(', '),
+        animation: fresh ? 'fade-in 1100ms var(--ease-out-expo) both' : undefined,
+        willChange: fresh ? 'opacity' : undefined,
+      }}
+      onAnimationEnd={(e) => e.target === e.currentTarget && onSettled?.()}
+    >
+      {/* The art reads its palette from these, scoped to this layer only. */}
+      <div
+        className="absolute inset-0 translate-y-[4%] scale-[1.06] opacity-90"
+        style={
+          {
+            '--env-accent': theme.accent,
+            '--env-ray': theme.ray,
+            '--env-a': theme.a,
+            '--env-b': theme.b,
+            '--env-void': theme.void,
+          } as CSSProperties
+        }
+      >
+        <Scape lite={lite} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Two canvases of stars, painted once. Depth comes from moving them at
+ * different speeds against the page scroll (see `.stars-*` in the CSS below).
+ */
+function Starfield({ compact }: { compact: boolean }) {
+  const far = useRef<HTMLCanvasElement>(null);
+  const near = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    let w = 0;
+    let h = 0;
+    const paint = () => {
+      const nw = window.innerWidth;
+      const nh = window.innerHeight;
+      // Phone address bars resize the viewport constantly; only repaint for
+      // a real change.
+      if (w && nw === w && Math.abs(nh - h) < 160) return;
+      w = nw;
+      h = nh;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const draw = (canvas: HTMLCanvasElement | null, seed: number, count: number, bright: boolean) => {
+        if (!canvas) return;
+        // Taller than the viewport so the parallax never runs out of sky.
+        const ch = h * 1.35;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(ch * dpr);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, ch);
+        const rnd = mulberry32(seed);
+        for (let i = 0; i < count; i++) {
+          const x = rnd() * w;
+          const y = rnd() * ch;
+          const r = bright ? 0.6 + rnd() ** 3 * 1.6 : 0.3 + rnd() * 0.7;
+          const tint = rnd();
+          const color = tint > 0.93 ? '255,178,120' : tint > 0.78 ? '140,225,255' : tint > 0.68 ? '185,165,255' : '225,235,255';
+          const a = bright ? 0.45 + rnd() * 0.5 : 0.15 + rnd() * 0.4;
+          if (bright && r > 1.3) {
+            const g = ctx.createRadialGradient(x, y, 0, x, y, r * 5);
+            g.addColorStop(0, `rgba(${color},${a * 0.5})`);
+            g.addColorStop(1, `rgba(${color},0)`);
+            ctx.fillStyle = g;
+            ctx.fillRect(x - r * 5, y - r * 5, r * 10, r * 10);
+          }
+          ctx.fillStyle = `rgba(${color},${a})`;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      };
+      const area = (w * h) / (1440 * 900);
+      draw(far.current, 11, Math.round((compact ? 260 : 420) * Math.min(area, 1.6)), false);
+      draw(near.current, 29, Math.round((compact ? 50 : 90) * Math.min(area, 1.6)), true);
+    };
+
+    paint();
+    let t = 0;
+    const onResize = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(paint, 200);
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [compact]);
+
+  return (
+    <>
+      <canvas ref={far} className="stars stars-far absolute top-0 left-0 h-[135vh] w-full" />
+      <canvas ref={near} className="stars stars-near absolute top-0 left-0 h-[135vh] w-full" />
+    </>
+  );
+}
+
+/** A soft light that follows the pointer — desktop only, one transform per frame. */
+function Spotlight({ color }: { color: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let raf = 0;
+    let x = 0;
+    let y = 0;
+    const apply = () => {
+      raf = 0;
+      ref.current?.style.setProperty('transform', `translate3d(${x - 450}px, ${y - 450}px, 0)`);
+    };
+    const onMove = (e: PointerEvent) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (!raf) raf = requestAnimationFrame(apply);
+      if (ref.current) ref.current.style.opacity = '1';
+    };
+    const onLeave = () => {
+      if (ref.current) ref.current.style.opacity = '0';
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
+    };
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className="absolute top-0 left-0 h-[900px] w-[900px] rounded-full opacity-0 transition-opacity duration-700"
+      style={{ background: `radial-gradient(circle, ${alpha(color, 0.09)} 0%, ${alpha(color, 0.03)} 40%, transparent 70%)`, willChange: 'transform' }}
+    />
   );
 }
