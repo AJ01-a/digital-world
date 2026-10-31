@@ -1052,6 +1052,190 @@ section .grid > * { min-width: 0; }
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Book: Atomic Habits
+   Quieter than the shows. White light from the left, a little crimson
+   from the right, and the cover's own warm gold used sparingly. The
+   dots echo the cover's dotted lettering. Transform and opacity only.
+   ───────────────────────────────────────────────────────────── */
+.book-sec { isolation: isolate; --gold: #d8b27c; }
+.book-sec::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(216, 178, 124, 0.13) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(55% 32% at 24% 12%, #000, transparent 75%);
+  mask-image: radial-gradient(55% 32% at 24% 12%, #000, transparent 75%);
+}
+
+.book-stage { position: relative; display: flex; flex-direction: column; align-items: center; padding: 1.5rem 0 0; }
+.book-light {
+  position: absolute;
+  inset: -12% 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 40% 42%, rgba(240, 222, 196, 0.16), transparent 70%),
+    radial-gradient(26% 36% at 80% 56%, rgba(255, 60, 74, 0.13), transparent 70%);
+}
+.book-enter {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) rotate(-2.5deg);
+  transition: opacity 1100ms var(--ease-out-expo), transform 1500ms var(--ease-out-expo);
+}
+.book-stage.is-in .book-enter { opacity: 1; transform: rotate(-1deg); }
+.book {
+  position: relative;
+  width: clamp(190px, 56vw, 300px);
+  aspect-ratio: 426 / 638;
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 700ms var(--ease-out-expo);
+}
+@media (min-width: 1024px) {
+  .book { width: 300px; }
+  .book-light { inset: -12% -18% 0; }
+}
+/* The page block peeking out to the right and below: the book has thickness. */
+.book-pages {
+  position: absolute;
+  top: 1.6%;
+  bottom: -1.2%;
+  left: 3%;
+  right: -2.6%;
+  border-radius: 2px 4px 4px 2px;
+  background:
+    repeating-linear-gradient(90deg, #ebe4d8 0 1px, #cbc2b4 1px 2px) right / 9px 100% no-repeat,
+    repeating-linear-gradient(180deg, #ebe4d8 0 1px, #cbc2b4 1px 2px) bottom / 100% 7px no-repeat,
+    #d9d1c4;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.95);
+}
+.book-cover {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 2px 5px 5px 2px;
+  background: #f4f1ec;
+  box-shadow:
+    0 50px 80px -40px rgba(0, 0, 0, 0.95),
+    0 16px 28px -16px rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+/* The fold of the hardcover along the spine. */
+.book-hinge {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 7%;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.26), rgba(255, 255, 255, 0.28) 38%, rgba(0, 0, 0, 0.1) 62%, transparent);
+}
+/* Light from the top left, falling off towards the bottom right. */
+.book-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.14), transparent 38%, transparent 62%, rgba(40, 20, 16, 0.16));
+}
+/* My place in it — a ribbon still somewhere in the middle. */
+.book-ribbon {
+  position: absolute;
+  left: 64%;
+  bottom: -26px;
+  width: 11px;
+  height: 40px;
+  background: linear-gradient(90deg, #a3121f, #e0323f 55%, #b5151f);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+.book-floor {
+  width: 72%;
+  height: 26px;
+  margin-top: 14px;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.8), transparent);
+  pointer-events: none;
+}
+/* Shown if the cover image is ever missing: a typeset stand-in. */
+.book-placeholder { background: linear-gradient(160deg, #fbf9f5, #ece7df); }
+.book-placeholder-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.7rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #c9a46a;
+}
+
+/* Small steps: dots arrive column by column, lowest first. */
+.steps-base { fill: color-mix(in oklab, var(--color-ink) 22%, transparent); }
+.steps-dot {
+  fill: var(--gold);
+  opacity: 0;
+  transform: scale(0.2);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 500ms var(--ease-out-expo), transform 600ms var(--ease-out-expo), fill 400ms;
+  transition-delay: calc(var(--j, 0) * 22ms);
+}
+.steps-col.is-on .steps-dot { opacity: 0.9; transform: none; }
+.steps-col.is-off .steps-dot { fill: none; stroke: var(--gold); stroke-width: 0.9; }
+.steps-col.is-latest .steps-dot { fill: #fff; opacity: 1; }
+.steps-col.is-latest.is-off .steps-dot { fill: none; stroke: #fff; }
+.steps-range { accent-color: var(--env-accent); height: 44px; cursor: pointer; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* A page from a notebook: ivory paper, a crimson margin rule. */
+.book-page {
+  position: relative;
+  border-radius: 18px;
+  color: #1d1815;
+  background:
+    radial-gradient(80% 60% at 20% 0%, rgba(255, 255, 255, 0.6), transparent 70%),
+    linear-gradient(180deg, #f3eee6, #e9e2d7);
+  box-shadow: 0 30px 80px -50px rgba(0, 0, 0, 0.95);
+}
+.book-page-margin { position: absolute; top: 0; bottom: 0; left: 1.75rem; width: 1px; background: rgba(196, 29, 43, 0.55); }
+@media (min-width: 640px) { .book-page-margin { left: 2.6rem; } }
+.book-page-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #6a5f56;
+}
+.book-page-num {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #b51c29;
+}
+
+/* Still a work in progress: a track with no end. Answering moves me on a little. */
+.wip-tail { background: linear-gradient(90deg, color-mix(in oklab, var(--color-ink) 30%, transparent) 0 4px, transparent 4px) 0 0 / 9px 1px repeat-x; -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent); mask-image: linear-gradient(90deg, #000 40%, transparent); }
+.wip-fill {
+  background: linear-gradient(90deg, color-mix(in oklab, var(--color-ink) 25%, transparent), var(--env-accent));
+  transform: scaleX(0.56);
+  transform-origin: left;
+  transition: transform 1200ms var(--ease-out-expo);
+}
+.wip-track { container-type: inline-size; }
+/* Zero width, moved in container units — so it never widens the page. */
+.wip-me { transform: translate3d(56cqw, 0, 0); transition: transform 1200ms var(--ease-out-expo); }
+.wip.is-open .wip-fill { transform: scaleX(0.66); }
+.wip.is-open .wip-me { transform: translate3d(66cqw, 0, 0); }
+.wip-dot {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  rotate: 45deg;
+  background: var(--env-accent);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--env-accent) 18%, transparent), 0 0 18px color-mix(in oklab, var(--env-accent) 55%, transparent);
+}
+.wip-note:not([hidden]) { animation: rise-in 600ms var(--ease-out-expo) both; }
+
+/* ─────────────────────────────────────────────────────────────
    Finale — the closing sequence at the very bottom of the page.
    waiting → playing → done, as classes on the section (Finale.tsx).
    Everything fades or moves with opacity and transform; the one
@@ -1131,6 +1315,9 @@ section .grid > * { min-width: 0; }
   .show-parallax, .loki-track-fill { animation: none !important; transform: none; }
   .loki-quote .beat, .loki-quote-light { opacity: 1; transform: none; }
   .loki-final::after { transform: none; }
+  /* The book: already on the table, standing still. */
+  .book-enter { opacity: 1; transform: rotate(-1deg); }
+  .book { transform: none !important; }
   /* Progress, not motion: the hold ring still fills over the hold. */
   .intro .hold-arc { transition-duration: 200ms !important; }
   .intro.is-holding .hold-arc { transition-duration: var(--hold) !important; }

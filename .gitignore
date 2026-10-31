@@ -41,3 +41,7 @@ dist-ssr
 
 # Original video for the ending — the web copy lives in public/finale.
 /Videos/
+
+# Original book photo — the straightened cover lives in public/books
+# (regenerate with scripts/book-art.py).
+/Books/

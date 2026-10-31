@@ -10,7 +10,7 @@
  * Clover's personality is fictional. Questions about the real dog get a
  * friendly deflection rather than invented facts.
  */
-import { AUTOMATION_COPY, BUILDS, CLOVER, DRIVING, FACTS, LOKI, OMARCHY, ONE_PIECE, TECH_COPY, TOPICS } from '../data/content';
+import { AUTOMATION_COPY, BOOK, BUILDS, CLOVER, DRIVING, FACTS, LOKI, OMARCHY, ONE_PIECE, TECH_COPY, TOPICS } from '../data/content';
 import { GAME_WORLDS, SCENE_MAP, type SceneId } from '../data/worlds';
 import type { Mood } from './CloverArt';
 import { HEART_REPLIES, isHeartQuestion } from './heart';
@@ -64,6 +64,7 @@ const PLACES: { id: SceneId; words: string[] }[] = [
   { id: 'games', words: ['games', 'game', 'gaming'] },
   { id: 'onepiece', words: ['one piece', 'luffy', 'anime'] },
   { id: 'loki', words: ['loki', 'loki chapter'] },
+  { id: 'book', words: ['book', 'the book', 'book chapter', 'atomic habits', 'reading'] },
   { id: 'strategy', words: ['chess', 'strategy', 'chess puzzle'] },
   { id: 'words', words: ['word puzzle', 'word game', 'wordle', 'words'] },
   { id: 'driving', words: ['drive', 'driving', 'road', 'night drive'] },
@@ -94,6 +95,7 @@ export const TOUR: { to: SceneId; line: string }[] = [
   { to: 'games', line: 'Games. Pick a world and the whole site changes colour with it — and Monster Hunter has a whole ecosystem to explore.' },
   { to: 'onepiece', line: "One Piece — AJ's favourite anime. Tap Luffy, and the straw hat: there's more to both than the fights." },
   { to: 'loki', line: "Loki, from villain to the god he needed to be. The timeline fills in as you scroll — and the pages turn from chaos to calm." },
+  { to: 'book', line: "The first book AJ ever read: Atomic Habits. Take a few small steps on the chart — and ask him if he's finished." },
   { to: 'strategy', line: "Chess puzzles, one move each. I'd help, but I don't have thumbs." },
   { to: 'driving', line: 'The night drive — a white Envista on an empty road. On a computer, your pointer sets the pace.' },
   { to: 'clover', line: 'And this is my chapter. Hi again! *wags*' },
@@ -111,7 +113,8 @@ const SUGGEST: Record<SceneId, string[]> = {
   projects: ['How do you work?', 'How was this site made?', 'Take me to the chess puzzle'],
   games: ['Tell me about Monster Hunter', "What's AJ's favourite game?", 'Tell me about Sekiro'],
   onepiece: ['Why One Piece?', 'What does the straw hat mean?', 'Take me to Loki'],
-  loki: ['Why Loki?', 'What is glorious purpose?', 'Take me to the chess puzzle'],
+  loki: ['Why Loki?', 'What is glorious purpose?', 'Take me to the book'],
+  book: ['Why Atomic Habits?', 'Has AJ mastered it?', 'Take me to the chess puzzle'],
   strategy: ['Give me a hint', 'Is AJ good at chess?', 'Take me to the word puzzle'],
   words: ['Hint for the word puzzle?', 'Where do the words come from?', 'Take me to the drive'],
   driving: ['Why the drives?', 'What car is that?', 'Take me to Clover'],
@@ -363,6 +366,24 @@ const INTENTS: Intent[] = [
       lines: [`"${LOKI.lede}"`, `The line that stays with him: "${LOKI.quote.text}"`],
       mood: 'idle',
       actions: [go('Visit the Loki chapter', 'loki'), ask('What is glorious purpose?')],
+    }),
+  },
+  {
+    id: 'book',
+    keys: ['atomic habits', 'james clear', 'book', 'books', 'first book', 'reading', 'what does aj read', 'why atomic habits', 'favourite book', 'favorite book', 'habits', 'bad habits', 'good habits'],
+    reply: () => ({
+      lines: [`In AJ's words: "${BOOK.lede}"`, `"${BOOK.body[0]}"`],
+      mood: 'idle',
+      actions: [go('Visit the book chapter', 'book'), ask('Has AJ mastered it?')],
+    }),
+  },
+  {
+    id: 'book-progress',
+    keys: ['mastered', 'has aj mastered it', 'is aj finished', 'is he finished', 'work in progress', 'every lesson'],
+    reply: () => ({
+      lines: [`Not yet — and he says so himself: "${BOOK.body[1]}"`, `"${BOOK.close}"`],
+      mood: 'happy',
+      actions: [go('Visit the book chapter', 'book')],
     }),
   },
   {

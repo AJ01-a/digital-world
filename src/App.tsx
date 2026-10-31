@@ -10,6 +10,7 @@ import Clover from './clover/Clover';
 import BackgroundStage from './effects/BackgroundStage';
 import About from './sections/About';
 import Automation from './sections/Automation';
+import Book from './sections/Book';
 import CloverSection from './sections/CloverSection';
 import Driving from './sections/Driving';
 import Games from './sections/Games';
@@ -110,6 +111,7 @@ function Experience() {
           <Games />
           <OnePiece />
           <Loki />
+          <Book />
           <Strategy />
           <Words />
           <Driving />

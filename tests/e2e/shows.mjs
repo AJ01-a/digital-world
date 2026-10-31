@@ -108,7 +108,7 @@ const LINE = 'I know what kind of god I need to be… for you. For all of us.';
   await p.goto(URL_); await p.waitForTimeout(900);
   const rail = await p.locator('nav[aria-label="Chapters"] button').allInnerTexts();
   const labels = rail.map((t) => t.replace(/^(\d\d)\s*/, '$1 ').replace(/\s+/g, ' ').trim().toLowerCase());
-  check('rail lists both chapters between Games and Chess', labels.join('|').includes('05 games|06 one piece|07 loki|08 chess'), labels.join(' | '));
+  check('rail lists both chapters between Games and the book', labels.join('|').includes('05 games|06 one piece|07 loki|08 book'), labels.join(' | '));
   await p.locator('nav[aria-label="Chapters"] button', { hasText: 'Loki' }).click(); await p.waitForTimeout(1600);
   const top = await p.evaluate(() => document.getElementById('loki').getBoundingClientRect().top);
   check('rail travels to Loki', Math.abs(top - 72) < 40, `top=${Math.round(top)}`);

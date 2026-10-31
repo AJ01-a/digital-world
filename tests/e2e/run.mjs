@@ -5,7 +5,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { preview } from 'vite';
 
-const SUITES = ['site.mjs', 'intro.mjs', 'worlds.mjs', 'shows.mjs', 'finale.mjs'];
+const SUITES = ['site.mjs', 'intro.mjs', 'worlds.mjs', 'shows.mjs', 'book.mjs', 'finale.mjs'];
 
 if (!process.argv.includes('--no-build')) {
   const build = spawnSync('npm', ['run', 'build'], { stdio: 'inherit', shell: process.platform === 'win32' });

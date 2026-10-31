@@ -113,7 +113,7 @@ export default function SecretTerminal() {
           setTerminalOpen(false);
           window.setTimeout(() => goTo(target), 220);
         } else {
-          push([{ kind: 'out', text: 'unknown destination. try: home about tech automation projects games strategy driving clover' }]);
+          push([{ kind: 'out', text: 'unknown destination. try: home about tech automation projects games onepiece loki book strategy driving clover' }]);
         }
         return;
       }

@@ -37,6 +37,7 @@ export type SceneId =
   | 'games'
   | 'onepiece'
   | 'loki'
+  | 'book'
   | 'strategy'
   | 'words'
   | 'driving'
@@ -65,7 +66,7 @@ export interface Scene {
  * the red side — white light from the left (`ray`), red from the right
  * (`glow`) — and red is kept for accents that matter. The game worlds,
  * Clover's chapter, the night drive and the two shows keep environments
- * of their own; warm orange still belongs to Clover, emerald to Loki.
+ * of their own (the book only warms the house palette slightly); warm orange still belongs to Clover, emerald to Loki.
  */
 export const SCENES: Scene[] = [
   {
@@ -152,10 +153,21 @@ export const SCENES: Scene[] = [
     theme: { void: '#030605', a: '#08110d', b: '#102219', accent: '#5fd49c', tint: '#a8c4b6', ray: '#183d2c', glow: '#6b5418' },
   },
   {
+    id: 'book',
+    scape: 'horizon',
+    label: 'Book',
+    index: '08',
+    mood: 'Growth',
+    inRail: true,
+    // Quieter than the shows: the house black, a warm white light from the
+    // left (the page), crimson kept for what you can press.
+    theme: { void: '#050404', a: '#0d0b0a', b: '#1a1412', accent: '#ff5a62', tint: '#c3b8ad', ray: '#3e3832', glow: '#5c0e16' },
+  },
+  {
     id: 'strategy',
     scape: 'horizon',
     label: 'Chess',
-    index: '08',
+    index: '09',
     mood: 'Patience',
     inRail: true,
     theme: { void: '#040405', a: '#0d0d10', b: '#1b1b21', accent: '#f4f6fb', tint: '#a8abb5', ray: '#3a3e4a', glow: '#7a1420' },
@@ -164,7 +176,7 @@ export const SCENES: Scene[] = [
     id: 'words',
     scape: 'horizon',
     label: 'Words',
-    index: '08',
+    index: '09',
     mood: 'Play',
     inRail: false,
     theme: { void: '#050405', a: '#110a0c', b: '#200d12', accent: '#ff5a66', tint: '#c2adb0', ray: '#3a1016', glow: '#6e0d17' },
@@ -173,7 +185,7 @@ export const SCENES: Scene[] = [
     id: 'driving',
     scape: 'city',
     label: 'Drive',
-    index: '09',
+    index: '10',
     mood: 'Freedom',
     inRail: true,
     theme: { void: '#030406', a: '#090b11', b: '#12151f', accent: '#e6ebf5', tint: '#a2a9b8', ray: '#2a3040', glow: '#5c0e16' },
@@ -182,7 +194,7 @@ export const SCENES: Scene[] = [
     id: 'clover',
     scape: 'nature',
     label: 'Clover',
-    index: '10',
+    index: '11',
     mood: 'Warmth',
     inRail: true,
     theme: { void: '#080503', a: '#1a0d07', b: '#341a0c', accent: '#ff9b52', tint: '#d4a582', ray: '#6d3513' },
@@ -191,7 +203,7 @@ export const SCENES: Scene[] = [
     id: 'outro',
     scape: 'horizon',
     label: 'End',
-    index: '11',
+    index: '12',
     mood: 'Thanks',
     inRail: false,
     theme: { void: '#040405', a: '#0c0b0e', b: '#19141a', accent: '#f2f4f8', tint: '#aeb1bb', ray: '#3a3e4a', glow: '#7a1420' },
@@ -201,7 +213,7 @@ export const SCENES: Scene[] = [
     id: 'finale',
     scape: 'horizon',
     label: 'Finale',
-    index: '11',
+    index: '12',
     mood: 'Beginning',
     inRail: false,
     theme: { void: '#000000', a: '#040304', b: '#0c0507', accent: '#ff4a57', tint: '#b4b7c0', ray: '#1b1d24', glow: '#5c0a12' },

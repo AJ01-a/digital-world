@@ -256,6 +256,52 @@ export const LOKI = {
   close: "People can change. Who you were doesn't get to decide who you can become — and the best kind of purpose is usually bigger than yourself.",
 };
 
+/**
+ * The first book AJ read. Everything here is AJ's own reflection — there are
+ * no quotations from the book. `idea` paraphrases the book's central idea and
+ * is labelled as a paraphrase on the page. Keep it honest: no invented habits,
+ * no claims of having mastered every lesson.
+ */
+export const BOOK = {
+  kicker: 'My first book',
+  title: 'Atomic Habits',
+  author: 'James Clear',
+  lede: "Atomic Habits was the first book I ever read. It helped me recognise something I hadn't really seen before: that I could change how I act by changing my habits.",
+  body: [
+    "That idea stayed with me. Since then I've been cutting back on habits that weren't doing me any good, and replacing them with ones that actually benefit me — gradually, rather than all at once.",
+    "I haven't put every lesson from the book into practice yet. That doesn't take anything away from what it gave me. What I have applied has already made a real difference — I'm better than I was before, and that matters to me.",
+  ],
+  idea: {
+    text: "Small habits, repeated consistently, add up over time. You don't have to change everything at once — you change what you do, a little at a time, and let it build.",
+    note: "James Clear's idea, as I understood it — in my words, not a quotation.",
+  },
+  /** Captions for the small-steps illustration, by how far along it is. */
+  steps: {
+    none: 'Nothing yet. Every line starts flat.',
+    early: 'A few small steps. On their own, they barely show.',
+    middle: 'Still small. Some days it feels like nothing is changing at all.',
+    late: 'Somewhere along the way, the small steps start to show.',
+    full: "Looking back, no single step stands out — only how far they went together.",
+    offDays: "The hollow marks are off days. The line didn't start again from nothing — it kept going.",
+    disclaimer: 'An illustration of the idea, not a measurement or a promise.',
+  },
+  changes: [
+    { k: 'Awareness', v: "I notice my habits now — the things I do on autopilot, and whether they're actually helping me." },
+    { k: 'Letting go', v: "I've been cutting back on habits that weren't benefiting me. Not perfectly — but they have less of a hold than they used to." },
+    { k: 'Replacing', v: 'Where an old habit used to sit, I try to put something better in its place — something that benefits me.' },
+    { k: 'Still going', v: "Growth isn't a finish line for me any more. It's something I keep doing." },
+  ],
+  changesNote: 'My experience so far — reflections, not a finished checklist.',
+  wip: {
+    lead: 'A question worth asking myself every now and then.',
+    ask: 'Am I finished?',
+    answer: "No — and that's okay.",
+    body: "I'm still learning, and I'm still working on the rest of what the book taught me. Somewhere along the way I stopped waiting to be perfect before calling it progress.",
+  },
+  close: "Change doesn't wait until you have it all figured out. Mine started small — and it's still going.",
+  credit: 'Atomic Habits © James Clear — the cover is shown here as a reader. Everything on this page is my own reflection, not text from the book.',
+};
+
 export const DRIVING = {
   line: 'Sometimes I just like getting in the car and going for a drive.',
   body: 'No plan, no destination worth mentioning. Music on, roads empty, city lights going past. It is the one place where thinking about nothing in particular actually works.',
@@ -287,6 +333,7 @@ export const FACTS = [
   'AJ is still learning, and quite likes it that way.',
   "Ask Clover who has AJ's heart. (Spoiler: Jesus is his King.)",
   'One Piece is AJ\'s favourite anime — for the lessons more than the fights.',
+  'The first book AJ ever read was Atomic Habits by James Clear.',
 ];
 
 export const OUTRO = {
@@ -311,7 +358,7 @@ export const TERMINAL_HELP: [string, string][] = [
   ['tech', 'the setup'],
   ['learning', 'what is being learned'],
   ['clover', 'call the guide'],
-  ['goto <id>', 'travel: home about tech automation projects games onepiece loki strategy driving clover finale'],
+  ['goto <id>', 'travel: home about tech automation projects games onepiece loki book strategy driving clover finale'],
   ['clear', 'wipe the screen'],
   ['exit', 'close this window'],
 ];

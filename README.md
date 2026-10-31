@@ -1,6 +1,6 @@
 # AJ — Digital World
 
-An interactive personal site — one page, fourteen chapters and a closing scene, an environment that
+An interactive personal site — one page, fifteen chapters and a closing scene, an environment that
 re-tints itself as you move through it, and Clover, a digital dog who shows
 visitors around. Hosted for free on GitHub Pages.
 
@@ -51,6 +51,8 @@ the build works from any path without further changes.
 | Game artwork (generated web copies + manifest) | `scripts/game-art.py` → `public/games/`, `src/data/gameArt.ts` |
 | The One Piece and Loki chapters | `src/sections/OnePiece.tsx`, `src/sections/Loki.tsx`, copy in `ONE_PIECE` / `LOKI` in `src/data/content.ts` (+ `.g5-*`, `.hat-*`, `.loki-*`, `.purpose-*` in `src/index.css`) |
 | Show artwork (generated web copies + manifest) | `scripts/show-art.py` → `public/shows/`, `src/data/showArt.ts` |
+| The book chapter (Atomic Habits) | `src/sections/Book.tsx`, copy in `BOOK` in `src/data/content.ts` (+ `.book-*`, `.steps-*`, `.wip-*` in `src/index.css`) |
+| The book cover (straightened web copies + manifest) | `scripts/book-art.py` → `public/books/`, `src/data/bookArt.ts` |
 | The closing sequence (glass, closing line, footer) | `src/sections/Finale.tsx`, copy in `FINALE` in `src/data/content.ts` (+ `.finale-*` in `src/index.css`) |
 | The ending's video clip | `scripts/finale-clip.py` → `public/finale/glass-break.mp4` |
 | The Monster Hunter ecosystem | `src/effects/Ecosystem.tsx` (+ `.eco-*` in `src/index.css`) |
@@ -185,6 +187,23 @@ artwork belongs to its owners (Eiichiro Oda / Shueisha / Toei Animation, and
 Marvel Studios / Disney) and is credited under each chapter. The only
 quotations are Loki's two lines in `LOKI` — everything labelled a reflection
 is AJ's own commentary.
+
+**The book cover.** The book chapter shows the cover of *Atomic Habits*,
+cut out of a styled photo of the book. Put the original in `Books/` (kept out
+of git), give its file name and the cover's four corners in `SOURCES` at the
+top of `scripts/book-art.py`, and run:
+
+```bash
+python3 scripts/book-art.py
+```
+
+It straightens the cover, writes AVIF + WebP copies (320 px and the cover's
+own width, about 426 px — never upscaled) to `public/books/` and regenerates
+`src/data/bookArt.ts`. If the cover is missing or fails to load, a typeset
+stand-in of the same size takes its place. The chapter has no quotations from
+the book: the one line describing its idea is a paraphrase and is labelled as
+one, and the small-steps chart is labelled as an illustration, not a
+measurement.
 
 **The ending.** The page closes on a few seconds of glass breaking, taken
 from a free-to-use effects pack (VFX GURU, credited in the footer). Put the
