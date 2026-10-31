@@ -118,7 +118,7 @@ export const BUILDS: Build[] = [
     id: 'site',
     name: 'This website',
     kind: 'Personal site',
-    summary: 'One page, twelve chapters, and an environment that re-tints itself as you move through it.',
+    summary: 'One page, fourteen chapters, and an environment that re-tints itself as you move through it.',
     how: [
       'Each chapter owns a palette; the background cross-fades between them on the compositor.',
       'Animations stick to transform and opacity, and pause when they are off screen.',
@@ -184,12 +184,77 @@ export const BUILDS: Build[] = [
     summary: 'Every backdrop — trees, mountains, a whole Monster Hunter ecosystem, the car on the night drive — is drawn from code.',
     how: [
       'Seeded random numbers, so the same shapes come back every visit.',
-      'The only pictures on the site are AJ\'s own portrait artwork in the intro and the game artwork.',
+      'The only pictures on the site are AJ\'s own portrait artwork in the intro, plus the game and show artwork.',
     ],
     stack: ['SVG', 'Canvas'],
     try: { label: 'See the network', target: 'tech' },
   },
 ];
+
+/*
+ * The two shows. Everything labelled as a reflection is AJ's own commentary,
+ * not dialogue. The only quotations are Loki's two lines, credited to where
+ * they are spoken — keep them word for word.
+ */
+export const ONE_PIECE = {
+  title: 'The freedom to be yourself.',
+  lede: "One Piece is my favourite anime — and honestly, not because of the fights. It's because of what's underneath them.",
+  body: [
+    'What I admire most about Luffy is how freely he lives. He laughs loudly, eats far too much, says exactly what he thinks, and never tries to become someone else just to fit in.',
+    "But carefree isn't the same as careless. When the people he cares about need him, he doesn't stop to calculate the odds — he goes. The fear is there; it just never gets to make the decision. He keeps moving forward.",
+  ],
+  turn: "That's what makes the story special to me. It can be hilarious one moment and hit incredibly hard the next, and it never loses its heart along the way.",
+  thesis: 'A great story can entertain you and still teach you something about how to live.',
+  gear5: {
+    label: 'Gear 5',
+    reveal:
+      "His strongest form is also his silliest — he fights laughing, bending the world around him like a cartoon. To me it says something simple: being free and being strong aren't opposites. Sometimes the freest version of you is the strongest one.",
+  },
+  hat: {
+    story: 'In the story, the straw hat is a promise: Luffy will give it back once he has become a great pirate.',
+    reflection: 'To me it stands for the dream you carry with you — something you protect, and keep walking towards, however far away it looks.',
+  },
+  lessons: [
+    { id: 'freedom', k: 'Freedom', v: "Freedom isn't doing whatever you want. It's refusing to let fear — or anyone else — decide who you are." },
+    { id: 'dreams', k: 'Dreams', v: 'No dream is treated as too big or too strange. Everyone gets to chase theirs out loud.' },
+    { id: 'perseverance', k: 'Perseverance', v: "Losing isn't the end of the story. Getting back up, getting stronger and going again — that is the story." },
+  ],
+};
+
+export const LOKI = {
+  title: 'Glorious purpose.',
+  lede: 'Loki is the character whose growth means the most to me. He starts out as a villain who wants a throne — and ends up taking one nobody would ever want, so that everyone else can be free.',
+  /** Dialogue, word for word. */
+  before: { text: 'I am Loki, of Asgard, and I am burdened with glorious purpose.', source: 'Loki — The Avengers (2012)' },
+  /**
+   * Dialogue, word for word, checked against the Season 2 finale transcript:
+   * "I know what kind of god I need to be… for you. For all of us."
+   * Shown in three beats; `text` is the line as one string.
+   */
+  quote: {
+    beats: ['I know what kind of god I need to be…', 'for you.', 'For all of us.'],
+    text: 'I know what kind of god I need to be… for you. For all of us.',
+    source: 'Loki — Season 2 finale, “Glorious Purpose”',
+  },
+  journey: [
+    { when: 'The Avengers', k: 'Burdened with glorious purpose', v: "He arrives convinced he was born to rule. Purpose, at this point, means a throne — and it's entirely about him." },
+    { when: 'Loki · Season 1', k: 'Caught by time', v: 'The TVA arrests him and shows him how his own story was meant to go. For the first time, he has to look honestly at who he has been.' },
+    { when: 'Loki · Seasons 1–2', k: 'Someone to fight for', v: 'Mobius and Sylvie change what he wants. He stops reaching for a crown and starts looking out for people.' },
+    { when: 'Loki · Season 2', k: 'Learning the loop', v: 'He learns to control his time-slipping and goes back again and again, trying to save everyone — learning everything he can for what amounts to centuries.' },
+    { when: 'The end of time', k: 'The god he needed to be', v: 'He walks out to the failing Loom, takes hold of the branching timelines himself and holds them together from a throne — alone, so everyone else gets to live freely.' },
+  ],
+  purpose: {
+    then: { label: 'Then', head: 'A throne to rule from.', body: 'Glorious purpose meant power, recognition and a crown — something to take for himself.' },
+    now: { label: 'Now', head: 'A throne to hold everything together.', body: 'By the end it means the opposite. He gives up his own freedom so that everyone else keeps theirs — and so their stories can go on.' },
+  },
+  reflections: [
+    { k: 'Redemption', v: "Your past is part of your story. It doesn't have to be the ending." },
+    { k: 'Responsibility', v: 'Growing up looks a lot like this: deciding something is yours to carry, even when nobody could make you.' },
+    { k: 'Sacrifice', v: 'The most powerful thing he ever does is give something up — not take something.' },
+    { k: 'Purpose', v: 'Purpose stopped being about what he could get, and became about who he could hold up.' },
+  ],
+  close: "People can change. Who you were doesn't get to decide who you can become — and the best kind of purpose is usually bigger than yourself.",
+};
 
 export const DRIVING = {
   line: 'Sometimes I just like getting in the car and going for a drive.',
@@ -220,6 +285,8 @@ export const FACTS = [
   'AJ once "quickly reinstalled" an OS. It was not quick.',
   'AJ thinks Sekiro is the best combat system ever made.',
   'AJ is still learning, and quite likes it that way.',
+  "Ask Clover who has AJ's heart. (Spoiler: Jesus is his King.)",
+  'One Piece is AJ\'s favourite anime — for the lessons more than the fights.',
 ];
 
 export const OUTRO = {
@@ -227,6 +294,13 @@ export const OUTRO = {
   body: "Technology, networks, AI, games, chess, long drives and walks with Clover. I'm always experimenting with something.",
   quote: "I don't just want to use technology — I want to understand it, experiment with it, and build with it.",
   thanks: 'Thanks for stopping by.',
+};
+
+/** The closing sequence at the very bottom of the page. */
+export const FINALE = {
+  line: 'This is only the beginning.',
+  sub: 'More to learn. More to build. More to become.',
+  credit: 'Glass footage from VFX GURU’s free-to-use elements pack.',
 };
 
 export const TERMINAL_HELP: [string, string][] = [
@@ -237,7 +311,7 @@ export const TERMINAL_HELP: [string, string][] = [
   ['tech', 'the setup'],
   ['learning', 'what is being learned'],
   ['clover', 'call the guide'],
-  ['goto <id>', 'travel: home about tech automation projects games strategy driving clover'],
+  ['goto <id>', 'travel: home about tech automation projects games onepiece loki strategy driving clover finale'],
   ['clear', 'wipe the screen'],
   ['exit', 'close this window'],
 ];

@@ -5,7 +5,7 @@ import { useActions, useDevice, useEnv } from '../../state/hooks';
 import { cn } from '../../lib/utils';
 
 /** Hidden scenes light up their parent entry in the rail. */
-const PARENT: Partial<Record<SceneId, SceneId>> = { words: 'strategy', omarchy: 'tech', outro: 'clover' };
+const PARENT: Partial<Record<SceneId, SceneId>> = { words: 'strategy', omarchy: 'tech', outro: 'clover', finale: 'clover' };
 
 export default function NavRail() {
   const { active } = useEnv();

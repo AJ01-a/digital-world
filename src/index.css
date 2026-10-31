@@ -724,6 +724,35 @@ section .grid > * { min-width: 0; }
 .clover-tongue { transform-box: fill-box; transform-origin: top; transform: scaleY(0); transition: transform 300ms var(--ease-out-expo); }
 .mood-happy .clover-tongue { transform: none; }
 
+/* "Jesus is my King!" — the one line Clover says with a little ceremony:
+   a crown settles in and an underline draws across, once. */
+.clover-proclaim {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  position: relative;
+  padding-bottom: 0.35rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: #fff;
+}
+.clover-proclaim::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #f4f6fb, #ff4a57 70%, transparent);
+  transform-origin: left;
+  animation: proclaim-line 900ms var(--ease-out-expo) 250ms both;
+}
+.clover-crown { flex: none; color: #ffc596; animation: crown-in 650ms var(--ease-out-expo) 120ms both; }
+@keyframes proclaim-line { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes crown-in { from { opacity: 0; transform: translate3d(0, -8px, 0) rotate(-14deg) scale(0.7); } to { opacity: 1; transform: none; } }
+
 /* ─────────────────────────────────────────────────────────────
    Games: the stage
    ───────────────────────────────────────────────────────────── */
@@ -885,6 +914,203 @@ section .grid > * { min-width: 0; }
 /* Reduced motion: a still, composed scene — every creature in its resting pose. */
 .eco-still [class*='eco-'] { animation: none !important; }
 
+/* ─────────────────────────────────────────────────────────────
+   Shows: One Piece and Loki
+   Motion is transform and opacity only. The artwork parallax is a
+   scroll-driven animation — nothing runs at rest and it stays on the
+   compositor; browsers without view timelines get still artwork.
+   ───────────────────────────────────────────────────────────── */
+/* Taller than its frame, so the parallax never shows an edge. */
+.show-art { position: absolute; inset: -6% 0; }
+@keyframes show-parallax { from { transform: translate3d(0, -4.5%, 0); } to { transform: translate3d(0, 4.5%, 0); } }
+@keyframes track-fill { from { transform: scaleY(0); } to { transform: none; } }
+@supports (animation-timeline: view()) {
+  /* The frame clips its artwork, which makes it a scroll container of its
+     own — so the timeline is taken from the frame against the page, by name. */
+  .show-frame { view-timeline: --show-frame block; }
+  .show-parallax { animation: show-parallax linear both; animation-timeline: --show-frame; }
+  .loki-track-fill { animation: track-fill linear both; animation-timeline: view(); animation-range: entry 30% cover 62%; }
+}
+
+/* One Piece — warm sun from the top right, the house black below. */
+.op-sec, .loki-sec { isolation: isolate; }
+.op-sec::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 35% at 88% 4%, rgba(255, 196, 110, 0.09), transparent 70%),
+    radial-gradient(60% 30% at 10% 96%, rgba(160, 20, 16, 0.14), transparent 70%);
+}
+
+/* Gear 5: the scene wakes — a slow push in and a burst of light. */
+.g5-zoom { transition: transform 1200ms var(--ease-out-expo); }
+.g5.is-awake .g5-zoom { transform: scale(1.07); }
+.g5-flash {
+  opacity: 0;
+  background: radial-gradient(42% 52% at 50% 36%, rgba(255, 248, 220, 0.42), rgba(255, 196, 90, 0.14) 45%, transparent 75%);
+  transition: opacity 900ms var(--ease-out-expo);
+}
+.g5.is-awake .g5-flash { opacity: 1; }
+@media (hover: hover) {
+  .g5:not(.is-awake):hover .g5-zoom { transform: scale(1.025); }
+}
+.g5-note:not([hidden]) { animation: rise-in 650ms var(--ease-out-expo) both; }
+.g5-sun {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 25%, transparent);
+  transition: transform 500ms var(--ease-out-expo);
+}
+.g5-sun.is-on { transform: scale(1.35); }
+
+/* The straw hat lifts when picked up. The frame is the artwork's own red,
+   so a tilt never shows an edge; at rest it is framed on the hat, leaving
+   the title room at the bottom. */
+.hat-zoom { transform-origin: 50% 28%; transform: scale(1.24); transition: transform 1000ms var(--ease-out-expo); }
+.hat.is-open .hat-zoom { transform: translate3d(0, -6%, 0) rotate(-6deg) scale(1.34); }
+@media (hover: hover) {
+  .hat:not(.is-open) button:hover .hat-zoom { transform: translate3d(0, -2%, 0) rotate(-1.5deg) scale(1.26); }
+}
+.hat-meaning:not([hidden]) { animation: rise-in 600ms var(--ease-out-expo) both; }
+
+/* Loki — crossed lines of time at the top, settling into a gold calm below. */
+.loki-sec::before,
+.loki-sec::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.loki-sec::before {
+  background:
+    repeating-linear-gradient(115deg, rgba(95, 212, 156, 0.05) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(62deg, rgba(255, 74, 87, 0.04) 0 1px, transparent 1px 71px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 22%, transparent 48%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 22%, transparent 48%);
+}
+.loki-sec::after { background: radial-gradient(70% 22% at 50% 100%, rgba(224, 189, 104, 0.12), transparent 70%); }
+/* Where he starts: a slight split of red and green, like a signal out of phase. */
+.loki-glitch { text-shadow: -1.5px 0 rgba(255, 74, 87, 0.45), 1.5px 0 rgba(95, 212, 156, 0.45); }
+
+/* Then: in shadow. Now: the light comes in. */
+.purpose-shade {
+  background: linear-gradient(180deg, rgba(3, 6, 5, 0.6), rgba(3, 6, 5, 0.82));
+  transition: opacity 1100ms var(--ease-out-expo);
+}
+.purpose.is-now .purpose-shade { opacity: 0; }
+.purpose-art { transition: transform 1400ms var(--ease-out-expo); transform: scale(1.04); }
+.purpose.is-now .purpose-art { transform: none; }
+
+/* The quote arrives a little slower than ordinary headings. */
+/* The quote arrives in beats — "…for you." after a breath, then "For all of
+   us." last, in gold, as the light behind it comes up. Opacity and transform
+   only; the whole line reads in under three seconds. */
+.loki-quote .beat {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition: opacity 1000ms var(--ease-out-expo), transform 1200ms var(--ease-out-expo);
+}
+.loki-quote .beat-2 { transition-delay: 900ms; }
+.loki-quote .beat-3 { transition-delay: 1700ms; }
+.loki-quote .beat-4 { transition-delay: 2400ms; }
+.loki-quote.is-in .beat { opacity: 1; transform: none; }
+.loki-final { position: relative; color: #e0bd68; text-shadow: 0 0 28px rgba(224, 189, 104, 0.28); }
+.loki-final::after {
+  content: "";
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -0.08em;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e0bd68, transparent);
+  transform: scaleX(0);
+  transition: transform 1400ms var(--ease-out-expo) 2300ms;
+}
+.loki-quote.is-in .loki-final::after { transform: none; }
+.loki-quote-light {
+  background:
+    radial-gradient(40% 55% at 30% 45%, rgba(95, 212, 156, 0.1), transparent 70%),
+    radial-gradient(45% 50% at 62% 70%, rgba(224, 189, 104, 0.1), transparent 70%);
+  opacity: 0;
+  transition: opacity 2400ms var(--ease-out-expo) 600ms;
+}
+.loki-quote.is-in .loki-quote-light { opacity: 1; }
+
+/* Reflections keep the reveal's staggered entrance; hover only lights the edge. */
+.reflection {
+  transition: opacity 900ms var(--ease-out-expo), transform 1000ms var(--ease-out-expo), border-color 400ms var(--ease-out-expo);
+  transition-delay: var(--d, 0ms), var(--d, 0ms), 0ms;
+}
+@media (hover: hover) {
+  .reflection:hover { border-color: color-mix(in oklab, var(--env-accent) 45%, transparent); }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Finale — the closing sequence at the very bottom of the page.
+   waiting → playing → done, as classes on the section (Finale.tsx).
+   Everything fades or moves with opacity and transform; the one
+   flicker on the line is a single 420ms text-shadow step.
+   ───────────────────────────────────────────────────────────── */
+/* flow-root: the approach pulls up over the chapter above without dragging the black with it. */
+.finale { display: flow-root; background: #000; }
+/* The approach: the chapter above darkens into the last scene. */
+.finale-approach { height: clamp(7rem, 24svh, 15rem); margin-top: calc(-1 * clamp(7rem, 24svh, 15rem)); position: relative; background: linear-gradient(180deg, transparent, #000); pointer-events: none; }
+.finale-stage { background: #000; }
+.finale-scene { isolation: isolate; }
+/* The scene's bottom edge melts into the footer. */
+.finale-fade { z-index: -1; bottom: -1px; background: linear-gradient(180deg, transparent, #000 80%); }
+
+/* The footage and its still share a frame: full-bleed from tablets up; on a
+   phone a square band through the middle, so the hole stays whole. */
+.finale-frame { position: absolute; inset: 0; z-index: -2; }
+@media (max-width: 639px) {
+  .finale-frame {
+    inset: 50% 0 auto;
+    height: min(118vw, 100%);
+    transform: translate3d(0, -50%, 0);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  }
+}
+.finale-video { opacity: 0; transition: opacity 600ms var(--ease-out-expo); }
+.is-playing .finale-video { opacity: 1; }
+.finale-poster { opacity: 0; transition: opacity 1800ms var(--ease-out-expo) 250ms; }
+.is-done .finale-poster { opacity: 0.32; }
+/* Tints the white glass red towards the right; black stays black. */
+.finale-tint { z-index: -1; mix-blend-mode: multiply; background: linear-gradient(90deg, transparent 36%, rgba(255, 60, 74, 0.9) 100%); }
+.finale-glow { z-index: -1; opacity: 0; background: radial-gradient(42% 38% at 50% 50%, rgba(255, 52, 68, 0.15), transparent 72%); transition: opacity 2000ms var(--ease-out-expo) 400ms; }
+.is-done .finale-glow { opacity: 1; }
+
+.finale-line {
+  opacity: 0;
+  transform: translate3d(0, 10px, 0) scale(0.985);
+  text-shadow: 0 2px 28px #000, 0 0 2px #000;
+  transition: opacity 900ms var(--ease-out-expo), transform 1100ms var(--ease-out-expo);
+}
+.line-in .finale-line { opacity: 1; transform: none; animation: finale-glitch 420ms steps(1, end) 80ms 1; }
+@keyframes finale-glitch {
+  0% { text-shadow: -3px 0 rgba(255, 52, 68, 0.85), 3px 0 rgba(255, 255, 255, 0.6), 0 2px 28px #000; }
+  34% { text-shadow: 2px 0 rgba(255, 52, 68, 0.85), -2px 0 rgba(255, 255, 255, 0.6), 0 2px 28px #000; }
+  67% { text-shadow: -1px 0 rgba(255, 52, 68, 0.6), 1px 0 rgba(255, 255, 255, 0.4), 0 2px 28px #000; }
+}
+.finale-mark, .finale-sub, .finale-actions {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition: opacity 900ms var(--ease-out-expo), transform 1100ms var(--ease-out-expo);
+}
+/* Hidden controls stay out of the tab order until they can be seen. */
+.finale-actions { visibility: hidden; }
+.is-done .finale-mark, .is-done .finale-sub, .is-done .finale-actions { opacity: 1; transform: none; }
+.is-done .finale-actions { visibility: visible; }
+.is-done .finale-sub { transition-delay: 500ms; }
+.is-done .finale-actions { transition-delay: 850ms; }
+
 .clover-msg { animation: pop-in 380ms var(--ease-out-expo) both; }
 .typing-dot { animation: twinkle 600ms ease-in-out infinite alternate; }
 
@@ -901,6 +1127,10 @@ section .grid > * { min-width: 0; }
     transition-delay: 0ms !important;
   }
   .reveal, .rw > span, .draw-x { opacity: 1; transform: none; }
+  /* The shows: still artwork and a full journey track. */
+  .show-parallax, .loki-track-fill { animation: none !important; transform: none; }
+  .loki-quote .beat, .loki-quote-light { opacity: 1; transform: none; }
+  .loki-final::after { transform: none; }
   /* Progress, not motion: the hold ring still fills over the hold. */
   .intro .hold-arc { transition-duration: 200ms !important; }
   .intro.is-holding .hold-arc { transition-duration: var(--hold) !important; }

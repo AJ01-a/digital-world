@@ -14,7 +14,10 @@ import CloverSection from './sections/CloverSection';
 import Driving from './sections/Driving';
 import Games from './sections/Games';
 import Hero from './sections/Hero';
+import Loki from './sections/Loki';
 import Omarchy from './sections/Omarchy';
+import OnePiece from './sections/OnePiece';
+import Finale from './sections/Finale';
 import Outro from './sections/Outro';
 import Projects from './sections/Projects';
 import Strategy from './sections/Strategy';
@@ -105,11 +108,14 @@ function Experience() {
           <Automation />
           <Projects />
           <Games />
+          <OnePiece />
+          <Loki />
           <Strategy />
           <Words />
           <Driving />
           <CloverSection />
           <Outro />
+          <Finale />
         </main>
         <ChromeEnv>
           <Clover ready={introDone} />

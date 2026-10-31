@@ -34,3 +34,10 @@ dist-ssr
 
 # Words the browser tests check never appear on the site (kept local).
 /tests/e2e/private-words.txt
+
+# Original show artwork — web-sized copies live in public/shows
+# (regenerate with scripts/show-art.py).
+/Shows/
+
+# Original video for the ending — the web copy lives in public/finale.
+/Videos/

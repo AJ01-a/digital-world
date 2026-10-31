@@ -1,4 +1,4 @@
-// Game worlds, Monster Hunter ecosystem, Clover's secret, the drive,
+// Game worlds, Monster Hunter ecosystem, who has AJ's heart, the drive,
 // reduced motion, missing artwork and small-screen overflow.
 // Usage: node tests/e2e/worlds.mjs <url>  (or `npm run test:e2e`)
 import { launch } from './browser.mjs';
@@ -100,7 +100,7 @@ for (const [w, h] of [[390, 844], [768, 1024], [1024, 768], [1280, 720], [1440, 
   await ctx.close();
 }
 
-/* 3 — Clover's secret */
+/* 3 — who has AJ's heart */
 {
   const { p, ctx } = await page();
   await p.goto(URL_ + '#clover'); await p.waitForTimeout(1200);
@@ -111,13 +111,15 @@ for (const [w, h] of [[390, 844], [768, 1024], [1024, 768], [1280, 720], [1440, 
     await p.waitForFunction((n) => document.querySelectorAll('[aria-label="Conversation with Clover"] .clover-msg').length >= n + 2, n, { timeout: 5000 });
     return p.locator('[aria-label="Conversation with Clover"] .clover-msg').last().innerText();
   };
-  for (const q of ['WHO IS MY CRUSH?', "Who's AJ's crush?", 'can you tell me who aj likes', 'Who does he like?']) {
-    const a = await ask(q); check(`Clover secret: "${q}"`, /starts with S!/.test(a) && /leans in/.test(a), a.replace(/\s+/g, ' ').slice(0, 90));
+  for (const q of ['WHO IS MY CRUSH?', "Who's AJ's crush?", 'can you tell me who aj likes', 'Who does he like?', 'who does AJ love', 'Who is AJ in love with?']) {
+    const a = await ask(q);
+    const proclaimed = await p.locator('[aria-label="Conversation with Clover"] .clover-msg').last().locator('.clover-proclaim').innerText().catch(() => '');
+    check(`Clover's answer: "${q}"`, proclaimed.trim() === 'Jesus is my King!' && /\*.+\*/.test(a), a.replace(/\s+/g, ' ').slice(0, 90));
   }
-  for (const q of ['What does AJ like?', 'I crushed the chess puzzle', 'Who is AJ?']) {
-    const a = await ask(q); check(`no secret for: "${q}"`, !/starts with S/.test(a), a.replace(/\s+/g, ' ').slice(0, 70));
+  for (const q of ['What does AJ like?', 'I crushed the chess puzzle', 'Who is AJ?', 'Tell me about Loki']) {
+    const a = await ask(q); check(`no heart answer for: "${q}"`, !/Jesus is my King/.test(a), a.replace(/\s+/g, ' ').slice(0, 70));
   }
-  const f = await ask("what's her full name?"); check('follow-up stays sealed', /S is all you're getting/.test(f), f.slice(0, 60));
+  const f = await ask("what's her full name?"); check('old secret is gone (no S, no sealed reply)', !/starts with S|S is all/.test(f), f.slice(0, 60));
   await ctx.close();
 }
 

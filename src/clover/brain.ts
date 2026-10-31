@@ -10,10 +10,10 @@
  * Clover's personality is fictional. Questions about the real dog get a
  * friendly deflection rather than invented facts.
  */
-import { AUTOMATION_COPY, BUILDS, CLOVER, DRIVING, FACTS, OMARCHY, TECH_COPY, TOPICS } from '../data/content';
+import { AUTOMATION_COPY, BUILDS, CLOVER, DRIVING, FACTS, LOKI, OMARCHY, ONE_PIECE, TECH_COPY, TOPICS } from '../data/content';
 import { GAME_WORLDS, SCENE_MAP, type SceneId } from '../data/worlds';
 import type { Mood } from './CloverArt';
-import { CRUSH_REPLY, CRUSH_SEALED, isCrushFollowUp, isCrushQuestion } from './crush';
+import { HEART_REPLIES, isHeartQuestion } from './heart';
 
 export type Action =
   | { label: string; kind: 'goto'; to: SceneId }
@@ -30,6 +30,8 @@ export interface Reply {
   go?: SceneId;
   /** Start the guided tour. */
   tour?: boolean;
+  /** The last line is a declaration, shown with emphasis. */
+  proclaim?: boolean;
 }
 
 /* ── text helpers ─────────────────────────────────────────── */
@@ -60,11 +62,14 @@ const PLACES: { id: SceneId; words: string[] }[] = [
   { id: 'automation', words: ['automation', 'lab', 'pipeline', 'claude code'] },
   { id: 'projects', words: ['projects', 'project', 'builds', 'portfolio'] },
   { id: 'games', words: ['games', 'game', 'gaming'] },
+  { id: 'onepiece', words: ['one piece', 'luffy', 'anime'] },
+  { id: 'loki', words: ['loki', 'loki chapter'] },
   { id: 'strategy', words: ['chess', 'strategy', 'chess puzzle'] },
   { id: 'words', words: ['word puzzle', 'word game', 'wordle', 'words'] },
   { id: 'driving', words: ['drive', 'driving', 'road', 'night drive'] },
   { id: 'clover', words: ['clover', 'your chapter', 'dog chapter', 'walks'] },
-  { id: 'outro', words: ['end', 'bottom', 'footer', 'outro'] },
+  { id: 'outro', words: ['end', 'outro'] },
+  { id: 'finale', words: ['finale', 'ending', 'the ending', 'bottom', 'footer', 'very end'] },
 ];
 
 const MOVE = /\b(take|go|bring|jump|navigate|show|open|scroll|visit|head|move|lead|get|back) (me )?(to|back to|down to|up to|over to)?\b|\bwhere (is|are|can i find)\b/;
@@ -87,6 +92,8 @@ export const TOUR: { to: SceneId; line: string }[] = [
   { to: 'automation', line: "The lab: how AJ turns ideas into running code with Claude Code and WSL. The terminal here is a scripted illustration, not a real one." },
   { to: 'projects', line: 'Builds. Everything listed here actually runs on this page — me included.' },
   { to: 'games', line: 'Games. Pick a world and the whole site changes colour with it — and Monster Hunter has a whole ecosystem to explore.' },
+  { to: 'onepiece', line: "One Piece — AJ's favourite anime. Tap Luffy, and the straw hat: there's more to both than the fights." },
+  { to: 'loki', line: "Loki, from villain to the god he needed to be. The timeline fills in as you scroll — and the pages turn from chaos to calm." },
   { to: 'strategy', line: "Chess puzzles, one move each. I'd help, but I don't have thumbs." },
   { to: 'driving', line: 'The night drive — a white Envista on an empty road. On a computer, your pointer sets the pace.' },
   { to: 'clover', line: 'And this is my chapter. Hi again! *wags*' },
@@ -103,11 +110,14 @@ const SUGGEST: Record<SceneId, string[]> = {
   automation: ['Is that terminal real?', 'How does AJ use Claude Code?', 'Show me the builds'],
   projects: ['How do you work?', 'How was this site made?', 'Take me to the chess puzzle'],
   games: ['Tell me about Monster Hunter', "What's AJ's favourite game?", 'Tell me about Sekiro'],
+  onepiece: ['Why One Piece?', 'What does the straw hat mean?', 'Take me to Loki'],
+  loki: ['Why Loki?', 'What is glorious purpose?', 'Take me to the chess puzzle'],
   strategy: ['Give me a hint', 'Is AJ good at chess?', 'Take me to the word puzzle'],
   words: ['Hint for the word puzzle?', 'Where do the words come from?', 'Take me to the drive'],
   driving: ['Why the drives?', 'What car is that?', 'Take me to Clover'],
   clover: ['What breed are you?', 'Do a trick!', 'Are you a real dog?'],
   outro: ['Back to the top', 'How can I contact AJ?', 'Thanks, Clover!'],
+  finale: ['Back to the top', 'Thanks, Clover!', 'Give me the tour'],
 };
 
 export const suggestionsFor = (scene: SceneId) => SUGGEST[scene];
@@ -188,6 +198,7 @@ const INTENTS: Intent[] = [
         '• AI and automation, especially in the terminal',
         '• Building useful digital projects',
         '• Story-driven games and chess',
+        '• Stories that mean something — One Piece and Loki',
         '• Long drives, and walks with Clover (the real one)',
       ],
       mood: 'happy',
@@ -283,7 +294,7 @@ const INTENTS: Intent[] = [
     reply: () => ({
       lines: [
         'This site is React and TypeScript, built with Vite and styled with Tailwind CSS. It is deployed to GitHub Pages by a GitHub Actions workflow.',
-        'The backgrounds, the logo, the car and I are all drawn in code. The only pictures are AJ\'s own portrait artwork in the intro and the game artwork in the Games chapter.',
+        'The backgrounds, the logo, the car and I are all drawn in code. The only pictures are AJ\'s own portrait artwork in the intro, the game artwork, and the One Piece and Loki artwork.',
       ],
       mood: 'idle',
       actions: [go('See the builds', 'projects')],
@@ -318,6 +329,54 @@ const INTENTS: Intent[] = [
     keys: [g.short.toLowerCase(), g.title.normalize('NFD').toLowerCase().replace(/[^a-z\s]/g, ''), ...(g.aliases ?? [])],
     reply: () => ({ lines: [`${g.title}: "${g.line}"`, `"${g.note}"`], mood: 'idle', actions: [go('Enter the game worlds', 'games')] }),
   })),
+  {
+    id: 'shows',
+    keys: ['shows', 'tv shows', 'tv', 'series', 'watch', 'what does aj watch', 'favourite show', 'favorite show', 'favourite anime', 'favorite anime', 'anime', 'marvel'],
+    reply: () => ({
+      lines: [
+        'Two stories have their own chapters here:',
+        `• One Piece — "${ONE_PIECE.thesis}"`,
+        `• Loki — "${LOKI.close.split('. ')[0]}."`,
+      ],
+      mood: 'happy',
+      actions: [go('Visit One Piece', 'onepiece'), go('Visit Loki', 'loki')],
+    }),
+  },
+  {
+    id: 'onepiece',
+    keys: ['one piece', 'luffy', 'monkey d luffy', 'gear 5', 'gear five', 'nika', 'straw hats', 'zoro', 'why one piece', 'pirate', 'pirates'],
+    reply: () => ({
+      lines: [`In AJ's words: "${ONE_PIECE.lede}"`, `"${ONE_PIECE.body[1]}"`],
+      mood: 'happy',
+      actions: [go('Visit One Piece', 'onepiece'), ask('What does the straw hat mean?')],
+    }),
+  },
+  {
+    id: 'straw-hat',
+    keys: ['straw hat', 'the hat', 'hat', 'what does the straw hat mean'],
+    reply: () => ({ lines: [ONE_PIECE.hat.story, `For AJ: "${ONE_PIECE.hat.reflection}"`], mood: 'happy', actions: [go('See the straw hat', 'onepiece')] }),
+  },
+  {
+    id: 'loki',
+    keys: ['loki', 'why loki', 'tom hiddleston', 'hiddleston', 'god of stories', 'god of mischief', 'tva', 'sylvie', 'mobius', 'asgard'],
+    reply: () => ({
+      lines: [`"${LOKI.lede}"`, `The line that stays with him: "${LOKI.quote.text}"`],
+      mood: 'idle',
+      actions: [go('Visit the Loki chapter', 'loki'), ask('What is glorious purpose?')],
+    }),
+  },
+  {
+    id: 'purpose',
+    keys: ['glorious purpose', 'purpose', 'what is glorious purpose', 'burdened'],
+    reply: () => ({
+      lines: [
+        `Then: "${LOKI.before.text}" (${LOKI.before.source.replace('Loki — ', '')}) — ${LOKI.purpose.then.body.toLowerCase()}`,
+        `Now: ${LOKI.purpose.now.body}`,
+      ],
+      mood: 'idle',
+      actions: [go('Visit the Loki chapter', 'loki')],
+    }),
+  },
   {
     id: 'chess',
     keys: ['chess', 'strategy', 'checkmate', 'is aj good at chess', 'mate in one'],
@@ -511,9 +570,8 @@ const FALLBACKS = [
 ];
 
 export function respond(input: string, active: SceneId): Reply {
-  // The secret comes first, so no other topic can swallow it.
-  if (isCrushQuestion(input)) return { lines: CRUSH_REPLY, mood: 'curious' };
-  if (isCrushFollowUp(input)) return { lines: CRUSH_SEALED, mood: 'curious' };
+  // Who has AJ's heart comes first, so no other topic can swallow it.
+  if (isHeartQuestion(input)) return { lines: pick(HEART_REPLIES), mood: 'happy', proclaim: true };
 
   const text = normalize(input);
 

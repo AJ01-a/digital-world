@@ -1,16 +1,9 @@
-import { IDENTITY, OUTRO } from '../data/content';
+import { OUTRO } from '../data/content';
 import Button, { Arrow } from '../components/ui/Button';
 import Logo from '../components/ui/Logo';
 import Reveal, { RevealWords } from '../components/ui/Reveal';
 import SectionShell from '../components/ui/SectionShell';
 import { useActions, useDevice } from '../state/hooks';
-
-/**
- * Add public links here later — anything left out simply does not render,
- * so the footer stays tidy either way. Only add channels you are happy for
- * anyone on the internet to use.
- */
-const LINKS: { label: string; href: string }[] = [];
 
 export default function Outro() {
   const { goTo, setTerminalOpen, openClover } = useActions();
@@ -56,46 +49,6 @@ export default function Outro() {
           )}
         </Reveal>
       </div>
-
-      <footer className="mx-auto mt-24 w-full max-w-[1180px] border-t border-[color-mix(in_oklab,var(--env-accent)_14%,transparent)] pt-8 pb-16 sm:pb-4">
-        <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-          <div className="flex items-center gap-3 text-center sm:text-left">
-            <Logo size={34} detail="compact" />
-            <div>
-              <p className="text-[1rem] text-[var(--color-ink)]">{OUTRO.thanks}</p>
-              <p className="label mt-1 text-[var(--env-tint)]">
-                {IDENTITY.name} · {IDENTITY.site}
-              </p>
-            </div>
-          </div>
-
-          {LINKS.length > 0 && (
-            <nav aria-label="Elsewhere" className="flex flex-wrap items-center justify-center gap-5">
-              {LINKS.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="label text-[var(--color-ink-dim)] transition-colors hover:text-[var(--env-accent)]"
-                >
-                  {l.label}
-                </a>
-              ))}
-            </nav>
-          )}
-
-          <p className="label text-[var(--color-ink-faint)]">
-            © {new Date().getFullYear()} · No cookies · No trackers
-            {!compact && (
-              <>
-                {' · press '}
-                <kbd className="rounded border border-white/15 px-1.5 py-0.5">/</kbd>
-              </>
-            )}
-          </p>
-        </div>
-      </footer>
     </SectionShell>
   );
 }

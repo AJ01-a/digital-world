@@ -20,11 +20,14 @@ const VOICES: Record<SceneId, Voice> = {
   automation: { root: 116.54, filter: 1250, noise: 0.045, wave: 'triangle' },
   projects: { root: 130.81, filter: 1300, noise: 0.045, wave: 'triangle' },
   games: { root: 98, filter: 460, noise: 0.1, wave: 'sine' },
+  onepiece: { root: 146.83, filter: 900, noise: 0.08, wave: 'sine' },
+  loki: { root: 92.5, filter: 520, noise: 0.04, wave: 'triangle' },
   strategy: { root: 130.81, filter: 940, noise: 0.03, wave: 'sine' },
   words: { root: 146.83, filter: 1050, noise: 0.03, wave: 'sine' },
   driving: { root: 87.31, filter: 360, noise: 0.17, wave: 'sine' },
   clover: { root: 164.81, filter: 640, noise: 0.075, wave: 'sine' },
   outro: { root: 110, filter: 700, noise: 0.04, wave: 'sine' },
+  finale: { root: 82.41, filter: 420, noise: 0.03, wave: 'sine' },
 };
 
 type Ctor = typeof AudioContext;

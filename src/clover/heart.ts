@@ -1,26 +1,30 @@
 /**
- * Clover's one secret.
+ * Who has AJ's heart.
  *
- * Asked who AJ has a crush on, Clover leans in and gives away a single
- * letter — and nothing else. This is a joke, not a data source: it never
- * names anyone, never stores what was asked, and runs entirely in the
- * browser like the rest of Clover's brain.
+ * Asked who AJ has a crush on — or who he loves, or who he's in love
+ * with — Clover perks up and answers in AJ's own words: "Jesus is my King!"
+ * It runs entirely in the browser like the rest of Clover's brain and
+ * never stores what was asked.
  *
  * Kept free of imports so it can be unit-tested on its own
- * (tests/crush.test.ts).
+ * (tests/heart.test.ts).
  */
 
-export const CRUSH_REPLY = [
-  '*glances around suspiciously, lowers his voice and leans in closer…*',
-  "Okay, but you didn't hear this from me… her name starts with S!",
+/** AJ's answer, word for word. Always the last line of the reply. */
+export const KING = 'Jesus is my King!';
+
+/* How Clover leads into it — one is picked each time, so asking twice
+   doesn't feel like a recording. */
+const OPENERS: string[][] = [
+  ['*ears shoot up, head tilts, tail suddenly going a mile a minute*', "Ooh, I know this one — and it's not a secret at all. Ask AJ who has his heart and he'll tell you straight away:"],
+  ['*sits up very straight, tail thumping the floor*', "Ruff! You're asking the wrong question — it's not a crush, it's a King. In AJ's own words:"],
+  ['*perks up and does a happy little spin*', "Easy! That's the least secret thing about him. He'd say it himself:"],
 ];
 
-export const CRUSH_SEALED = [
-  "*zips mouth* S is all you're getting. I've already said too much — AJ would never trust me with a secret again.",
-];
+export const HEART_REPLIES: string[][] = OPENERS.map((lines) => [...lines, KING]);
 
 /** Lowercase, straighten quotes, expand contractions and possessives, drop punctuation. */
-export function normalizeCrush(input: string) {
+export function normalizeHeart(input: string) {
   return ` ${input
     .toLowerCase()
     .replace(/[‘’ʼ`´]/g, "'")
@@ -67,20 +71,22 @@ const ASKING_WHO = / (?:who|whom|name|tell|know|guess|reveal|spill|which) /;
 const LIKE_VERB = String.raw`(?:like|likes|liking|into|fancy|fancies|love|loves|in love with|have feelings for|has feelings for|has a thing for|have a thing for|is sweet on)`;
 const WHO_LIKES = new RegExp(
   [
-    // who does aj like / who is aj into / who aj likes
+    // who does aj like / who is aj into / who aj likes / who is aj in love with
     String.raw` who(?:m)? (?:(?:does|do|did|is|would) )?${SUBJECT} (?:really |secretly |actually )?${LIKE_VERB} `,
     // who is the person (that) aj likes / the girl aj likes
     String.raw` (?:person|girl|someone|somebody|one) (?:that |who )?${SUBJECT} (?:really |secretly )?${LIKE_VERB} `,
     // does aj like someone / does aj have feelings for anyone
     String.raw` (?:does|do|is) ${SUBJECT} ${LIKE_VERB} (?:someone|somebody|anyone|anybody|a girl|a person) `,
+    // who has aj's heart / who stole his heart
+    String.raw` who (?:has|owns|holds|stole|won|got) ${SUBJECT} heart `,
   ].join('|'),
 );
 
 /* Comparisons and topics — "who does AJ like more, Sekiro or Elden Ring?" */
 const NOT_A_PERSON = / or | more | better | most | best | favou?rite | games? | chess | linux | music | food | team | (?:like|likes|love|loves) to /;
 
-export function isCrushQuestion(input: string): boolean {
-  const t = normalizeCrush(input);
+export function isHeartQuestion(input: string): boolean {
+  const t = normalizeHeart(input);
   if (t.length > 200) return false;
 
   if (t.includes(' crush') && !NOT_ROMANTIC.test(t) && CRUSH_PHRASE.test(t)) {
@@ -91,12 +97,4 @@ export function isCrushQuestion(input: string): boolean {
   }
 
   return WHO_LIKES.test(t) && !NOT_A_PERSON.test(t);
-}
-
-/** "What's her full name?" — the follow-ups Clover will not answer. */
-export function isCrushFollowUp(input: string): boolean {
-  const t = normalizeCrush(input);
-  return /( her (?:full |real |whole |last )?name | who is she | what does (?:the )?s stand for | more about her | starts with s | what is the rest)/.test(
-    t,
-  );
 }

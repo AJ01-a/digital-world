@@ -35,11 +35,14 @@ export type SceneId =
   | 'automation'
   | 'projects'
   | 'games'
+  | 'onepiece'
+  | 'loki'
   | 'strategy'
   | 'words'
   | 'driving'
   | 'clover'
-  | 'outro';
+  | 'outro'
+  | 'finale';
 
 export interface Scene {
   id: SceneId;
@@ -61,8 +64,8 @@ export interface Scene {
  * crimson. Black anchors every chapter; each leans towards the white side or
  * the red side — white light from the left (`ray`), red from the right
  * (`glow`) — and red is kept for accents that matter. The game worlds,
- * Clover's chapter and the night drive keep environments of their own;
- * warm orange still belongs to Clover.
+ * Clover's chapter, the night drive and the two shows keep environments
+ * of their own; warm orange still belongs to Clover, emerald to Loki.
  */
 export const SCENES: Scene[] = [
   {
@@ -129,10 +132,30 @@ export const SCENES: Scene[] = [
     theme: { void: '#080503', a: '#150a04', b: '#291306', accent: '#f0b45c', tint: '#c99257', ray: '#5a2b0e' },
   },
   {
+    id: 'onepiece',
+    scape: 'horizon',
+    label: 'One Piece',
+    index: '06',
+    mood: 'Freedom',
+    inRail: true,
+    // Straw-hat red and sunlit gold, on the house black.
+    theme: { void: '#070404', a: '#140808', b: '#2a0d0b', accent: '#ff5a4e', tint: '#d6b6a6', ray: '#5c2410', glow: '#8a1a12' },
+  },
+  {
+    id: 'loki',
+    scape: 'horizon',
+    label: 'Loki',
+    index: '07',
+    mood: 'Purpose',
+    inRail: true,
+    // Emerald with a gold second light — local to this chapter only.
+    theme: { void: '#030605', a: '#08110d', b: '#102219', accent: '#5fd49c', tint: '#a8c4b6', ray: '#183d2c', glow: '#6b5418' },
+  },
+  {
     id: 'strategy',
     scape: 'horizon',
     label: 'Chess',
-    index: '06',
+    index: '08',
     mood: 'Patience',
     inRail: true,
     theme: { void: '#040405', a: '#0d0d10', b: '#1b1b21', accent: '#f4f6fb', tint: '#a8abb5', ray: '#3a3e4a', glow: '#7a1420' },
@@ -141,7 +164,7 @@ export const SCENES: Scene[] = [
     id: 'words',
     scape: 'horizon',
     label: 'Words',
-    index: '06',
+    index: '08',
     mood: 'Play',
     inRail: false,
     theme: { void: '#050405', a: '#110a0c', b: '#200d12', accent: '#ff5a66', tint: '#c2adb0', ray: '#3a1016', glow: '#6e0d17' },
@@ -150,7 +173,7 @@ export const SCENES: Scene[] = [
     id: 'driving',
     scape: 'city',
     label: 'Drive',
-    index: '07',
+    index: '09',
     mood: 'Freedom',
     inRail: true,
     theme: { void: '#030406', a: '#090b11', b: '#12151f', accent: '#e6ebf5', tint: '#a2a9b8', ray: '#2a3040', glow: '#5c0e16' },
@@ -159,7 +182,7 @@ export const SCENES: Scene[] = [
     id: 'clover',
     scape: 'nature',
     label: 'Clover',
-    index: '08',
+    index: '10',
     mood: 'Warmth',
     inRail: true,
     theme: { void: '#080503', a: '#1a0d07', b: '#341a0c', accent: '#ff9b52', tint: '#d4a582', ray: '#6d3513' },
@@ -168,10 +191,20 @@ export const SCENES: Scene[] = [
     id: 'outro',
     scape: 'horizon',
     label: 'End',
-    index: '09',
+    index: '11',
     mood: 'Thanks',
     inRail: false,
     theme: { void: '#040405', a: '#0c0b0e', b: '#19141a', accent: '#f2f4f8', tint: '#aeb1bb', ray: '#3a3e4a', glow: '#7a1420' },
+  },
+  {
+    // The closing sequence: the world goes almost fully dark, with one red light left.
+    id: 'finale',
+    scape: 'horizon',
+    label: 'Finale',
+    index: '11',
+    mood: 'Beginning',
+    inRail: false,
+    theme: { void: '#000000', a: '#040304', b: '#0c0507', accent: '#ff4a57', tint: '#b4b7c0', ray: '#1b1d24', glow: '#5c0a12' },
   },
 ];
 

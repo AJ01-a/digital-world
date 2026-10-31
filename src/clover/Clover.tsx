@@ -10,9 +10,18 @@ interface Message {
   from: 'clover' | 'you';
   lines: string[];
   actions?: Action[];
+  /** Show the last line as a declaration. */
+  proclaim?: boolean;
 }
 
 const GREETED = 'aj:clover-greeted';
+
+/** A small crown that settles in beside a declaration. */
+const CrownMark = () => (
+  <svg className="clover-crown" width="18" height="14" viewBox="0 0 18 14" aria-hidden="true">
+    <path d="M1.5 12.5h15M2 10.5 1 3.2l4.6 3.6L9 1.5l3.4 5.3L17 3.2l-1 7.3z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
+  </svg>
+);
 
 /** Blinks every few seconds — a class toggle, not an animation loop, and only while the tab is visible. */
 function useBlink() {
@@ -129,7 +138,7 @@ export default function Clover({ ready }: { ready: boolean }) {
   /* ── conversation ── */
   const handleReply = useCallback(
     (reply: Reply) => {
-      push({ from: 'clover', lines: reply.lines, actions: reply.actions });
+      push({ from: 'clover', lines: reply.lines, actions: reply.actions, proclaim: reply.proclaim });
       setMood(reply.mood);
       if (reply.tour) later(startTour, 700);
       if (reply.go) {
@@ -351,11 +360,18 @@ export default function Clover({ ready }: { ready: boolean }) {
                   >
                     {m.from === 'you' && <span className="sr-only">You: </span>}
                     {m.from === 'clover' && <span className="sr-only">Clover: </span>}
-                    {m.lines.map((l, i) => (
-                      <p key={i} className={cn(i > 0 && 'mt-1.5', l.startsWith('•') && 'mt-1 pl-1 text-[0.86rem] text-[var(--color-ink-dim)]')}>
-                        {l}
-                      </p>
-                    ))}
+                    {m.lines.map((l, i) =>
+                      m.proclaim && i === m.lines.length - 1 ? (
+                        <p key={i} className="clover-proclaim mt-2.5">
+                          <CrownMark />
+                          <strong className="font-normal">{l}</strong>
+                        </p>
+                      ) : (
+                        <p key={i} className={cn(i > 0 && 'mt-1.5', l.startsWith('•') && 'mt-1 pl-1 text-[0.86rem] text-[var(--color-ink-dim)]', l.startsWith('*') && l.endsWith('*') && 'text-[0.84rem] text-[var(--color-ink-dim)] italic')}>
+                          {l}
+                        </p>
+                      ),
+                    )}
                     {m.actions && m.actions.length > 0 && (
                       <div className="mt-2.5 flex flex-wrap gap-1.5">
                         {m.actions.map((a) => (

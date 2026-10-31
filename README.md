@@ -1,6 +1,6 @@
 # AJ — Digital World
 
-An interactive personal site — one page, twelve chapters, an environment that
+An interactive personal site — one page, fourteen chapters and a closing scene, an environment that
 re-tints itself as you move through it, and Clover, a digital dog who shows
 visitors around. Hosted for free on GitHub Pages.
 
@@ -49,13 +49,18 @@ the build works from any path without further changes.
 | The intro (duality composition, glitch sequence) | `src/components/chrome/Intro.tsx`, layout in `src/lib/duality.ts` (+ `.intro`/`.duo-*` in `src/index.css`) |
 | Intro artwork (generated web copies + manifest) | `scripts/profile-art.py` → `public/intro/`, `src/data/introArt.ts` |
 | Game artwork (generated web copies + manifest) | `scripts/game-art.py` → `public/games/`, `src/data/gameArt.ts` |
+| The One Piece and Loki chapters | `src/sections/OnePiece.tsx`, `src/sections/Loki.tsx`, copy in `ONE_PIECE` / `LOKI` in `src/data/content.ts` (+ `.g5-*`, `.hat-*`, `.loki-*`, `.purpose-*` in `src/index.css`) |
+| Show artwork (generated web copies + manifest) | `scripts/show-art.py` → `public/shows/`, `src/data/showArt.ts` |
+| The closing sequence (glass, closing line, footer) | `src/sections/Finale.tsx`, copy in `FINALE` in `src/data/content.ts` (+ `.finale-*` in `src/index.css`) |
+| The ending's video clip | `scripts/finale-clip.py` → `public/finale/glass-break.mp4` |
 | The Monster Hunter ecosystem | `src/effects/Ecosystem.tsx` (+ `.eco-*` in `src/index.css`) |
 | The car on the night drive | `src/effects/Envista.tsx`, animated by `src/effects/RoadCanvas.tsx` |
 | What Clover understands and how he answers | `src/clover/brain.ts` |
+| Who has AJ's heart (the questions Clover recognises) | `src/clover/heart.ts` |
 | Clover's artwork (head and full body) | `src/clover/CloverArt.tsx` |
 | The AJ monogram | `src/components/ui/Logo.tsx` (+ `public/favicon.svg`) |
 | Design tokens, type, motion | `src/index.css` |
-| Public links in the footer | `LINKS` at the top of `src/sections/Outro.tsx` |
+| Public links in the footer | `LINKS` at the top of `src/sections/Finale.tsx` |
 | Page title, description, social preview tags | `index.html` |
 | Word puzzle answers | `WORDS` in `src/sections/Words.tsx` |
 | Chess puzzles | `PUZZLES` in `src/lib/chess.ts` |
@@ -79,6 +84,9 @@ say what the site already says.
 
 He can give a guided tour, take visitors to any chapter, answer questions about
 what AJ has published here, explain the site, and do a few (fictional) tricks.
+Ask him who AJ has a crush on — or who he loves — and he perks up and answers
+in AJ's own words: "Jesus is my King!" (the matching lives in
+`src/clover/heart.ts`, with its own tests).
 Questions about private details — surname, location, age, contact, the real
 dog — get a polite refusal by design.
 
@@ -125,7 +133,7 @@ Things that keep the site smooth — worth keeping in mind when adding to it:
 
 The backdrops, the logo, Clover, the Monster Hunter ecosystem and the car are
 **drawn in code** — nothing to load, nothing to license. The pictures are AJ's
-own artwork in the intro and the game artwork.
+own artwork in the intro, the game artwork, and the One Piece and Loki artwork.
 
 **Intro artwork.** Put the four originals — the white and red rim-lit
 portraits and the white and red chess lineups — in `Profile/` (kept out of
@@ -162,6 +170,45 @@ are skipped and reported — images are never matched to games by filename
 guesswork. The game artwork belongs to its studios and publishers; only
 publish images you're comfortable using.
 
+**Show artwork.** The One Piece and Loki chapters work the same way: originals
+in `Shows/` (kept out of git), mapped by filename in `SOURCES` at the top of
+`scripts/show-art.py`, then:
+
+```bash
+python3 scripts/show-art.py
+```
+
+It writes AVIF + WebP copies at 640 / 1280 / 1920 px to `public/shows/` and
+regenerates `src/data/showArt.ts`. Missing or failed artwork falls back to a
+painted backdrop in the chapter's colours, so the layout never breaks. The
+artwork belongs to its owners (Eiichiro Oda / Shueisha / Toei Animation, and
+Marvel Studios / Disney) and is credited under each chapter. The only
+quotations are Loki's two lines in `LOKI` — everything labelled a reflection
+is AJ's own commentary.
+
+**The ending.** The page closes on a few seconds of glass breaking, taken
+from a free-to-use effects pack (VFX GURU, credited in the footer). Put the
+original `.mp4` in `Videos/` (kept out of git) and run:
+
+```bash
+python3 scripts/finale-clip.py
+```
+
+It cuts the stretch the ending uses (`START`/`END` at the top of the script)
+into `public/finale/glass-break.mp4` **losslessly** — the same compressed
+frames, copied into a new MP4, no re-encoding and no ffmpeg needed — and drops
+the audio, since the ending always plays muted (about 1.9 MB instead of
+14 MB). The poster stills in `public/finale/` are a frame from the clip.
+
+How it behaves (`src/sections/Finale.tsx`): the clip is only requested once
+the visitor is a screen away from the bottom; it plays once, muted and inline,
+when the closing scene is mostly in view; the closing line appears inside the
+hole in the glass, then it settles on the AJ mark, the line, and two controls
+— back to the top, and replay. Skip is offered while it plays. Scrolling away
+mid-play settles it rather than restarting it later. If the video can't load
+or autoplay is refused, the still composition is shown instead. With reduced
+motion it starts settled, downloads nothing, and offers "Play the ending".
+
 The social images are rendered from HTML templates in `scripts/` (colours in
 `scripts/brand.css` and `scripts/brand.js`)
 (`og.html` → `public/og.jpg` at 1200×630, `share.html` →
@@ -188,7 +235,9 @@ so run `npm install` first.
 - **Palette**: near-black, white / cool silver, and crimson, from the intro.
   Each chapter's colours live in `SCENES` in `src/data/worlds.ts` (`ray` is
   the white light from the left, `glow` the red from the right). The game
-  worlds, Clover's chapter and the drive keep their own environments.
+  worlds, Clover's chapter, the drive and the two shows keep their own
+  environments — straw-hat red and gold for One Piece; emerald, with gold as
+  the second light, for Loki. Those stay local to their chapter.
 - **Sound** never plays on its own. The Ambient button generates a soft tone
   live in the browser (Web Audio) — there are no audio files.
 - **Reduced motion** is respected throughout.

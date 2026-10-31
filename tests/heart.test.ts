@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isCrushFollowUp, isCrushQuestion, normalizeCrush } from '../src/clover/crush.ts';
+import { HEART_REPLIES, KING, isHeartQuestion, normalizeHeart } from '../src/clover/heart.ts';
 
 const SHOULD_TRIGGER = [
   // From the brief
@@ -37,6 +37,13 @@ const SHOULD_TRIGGER = [
   "What's AJ's secret crush?",
   'Clover, who is your owner’s crush?',
   'Guess who my crush is',
+  // Love and heart
+  'Who does AJ love?',
+  'who does aj love',
+  'WHO IS AJ IN LOVE WITH',
+  "Who has AJ's heart?",
+  'who stole his heart',
+  'Who is your owners crush',
 ];
 
 const SHOULD_NOT_TRIGGER = [
@@ -65,31 +72,34 @@ const SHOULD_NOT_TRIGGER = [
   'Who does AJ like more, Sekiro or Elden Ring?',
   'Which game does AJ like best?',
   'Who does AJ like to play as?',
-  // Lots of S's, no crush
+  // Unrelated questions that share words with the trigger
   'Show me the sections, sir',
-  'S',
   'Does Sekiro start with S?',
+  'What does AJ love about One Piece?',
+  'Does AJ love games?',
+  'Who loves AJ?',
+  'Tell me about Loki',
+  'Who is Luffy?',
+  'Does AJ love to drive?',
+  'What is in his heart rate?',
 ];
 
 for (const q of SHOULD_TRIGGER) {
-  test(`triggers: ${JSON.stringify(q)}`, () => assert.equal(isCrushQuestion(q), true));
+  test(`triggers: ${JSON.stringify(q)}`, () => assert.equal(isHeartQuestion(q), true));
 }
 
 for (const q of SHOULD_NOT_TRIGGER) {
-  test(`stays quiet: ${JSON.stringify(q)}`, () => assert.equal(isCrushQuestion(q), false));
+  test(`stays quiet: ${JSON.stringify(q)}`, () => assert.equal(isHeartQuestion(q), false));
 }
 
 test('normalises case, quotes, contractions and possessives', () => {
-  assert.equal(normalizeCrush("  WHO’S  AJ's   Crush?! "), ' who is aj crush ');
-  assert.equal(normalizeCrush('whos ajs crush'), ' who is aj crush ');
-  assert.equal(normalizeCrush("Doesn't he?"), ' does not he ');
+  assert.equal(normalizeHeart("  WHO’S  AJ's   Crush?! "), ' who is aj crush ');
+  assert.equal(normalizeHeart('whos ajs crush'), ' who is aj crush ');
+  assert.equal(normalizeHeart("Doesn't he?"), ' does not he ');
 });
 
-test('follow-ups asking for more are recognised', () => {
-  for (const q of ["What's her name?", 'What is her full name', 'Who is she?', 'What does the S stand for?', 'Tell me more about her']) {
-    assert.equal(isCrushFollowUp(q), true, q);
-  }
-  for (const q of ['Is it real?', 'What is your name?', 'Who is AJ?', 'Tell me more about Omarchy']) {
-    assert.equal(isCrushFollowUp(q), false, q);
-  }
+test('every reply ends with the same words, exactly', () => {
+  assert.equal(KING, 'Jesus is my King!');
+  assert.ok(HEART_REPLIES.length >= 2);
+  for (const lines of HEART_REPLIES) assert.equal(lines[lines.length - 1], KING);
 });
